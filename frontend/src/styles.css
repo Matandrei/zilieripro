@@ -1,0 +1,70 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Onest:wght@100..900&display=swap');
+
+/* ── OWA Design System: Theme Blue ── */
+@theme {
+  --font-sans: 'Onest', ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --radius: 0.5rem;
+
+  --color-background: oklch(1.0000 0.0000 0);
+  --color-foreground: oklch(0.1371 0.0360 258.53);
+  --color-primary: oklch(0.4614 0.1487 254.36);
+  --color-primary-foreground: oklch(0.9930 0.0035 247.86);
+  --color-secondary: oklch(0.9684 0.0068 247.90);
+  --color-secondary-foreground: oklch(0.3414 0.0412 265.47);
+  --color-accent: oklch(0.9684 0.0068 247.90);
+  --color-accent-foreground: oklch(0.3414 0.0412 265.47);
+  --color-muted: oklch(0.9684 0.0068 247.90);
+  --color-muted-foreground: oklch(0.5464 0.0319 264.53);
+  --color-border: oklch(0.9290 0.0126 255.53);
+  --color-input: oklch(0.9290 0.0126 255.53);
+  --color-ring: oklch(0.4614 0.1487 254.36);
+  --color-destructive: oklch(0.4906 0.2013 29.23);
+  --color-destructive-foreground: oklch(0.9992 0.0011 197.14);
+  --color-success: oklch(0.4481 0.1166 149.95);
+  --color-success-foreground: oklch(0.985 0 0);
+  --color-warning: oklch(0.8652 0.1768 90.38);
+  --color-warning-foreground: oklch(0.3 0.05 60);
+  --color-card: oklch(1.0000 0.0000 0);
+  --color-card-foreground: oklch(0.1371 0.0360 258.53);
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── Scrollbar (OWA style) ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgb(210 210 210 / 89%);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: rgb(180 180 180 / 89%);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(210 210 210 / 89%) transparent;
+}
+
+/* ── Focus ring style (OWA) ── */
+*:focus-visible {
+  outline: none;
+}

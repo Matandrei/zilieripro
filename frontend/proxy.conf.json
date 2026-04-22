@@ -1,0 +1,7 @@
+{
+  "/api/zilieri": {
+    "target": "http://localhost:5276",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
