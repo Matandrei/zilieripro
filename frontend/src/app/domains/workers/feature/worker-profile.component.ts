@@ -101,7 +101,7 @@ import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.mo
           </div>
           <div class="overflow-x-auto">
             <table class="w-full caption-bottom text-sm">
-              <thead class="[&_tr]:border-b">
+              <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
                 <tr>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Cod</th>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Statut</th>
@@ -114,7 +114,7 @@ import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.mo
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 @for (voucher of vouchers(); track voucher.id) {
-                  <tr class="hover:bg-muted/50 border-b transition-colors">
+                  <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                     <td class="p-2 align-middle whitespace-nowrap">
                       <a [routerLink]="['/vouchers', voucher.id]" class="text-primary hover:underline underline-offset-4 font-medium">
                         {{ voucher.code }}

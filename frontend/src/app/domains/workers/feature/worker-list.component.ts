@@ -53,7 +53,7 @@ import { PaginatedResult, WorkerModel } from '../../../shared/models/voucher.mod
       <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full caption-bottom text-sm">
-            <thead class="[&_tr]:border-b">
+            <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
               <tr>
                 <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">IDNP</th>
                 <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Nume</th>
@@ -66,7 +66,7 @@ import { PaginatedResult, WorkerModel } from '../../../shared/models/voucher.mod
             </thead>
             <tbody class="[&_tr:last-child]:border-0">
               @for (worker of workers(); track worker.id) {
-                <tr class="hover:bg-muted/50 border-b transition-colors">
+                <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                   <td class="p-2 align-middle whitespace-nowrap font-mono">{{ worker.idnp }}</td>
                   <td class="p-2 align-middle whitespace-nowrap">
                     <a

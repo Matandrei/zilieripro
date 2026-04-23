@@ -145,7 +145,7 @@ interface NomenclatorCategory {
       <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full caption-bottom text-sm">
-            <thead class="[&_tr]:border-b bg-background sticky top-0 z-10">
+            <thead class="[&_tr]:border-b [&_tr]:border-foreground/10 bg-background sticky top-0 z-10">
               <tr>
                 <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">ID</th>
                 <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Nume</th>
@@ -157,7 +157,7 @@ interface NomenclatorCategory {
             </thead>
             <tbody class="[&_tr:last-child]:border-0">
               @for (item of filteredItems(); track item.id) {
-                <tr class="hover:bg-muted/50 border-b transition-colors">
+                <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                   @if (editingId() === item.id) {
                     <!-- Inline edit mode -->
                     <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ item.sortOrder }}</td>

@@ -117,7 +117,7 @@ export interface Ipc21Report {
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
           <div class="overflow-x-auto">
             <table class="w-full caption-bottom text-sm">
-              <thead class="[&_tr]:border-b">
+              <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
                 <tr>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Nr</th>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">IDNP Lucrator</th>
@@ -133,7 +133,7 @@ export interface Ipc21Report {
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 @for (line of r.lines; track line.workerIdnp; let i = $index) {
-                  <tr class="hover:bg-muted/50 border-b transition-colors">
+                  <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                     <td class="p-2 align-middle whitespace-nowrap text-foreground/80">{{ i + 1 }}</td>
                     <td class="p-2 align-middle whitespace-nowrap text-foreground/80 font-mono">{{ line.workerIdnp }}</td>
                     <td class="p-2 align-middle whitespace-nowrap text-foreground/80">{{ line.workerLastName }}</td>

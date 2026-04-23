@@ -120,7 +120,7 @@ import { StatisticsModel } from '../../../shared/models/voucher.model';
           </div>
           <div class="overflow-x-auto">
             <table class="w-full caption-bottom text-sm">
-              <thead class="[&_tr]:border-b">
+              <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
                 <tr>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Raion</th>
                   <th class="text-foreground h-10 px-2 text-end align-middle font-medium whitespace-nowrap">Nr. Vouchere</th>
@@ -128,7 +128,7 @@ import { StatisticsModel } from '../../../shared/models/voucher.model';
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 @for (entry of districtEntries(); track entry.key) {
-                  <tr class="hover:bg-muted/50 border-b transition-colors">
+                  <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                     <td class="p-2 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
                     <td class="p-2 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number }}</td>
                   </tr>
@@ -149,7 +149,7 @@ import { StatisticsModel } from '../../../shared/models/voucher.model';
           </div>
           <div class="overflow-x-auto">
             <table class="w-full caption-bottom text-sm">
-              <thead class="[&_tr]:border-b">
+              <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
                 <tr>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Luna</th>
                   <th class="text-foreground h-10 px-2 text-end align-middle font-medium whitespace-nowrap">Remunerare (MDL)</th>
@@ -157,7 +157,7 @@ import { StatisticsModel } from '../../../shared/models/voucher.model';
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 @for (entry of monthEntries(); track entry.key) {
-                  <tr class="hover:bg-muted/50 border-b transition-colors">
+                  <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                     <td class="p-2 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
                     <td class="p-2 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number:'1.2-2' }}</td>
                   </tr>

@@ -39,7 +39,7 @@ interface SystemParameter {
       <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full caption-bottom text-sm">
-            <thead class="[&_tr]:border-b">
+            <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
               <tr>
                 <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Parametru</th>
                 <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Valoare</th>
@@ -50,7 +50,7 @@ interface SystemParameter {
             </thead>
             <tbody class="[&_tr:last-child]:border-0">
               @for (param of params(); track param.key) {
-                <tr class="hover:bg-muted/50 border-b transition-colors">
+                <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                   <td class="p-2 align-middle whitespace-nowrap font-mono text-foreground/80">{{ param.key }}</td>
                   <td class="p-2 align-middle whitespace-nowrap">
                     @if (editingKey() === param.key) {
