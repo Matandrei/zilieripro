@@ -81,8 +81,13 @@ interface VoucherWorkerRow {
 
             <div class="space-y-2">
               <label class="text-sm font-medium leading-none">Localitate <span class="text-destructive">*</span></label>
-              <input type="text" formControlName="workLocality" placeholder="Introduceti localitatea"
-                class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
+              <select formControlName="workLocality"
+                class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
+                <option value="">Selectati localitatea</option>
+                @for (loc of localitiesForDistrict(); track loc) {
+                  <option [value]="loc">{{ loc }}</option>
+                }
+              </select>
             </div>
 
             <div class="space-y-2 md:col-span-2 lg:col-span-3">
@@ -261,7 +266,7 @@ interface VoucherWorkerRow {
                   <!-- Always-editable fields -->
                   <div class="p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
                     <div class="space-y-1.5">
-                      <label class="text-xs text-muted-foreground">Remunerare (MDL) *</label>
+                      <label class="text-xs text-muted-foreground">Remunerare neta (MDL) *</label>
                       <input type="number" min="1" [value]="row.netRemuneration" (input)="updateRow(i, 'netRemuneration', +$any($event.target).value)"
                         class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
                     </div>
@@ -271,23 +276,14 @@ interface VoucherWorkerRow {
                         class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
                     </div>
                     <div class="space-y-1.5">
-                      <label class="text-xs text-muted-foreground">Data nasterii</label>
-                      <input type="date" [value]="row.birthDate || ''" (input)="updateRow(i, 'birthDate', $any($event.target).value)"
-                        class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                    </div>
-                    <div class="space-y-1.5">
                       <label class="text-xs text-muted-foreground">Telefon</label>
                       <input type="tel" [value]="row.phone || ''" (input)="updateRow(i, 'phone', $any($event.target).value)"
                         class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
                     </div>
-                    <div class="space-y-1.5 md:col-span-3">
+                    <div class="space-y-1.5">
                       <label class="text-xs text-muted-foreground">Email</label>
                       <input type="email" [value]="row.email || ''" (input)="updateRow(i, 'email', $any($event.target).value)"
                         class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                    </div>
-                    <div class="space-y-1.5">
-                      <label class="text-xs text-muted-foreground">Remuneratie bruta</label>
-                      <div class="flex h-9 w-full items-center rounded-md bg-primary/10 ring-1 ring-primary/20 px-3 text-sm font-semibold text-primary">{{ taxOf(row).gross }} MDL</div>
                     </div>
                   </div>
 
@@ -371,6 +367,25 @@ export class CreateVoucherComponent implements OnInit {
   private prevDefaultHours = 8;
   private prevDefaultRemuneration = 0;
 
+  // District -> list of localities map
+  private readonly districtLocalities: Record<string, string[]> = {
+    Chisinau: ['mun. Chisinau', 'Buiucani', 'Centru', 'Botanica', 'Ciocana', 'Riscani', 'Durlesti', 'Vatra', 'Codru', 'Cricova', 'Sangera', 'Stauceni', 'Ialoveni', 'Straseni'],
+    Balti: ['mun. Balti', 'Singerei', 'Falesti', 'Glodeni', 'Riscani'],
+    Cahul: ['mun. Cahul', 'Cantemir', 'Taraclia', 'Vulcanesti'],
+    Orhei: ['mun. Orhei', 'Criuleni', 'Rezina', 'Telenesti', 'Soldanesti'],
+    Ungheni: ['mun. Ungheni', 'Nisporeni', 'Calarasi'],
+    Soroca: ['mun. Soroca', 'Drochia', 'Floresti', 'Donduseni'],
+    Edinet: ['mun. Edinet', 'Briceni', 'Ocnita', 'Riscani'],
+    Comrat: ['mun. Comrat', 'Ceadir-Lunga', 'Vulcanesti', 'Basarabeasca'],
+  };
+
+  protected readonly selectedDistrict = signal<string>('');
+
+  protected readonly localitiesForDistrict = computed(() => {
+    const d = this.selectedDistrict();
+    return d ? (this.districtLocalities[d] || []) : [];
+  });
+
   protected readonly filteredAvailableWorkers = computed(() => {
     const term = this.searchTerm().toLowerCase().trim();
     const addedIdnps = new Set(this.rows().map((r) => r.idnp));
@@ -411,6 +426,15 @@ export class CreateVoucherComponent implements OnInit {
     this.voucherForm.valueChanges.subscribe((v) => {
       const newHours = Number(v.defaultHours) || 8;
       const newRem = Number(v.defaultRemuneration) || 0;
+      const newDistrict = v.workDistrict || '';
+      if (newDistrict !== this.selectedDistrict()) {
+        this.selectedDistrict.set(newDistrict);
+        // Reset locality if the new district does not include it
+        const currentLoc = v.workLocality || '';
+        if (currentLoc && !this.localitiesForDistrict().includes(currentLoc)) {
+          this.voucherForm.patchValue({ workLocality: '' }, { emitEvent: false });
+        }
+      }
       if (newHours !== this.prevDefaultHours || newRem !== this.prevDefaultRemuneration) {
         this.rows.update((list) =>
           list.map((r) => ({
