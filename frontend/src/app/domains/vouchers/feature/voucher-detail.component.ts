@@ -81,7 +81,7 @@ import { VoucherStatusFlowComponent } from '../ui/voucher-status-flow.component'
 
           <!-- Status flow -->
           <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <h2 class="text-sm font-semibold text-foreground mb-4">Flux status</h2>
+            <h2 class="text-sm font-semibold text-foreground mb-4">Flux statut</h2>
             <app-voucher-status-flow [currentStatus]="voucher()!.status" />
           </div>
 
@@ -94,7 +94,7 @@ import { VoucherStatusFlowComponent } from '../ui/voucher-status-flow.component'
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.code }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Status:</span>
+                <span class="text-sm text-muted-foreground">Statut:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.status }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">

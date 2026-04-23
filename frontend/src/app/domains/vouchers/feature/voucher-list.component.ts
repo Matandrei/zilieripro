@@ -55,7 +55,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
       <!-- Filter Dropdowns Row -->
       <div class="flex flex-wrap items-end gap-4 mb-6">
         <div class="space-y-1">
-          <label class="text-xs font-medium text-muted-foreground">Status</label>
+          <label class="text-xs font-medium text-muted-foreground">Statut</label>
           <select
             class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 min-w-[160px]"
             [ngModel]="store.state().status"
@@ -133,8 +133,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
               <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Lucrator</th>
               <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">IDNP</th>
               <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Raion</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Stare</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Status</th>
+              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Statut</th>
               <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Ore</th>
               <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Remunerare</th>
               <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Data</th>
@@ -152,12 +151,6 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground">{{ voucher.workerFullName }}</td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/60 font-mono text-xs">{{ voucher.workerIdnp ?? '—' }}</td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.workDistrict }}</td>
-                <td class="px-4 py-3 align-middle whitespace-nowrap">
-                  <span class="inline-flex items-center gap-1.5 text-sm">
-                    <span [class]="'inline-block size-2 rounded-full ' + stateColor(voucher.status)"></span>
-                    {{ stateLabel(voucher.status) }}
-                  </span>
-                </td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap">
                   <span class="inline-flex items-center gap-1.5 text-sm">
                     <span [class]="'inline-block size-2 rounded-full ' + statusDotColor(voucher.status)"></span>
@@ -350,26 +343,6 @@ export class VoucherListComponent implements OnInit {
 
   protected closeMenu(): void {
     this.openMenuId.set('');
-  }
-
-  protected stateColor(status: string): string {
-    switch (status) {
-      case 'Activ': return 'bg-yellow-400';
-      case 'Executat': case 'Raportat': return 'bg-red-500';
-      case 'Emis': return 'bg-green-500';
-      case 'Anulat': return 'bg-red-500';
-      default: return 'bg-gray-400';
-    }
-  }
-
-  protected stateLabel(status: string): string {
-    switch (status) {
-      case 'Activ': return 'Activ';
-      case 'Executat': case 'Raportat': return 'Inchis';
-      case 'Emis': return 'Activ';
-      case 'Anulat': return 'Inchis';
-      default: return status;
-    }
   }
 
   protected statusDotColor(status: string): string {

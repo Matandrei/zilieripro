@@ -104,7 +104,7 @@ import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.mo
               <thead class="[&_tr]:border-b">
                 <tr>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Cod</th>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Status</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Statut</th>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Data</th>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Ore</th>
                   <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Remunerare neta</th>
