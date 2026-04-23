@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
 import { VoucherStore } from '../data/voucher.store';
 import { VoucherDataService } from '../data/voucher-data.service';
@@ -85,16 +85,44 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
             <option value="Soroca">Soroca</option>
           </select>
         </div>
-        <a
-          routerLink="/vouchers/create"
-          class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 ml-auto"
-        >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-          </svg>
-          Creare voucher
-        </a>
+        <div class="ml-auto flex items-center gap-2">
+          <button type="button" (click)="openRegisterPicker()"
+            class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+            </svg>
+            Registrul zilnic al zilierilor
+          </button>
+          <a routerLink="/vouchers/create"
+            class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+            </svg>
+            Creare voucher
+          </a>
+        </div>
       </div>
+
+      <!-- Register date picker modal -->
+      @if (registerPickerOpen()) {
+        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" (click)="closeRegisterPicker()">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" (click)="$event.stopPropagation()">
+            <h3 class="text-lg font-semibold text-foreground mb-1">Registrul zilnic al zilierilor</h3>
+            <p class="text-sm text-muted-foreground mb-4">Selectati data pentru care doriti sa generati registrul.</p>
+            <label class="block text-sm font-medium mb-2">Data activitatii</label>
+            <input type="date" [value]="registerDate()" (input)="registerDate.set($any($event.target).value)"
+              class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
+            <div class="mt-5 flex justify-end gap-2">
+              <button type="button" (click)="closeRegisterPicker()"
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium">Anuleaza</button>
+              <button type="button" (click)="openRegister()" [disabled]="!registerDate()"
+                class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
+                Genereaza registrul
+              </button>
+            </div>
+          </div>
+        </div>
+      }
 
       <!-- Table (no card wrapper, like eSocial) -->
       <div class="relative w-full overflow-x-auto">
@@ -270,11 +298,27 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
 export class VoucherListComponent implements OnInit {
   protected readonly store = inject(VoucherStore);
   private readonly voucherDataService = inject(VoucherDataService);
+  private readonly router = inject(Router);
 
   protected readonly vouchers = signal<VoucherTableItem[]>([]);
   protected readonly totalCount = signal(0);
   protected readonly loading = signal(false);
   protected readonly openMenuId = signal('');
+
+  protected readonly registerPickerOpen = signal(false);
+  protected readonly registerDate = signal(new Date().toISOString().split('T')[0]);
+
+  protected openRegisterPicker(): void {
+    this.registerPickerOpen.set(true);
+  }
+  protected closeRegisterPicker(): void {
+    this.registerPickerOpen.set(false);
+  }
+  protected openRegister(): void {
+    const date = this.registerDate();
+    this.registerPickerOpen.set(false);
+    this.router.navigate(['/vouchers/register'], { queryParams: { date } });
+  }
 
   protected readonly currentPage = computed(() => {
     const s = this.store.state();
