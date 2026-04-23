@@ -11,13 +11,6 @@ interface CompanyInfo {
   address: string;
 }
 
-interface AdminInfo {
-  idnp: string;
-  fullName: string;
-  email: string;
-  phone: string;
-}
-
 @Component({
   selector: 'app-company-profile',
   standalone: true,
@@ -29,59 +22,31 @@ interface AdminInfo {
         <p class="text-sm text-muted-foreground mt-1">Informatii preluate din RSUD prin MConnect</p>
       </div>
 
-      <!-- Company + Admin cards -->
+      <!-- Company card -->
       <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <!-- Date companie -->
-          <div>
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Date companie</h2>
-            <dl class="space-y-3">
-              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-                <dt class="text-sm text-muted-foreground">IDNO</dt>
-                <dd class="text-sm font-medium font-mono text-foreground">{{ company().idno }}</dd>
-              </div>
-              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-                <dt class="text-sm text-muted-foreground">Denumire</dt>
-                <dd class="text-sm font-medium text-foreground text-right">{{ company().name }}</dd>
-              </div>
-              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-                <dt class="text-sm text-muted-foreground">Forma organizare</dt>
-                <dd class="text-sm font-medium text-foreground">{{ company().legalForm }}</dd>
-              </div>
-              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-                <dt class="text-sm text-muted-foreground">Tip activitate</dt>
-                <dd class="text-sm font-medium text-foreground">{{ company().activityType }}</dd>
-              </div>
-              <div class="flex justify-between items-start">
-                <dt class="text-sm text-muted-foreground">Adresa</dt>
-                <dd class="text-sm font-medium text-foreground text-right max-w-[60%]">{{ company().address }}</dd>
-              </div>
-            </dl>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Date companie</h2>
+        <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+          <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+            <dt class="text-sm text-muted-foreground">IDNO</dt>
+            <dd class="text-sm font-medium font-mono text-foreground">{{ company().idno }}</dd>
           </div>
-
-          <!-- Administrator -->
-          <div class="md:border-l md:border-foreground/10 md:pl-6">
-            <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Administrator</h2>
-            <dl class="space-y-3">
-              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-                <dt class="text-sm text-muted-foreground">IDNP</dt>
-                <dd class="text-sm font-medium font-mono text-foreground">{{ admin().idnp }}</dd>
-              </div>
-              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-                <dt class="text-sm text-muted-foreground">Nume</dt>
-                <dd class="text-sm font-medium text-foreground">{{ admin().fullName }}</dd>
-              </div>
-              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-                <dt class="text-sm text-muted-foreground">Email</dt>
-                <dd class="text-sm font-medium text-foreground">{{ admin().email }}</dd>
-              </div>
-              <div class="flex justify-between items-start">
-                <dt class="text-sm text-muted-foreground">Telefon</dt>
-                <dd class="text-sm font-medium text-foreground">{{ admin().phone }}</dd>
-              </div>
-            </dl>
+          <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+            <dt class="text-sm text-muted-foreground">Denumire</dt>
+            <dd class="text-sm font-medium text-foreground text-right">{{ company().name }}</dd>
           </div>
-        </div>
+          <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+            <dt class="text-sm text-muted-foreground">Forma organizare</dt>
+            <dd class="text-sm font-medium text-foreground">{{ company().legalForm }}</dd>
+          </div>
+          <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+            <dt class="text-sm text-muted-foreground">Tip activitate</dt>
+            <dd class="text-sm font-medium text-foreground">{{ company().activityType }}</dd>
+          </div>
+          <div class="flex justify-between items-start md:col-span-2">
+            <dt class="text-sm text-muted-foreground">Adresa</dt>
+            <dd class="text-sm font-medium text-foreground text-right">{{ company().address }}</dd>
+          </div>
+        </dl>
       </div>
 
       <!-- User accounts -->
@@ -219,16 +184,6 @@ export class CompanyProfileComponent implements OnInit {
       legalForm: 'SRL',
       activityType: 'Agricultura',
       address: 'mun. Chisinau, str. Calea Iesilor 25',
-    };
-  });
-
-  protected readonly admin = computed<AdminInfo>(() => {
-    const u = this.auth.user();
-    return {
-      idnp: u?.idnp ?? '—',
-      fullName: u ? `${u.lastName} ${u.firstName}` : '—',
-      email: u?.email ?? '—',
-      phone: '+373 69 123 456',
     };
   });
 
