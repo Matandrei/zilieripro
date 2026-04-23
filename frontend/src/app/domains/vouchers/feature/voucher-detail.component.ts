@@ -4,12 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
-import { VoucherStatusFlowComponent } from '../ui/voucher-status-flow.component';
 
 @Component({
   selector: 'app-voucher-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule, StatusBadgeComponent, VoucherStatusFlowComponent],
+  imports: [RouterLink, FormsModule, StatusBadgeComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-4xl mx-auto">
@@ -79,12 +78,6 @@ import { VoucherStatusFlowComponent } from '../ui/voucher-status-flow.component'
             </div>
           </div>
 
-          <!-- Status flow -->
-          <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <h2 class="text-sm font-semibold text-foreground mb-4">Flux statut</h2>
-            <app-voucher-status-flow [currentStatus]="voucher()!.status" />
-          </div>
-
           <!-- Voucher details card -->
           <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
             <h2 class="text-lg font-semibold text-foreground mb-4">Informatii voucher</h2>
@@ -119,14 +112,6 @@ import { VoucherStatusFlowComponent } from '../ui/voucher-status-flow.component'
                   <span class="text-sm font-medium text-foreground">{{ voucher()!.workAddress }}</span>
                 </div>
               }
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Art. 5, alin. (1), lit. b):</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.art5Alin1LitB ? 'Da' : 'Nu' }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Art. 5, alin. (1), lit. g):</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.art5Alin1LitG ? 'Da' : 'Nu' }}</span>
-              </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
                 <span class="text-sm text-muted-foreground">Creat la:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.createdAt }}</span>
@@ -163,10 +148,6 @@ import { VoucherStatusFlowComponent } from '../ui/voucher-status-flow.component'
               <div class="flex justify-between border-b border-foreground/5 pb-2">
                 <span class="text-sm text-muted-foreground">Nume complet:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.firstName }} {{ voucher()!.worker.lastName }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Data nasterii:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.birthDate }}</span>
               </div>
               @if (voucher()!.worker.phone) {
                 <div class="flex justify-between border-b border-foreground/5 pb-2">
