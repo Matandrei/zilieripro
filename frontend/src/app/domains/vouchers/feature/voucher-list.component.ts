@@ -127,22 +127,22 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
       <!-- Table (no card wrapper, like eSocial) -->
       <div class="relative w-full overflow-x-auto">
         <table class="w-full caption-bottom text-sm">
-          <thead class="[&_tr]:border-b bg-background sticky top-0 z-10">
+          <thead class="[&_tr]:border-b [&_tr]:border-foreground/10 bg-background sticky top-0 z-10">
             <tr>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Cod</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Lucrator</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">IDNP</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Raion</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Statut</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Ore</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Remunerare</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Data</th>
-              <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap w-10"></th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Cod</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Lucrator</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">IDNP</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Raion</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Statut</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Ore</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Remunerare</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Data</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap w-10"></th>
             </tr>
           </thead>
           <tbody class="[&_tr:last-child]:border-0">
             @for (voucher of vouchers(); track voucher.id) {
-              <tr class="hover:bg-muted/50 border-b transition-colors">
+              <tr class="hover:bg-muted/30 border-b border-foreground/5 transition-colors">
                 <td class="px-4 py-3 align-middle whitespace-nowrap">
                   <a [routerLink]="['/vouchers', voucher.id]" class="text-primary hover:underline underline-offset-4 font-medium text-sm">
                     {{ voucher.code }}

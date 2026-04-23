@@ -20,6 +20,8 @@ export const routes: Routes = [
       // Reports
       { path: 'reports', loadComponent: () => import('./domains/reports/feature/reports.component').then(m => m.ReportsComponent) },
       { path: 'reports/ipc21', loadComponent: () => import('./domains/reports/feature/ipc21-report.component').then(m => m.Ipc21ReportComponent) },
+      // Company profile
+      { path: 'company', loadComponent: () => import('./domains/user-management/feature/company-profile.component').then(m => m.CompanyProfileComponent) },
       // Admin
       { path: 'admin/users', loadComponent: () => import('./domains/user-management/feature/user-list.component').then(m => m.UserListComponent) },
       { path: 'admin/users/:id', loadComponent: () => import('./domains/user-management/feature/user-detail.component').then(m => m.UserDetailComponent) },

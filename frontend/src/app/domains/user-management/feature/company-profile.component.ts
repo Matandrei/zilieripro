@@ -1,0 +1,316 @@
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { AuthStore } from '../../../shared/auth/auth.store';
+import { ApiService } from '../../../shared/services/api.service';
+import { UserTableItem } from '../../../shared/models/voucher.model';
+
+interface CompanyInfo {
+  idno: string;
+  name: string;
+  legalForm: string;
+  activityType: string;
+  address: string;
+}
+
+interface AdminInfo {
+  idnp: string;
+  fullName: string;
+  email: string;
+  phone: string;
+}
+
+@Component({
+  selector: 'app-company-profile',
+  standalone: true,
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <div class="max-w-6xl mx-auto">
+      <div class="mb-6">
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">Profil companie</h1>
+        <p class="text-sm text-muted-foreground mt-1">Informatii preluate din RSUD prin MConnect</p>
+      </div>
+
+      <!-- Company + Admin cards -->
+      <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Date companie -->
+          <div>
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Date companie</h2>
+            <dl class="space-y-3">
+              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+                <dt class="text-sm text-muted-foreground">IDNO</dt>
+                <dd class="text-sm font-medium font-mono text-foreground">{{ company().idno }}</dd>
+              </div>
+              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+                <dt class="text-sm text-muted-foreground">Denumire</dt>
+                <dd class="text-sm font-medium text-foreground text-right">{{ company().name }}</dd>
+              </div>
+              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+                <dt class="text-sm text-muted-foreground">Forma organizare</dt>
+                <dd class="text-sm font-medium text-foreground">{{ company().legalForm }}</dd>
+              </div>
+              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+                <dt class="text-sm text-muted-foreground">Tip activitate</dt>
+                <dd class="text-sm font-medium text-foreground">{{ company().activityType }}</dd>
+              </div>
+              <div class="flex justify-between items-start">
+                <dt class="text-sm text-muted-foreground">Adresa</dt>
+                <dd class="text-sm font-medium text-foreground text-right max-w-[60%]">{{ company().address }}</dd>
+              </div>
+            </dl>
+          </div>
+
+          <!-- Administrator -->
+          <div class="md:border-l md:border-foreground/10 md:pl-6">
+            <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Administrator</h2>
+            <dl class="space-y-3">
+              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+                <dt class="text-sm text-muted-foreground">IDNP</dt>
+                <dd class="text-sm font-medium font-mono text-foreground">{{ admin().idnp }}</dd>
+              </div>
+              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+                <dt class="text-sm text-muted-foreground">Nume</dt>
+                <dd class="text-sm font-medium text-foreground">{{ admin().fullName }}</dd>
+              </div>
+              <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
+                <dt class="text-sm text-muted-foreground">Email</dt>
+                <dd class="text-sm font-medium text-foreground">{{ admin().email }}</dd>
+              </div>
+              <div class="flex justify-between items-start">
+                <dt class="text-sm text-muted-foreground">Telefon</dt>
+                <dd class="text-sm font-medium text-foreground">{{ admin().phone }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+      </div>
+
+      <!-- User accounts -->
+      <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
+        <div class="flex items-start justify-between mb-4">
+          <div>
+            <h2 class="text-lg font-semibold text-foreground">Conturi utilizatori</h2>
+            <p class="text-sm text-muted-foreground">Persoanele care pot crea vouchere in numele companiei</p>
+          </div>
+          <button type="button" (click)="openAddUser()"
+            class="inline-flex h-9 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-semibold hover:bg-primary/90">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            Adauga utilizator
+          </button>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b border-foreground/10">
+              <tr class="text-muted-foreground">
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">IDNP</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Nume</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Prenume</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Vouchere create</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Statut</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Actiuni</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (loading()) {
+                <tr><td colspan="6" class="p-6 text-center text-muted-foreground">Se incarca...</td></tr>
+              } @else if (users().length === 0) {
+                <tr><td colspan="6" class="p-6 text-center text-muted-foreground">Niciun utilizator adaugat.</td></tr>
+              } @else {
+                @for (u of users(); track u.id) {
+                  <tr class="border-b border-foreground/5 hover:bg-muted/30 transition-colors">
+                    <td class="px-3 py-3 font-mono text-xs text-foreground/80">{{ u.idnp }}</td>
+                    <td class="px-3 py-3 font-medium text-foreground">{{ u.lastName }}</td>
+                    <td class="px-3 py-3 font-medium text-foreground">{{ u.firstName }}</td>
+                    <td class="px-3 py-3 text-foreground/80">{{ voucherCountFor(u) }}</td>
+                    <td class="px-3 py-3">
+                      <span [class]="'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ' + statusPill(u.status)">
+                        {{ statusLabel(u.status) }}
+                      </span>
+                    </td>
+                    <td class="px-3 py-3">
+                      @if (isAdminUser(u)) {
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-muted text-muted-foreground">Administrator</span>
+                      } @else {
+                        <div class="flex items-center gap-2">
+                          <button type="button" (click)="editUser(u)" class="size-8 inline-flex items-center justify-center rounded-md hover:bg-accent" title="Editeaza">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                          </button>
+                          @if (u.status === 'Blocked') {
+                            <button type="button" (click)="toggleBlock(u)" class="size-8 inline-flex items-center justify-center rounded-md hover:bg-green-500/10 text-green-600" title="Deblocheaza">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>
+                            </button>
+                          } @else {
+                            <button type="button" (click)="toggleBlock(u)" class="size-8 inline-flex items-center justify-center rounded-md hover:bg-destructive/10 text-destructive" title="Blocheaza">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </button>
+                          }
+                        </div>
+                      }
+                    </td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Add user modal -->
+      @if (addUserOpen()) {
+        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" (click)="addUserOpen.set(false)">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" (click)="$event.stopPropagation()">
+            <h3 class="text-lg font-semibold mb-1">Adauga utilizator</h3>
+            <p class="text-sm text-muted-foreground mb-4">Datele vor fi validate prin MConnect.</p>
+            <div class="space-y-3">
+              <div class="space-y-1.5">
+                <label class="text-xs text-muted-foreground">IDNP *</label>
+                <input type="text" maxlength="13" [value]="newUser().idnp" (input)="updateNewUser('idnp', $any($event.target).value)"
+                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1.5">
+                  <label class="text-xs text-muted-foreground">Nume *</label>
+                  <input type="text" [value]="newUser().lastName" (input)="updateNewUser('lastName', $any($event.target).value)"
+                    class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                </div>
+                <div class="space-y-1.5">
+                  <label class="text-xs text-muted-foreground">Prenume *</label>
+                  <input type="text" [value]="newUser().firstName" (input)="updateNewUser('firstName', $any($event.target).value)"
+                    class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                </div>
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-xs text-muted-foreground">Email</label>
+                <input type="email" [value]="newUser().email" (input)="updateNewUser('email', $any($event.target).value)"
+                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+              </div>
+              <div class="space-y-1.5">
+                <label class="text-xs text-muted-foreground">Telefon</label>
+                <input type="tel" [value]="newUser().phone" (input)="updateNewUser('phone', $any($event.target).value)"
+                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+              </div>
+            </div>
+            <div class="mt-5 flex justify-end gap-2">
+              <button type="button" (click)="addUserOpen.set(false)"
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Anuleaza</button>
+              <button type="button" (click)="saveNewUser()"
+                class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium">Salveaza</button>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  `,
+})
+export class CompanyProfileComponent implements OnInit {
+  private readonly auth = inject(AuthStore);
+  private readonly api = inject(ApiService);
+
+  protected readonly loading = signal(true);
+  protected readonly users = signal<UserTableItem[]>([]);
+  protected readonly addUserOpen = signal(false);
+  protected readonly newUser = signal({ idnp: '', firstName: '', lastName: '', email: '', phone: '' });
+
+  protected readonly company = computed<CompanyInfo>(() => {
+    const u = this.auth.user();
+    return {
+      idno: '1025600012345',
+      name: u?.beneficiaryName ?? 'SRL AgriSud',
+      legalForm: 'SRL',
+      activityType: 'Agricultura',
+      address: 'mun. Chisinau, str. Calea Iesilor 25',
+    };
+  });
+
+  protected readonly admin = computed<AdminInfo>(() => {
+    const u = this.auth.user();
+    return {
+      idnp: u?.idnp ?? '—',
+      fullName: u ? `${u.lastName} ${u.firstName}` : '—',
+      email: u?.email ?? '—',
+      phone: '+373 69 123 456',
+    };
+  });
+
+  ngOnInit(): void {
+    this.loadUsers();
+  }
+
+  private loadUsers(): void {
+    this.loading.set(true);
+    this.api.getUsers({ offset: 0, limit: 100 }).subscribe({
+      next: (r) => {
+        this.users.set(r.items);
+        this.loading.set(false);
+      },
+      error: () => this.loading.set(false),
+    });
+  }
+
+  protected isAdminUser(u: UserTableItem): boolean {
+    return u.idnp === this.auth.user()?.idnp;
+  }
+
+  protected voucherCountFor(_u: UserTableItem): number {
+    // Placeholder until backend exposes per-user voucher count
+    return 0;
+  }
+
+  protected statusPill(status: string): string {
+    switch (status) {
+      case 'Active': return 'bg-green-100 text-green-700';
+      case 'Blocked': return 'bg-red-100 text-red-700';
+      case 'Deleted': return 'bg-gray-200 text-gray-600';
+      default: return 'bg-gray-100 text-gray-600';
+    }
+  }
+
+  protected statusLabel(status: string): string {
+    switch (status) {
+      case 'Active': return 'Activ';
+      case 'Blocked': return 'Blocat';
+      case 'Deleted': return 'Sters';
+      default: return status;
+    }
+  }
+
+  protected editUser(_u: UserTableItem): void {
+    // TODO: open edit modal
+  }
+
+  protected toggleBlock(u: UserTableItem): void {
+    if (u.status === 'Blocked') {
+      // Would normally call an unblock endpoint
+      return;
+    }
+    this.api.blockUser(u.id).subscribe({ next: () => this.loadUsers() });
+  }
+
+  protected openAddUser(): void {
+    this.newUser.set({ idnp: '', firstName: '', lastName: '', email: '', phone: '' });
+    this.addUserOpen.set(true);
+  }
+
+  protected updateNewUser(key: string, value: string): void {
+    this.newUser.update((u) => ({ ...u, [key]: value }));
+  }
+
+  protected saveNewUser(): void {
+    const u = this.newUser();
+    if (!u.idnp || u.idnp.length !== 13 || !u.firstName || !u.lastName) return;
+    this.api.createUser({
+      idnp: u.idnp,
+      firstName: u.firstName,
+      lastName: u.lastName,
+      email: u.email || undefined,
+      phone: u.phone || undefined,
+      roleName: 'angajator',
+      password: 'TempPass123!',
+    } as any).subscribe({
+      next: () => {
+        this.addUserOpen.set(false);
+        this.loadUsers();
+      },
+    });
+  }
+}
