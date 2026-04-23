@@ -36,7 +36,7 @@ interface VoucherWorkerRow {
         <!-- =========== SECTIUNEA 1: CAMPURI OBLIGATORII =========== -->
         <form [formGroup]="voucherForm" class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
           <div class="mb-4">
-            <h2 class="text-lg font-semibold text-foreground">Campuri obligatorii</h2>
+            <h2 class="text-lg font-semibold text-foreground">Date predefinite</h2>
             <p class="text-sm text-muted-foreground mt-1">
               Necesare pentru crearea voucherului cu statut
               <span class="font-semibold text-foreground">EMIS</span>.
@@ -125,19 +125,20 @@ interface VoucherWorkerRow {
             </button>
           </div>
 
-          <!-- RSP info banner -->
-          <div class="mb-4 flex items-start gap-3 rounded-md bg-primary/5 ring-1 ring-primary/20 p-3 text-sm">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-primary flex-shrink-0 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-            <div>
-              <span class="font-semibold text-foreground">Verificare RSP:</span>
-              <span class="text-muted-foreground"> La salvare, datele se valideaza prin RSP (MConnect). Campurile eronate vor fi marcate.</span>
-            </div>
-          </div>
-
           <!-- INLINE PANEL: NEW WORKER -->
           @if (panel() === 'new') {
             <div class="mb-4 rounded-md ring-1 ring-foreground/10 p-4 bg-muted/20">
               <h3 class="text-sm font-semibold mb-3">Adauga lucrator nou</h3>
+
+              <!-- RSP info banner (inside the new-worker panel) -->
+              <div class="mb-4 flex items-start gap-3 rounded-md bg-primary/5 ring-1 ring-primary/20 p-3 text-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-primary flex-shrink-0 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                <div>
+                  <span class="font-semibold text-foreground">Verificare RSP:</span>
+                  <span class="text-muted-foreground"> La salvare, datele se valideaza prin RSP (MConnect). Campurile eronate vor fi marcate.</span>
+                </div>
+              </div>
+
               <div class="grid grid-cols-1 md:grid-cols-3 gap-3" [formGroup]="newWorkerForm">
                 <div class="space-y-1.5">
                   <label class="text-xs text-muted-foreground">Nume *</label>
