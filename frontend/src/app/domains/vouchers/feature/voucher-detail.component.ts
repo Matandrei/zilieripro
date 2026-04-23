@@ -114,24 +114,18 @@ import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge
               }
               <div class="flex justify-between border-b border-foreground/5 pb-2">
                 <span class="text-sm text-muted-foreground">Creat la:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.createdAt }}</span>
+                <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.createdAt) }}</span>
               </div>
-              @if (voucher()!.activatedAt) {
-                <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">Activat la:</span>
-                  <span class="text-sm font-medium text-foreground">{{ voucher()!.activatedAt }}</span>
-                </div>
-              }
               @if (voucher()!.executedAt) {
                 <div class="flex justify-between border-b border-foreground/5 pb-2">
                   <span class="text-sm text-muted-foreground">Executat la:</span>
-                  <span class="text-sm font-medium text-foreground">{{ voucher()!.executedAt }}</span>
+                  <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.executedAt!) }}</span>
                 </div>
               }
               @if (voucher()!.reportedAt) {
                 <div class="flex justify-between border-b border-foreground/5 pb-2">
                   <span class="text-sm text-muted-foreground">Raportat la:</span>
-                  <span class="text-sm font-medium text-foreground">{{ voucher()!.reportedAt }}</span>
+                  <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.reportedAt!) }}</span>
                 </div>
               }
             </div>
@@ -161,43 +155,6 @@ import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge
                   <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.email }}</span>
                 </div>
               }
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">RSP Validat:</span>
-                @if (voucher()!.worker.rspValidated) {
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">Validat</span>
-                } @else {
-                  <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-warning/15 text-warning-foreground">Nevalidat</span>
-                }
-              </div>
-              @if (voucher()!.worker.rspErrorMessage) {
-                <div class="flex justify-between border-b border-foreground/5 pb-2 md:col-span-2">
-                  <span class="text-sm text-muted-foreground">RSP Eroare:</span>
-                  <span class="text-destructive text-sm font-medium">{{ voucher()!.worker.rspErrorMessage }}</span>
-                </div>
-              }
-            </div>
-          </div>
-
-          <!-- Financial section -->
-          <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">Informatii financiare</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div class="bg-muted rounded-xl p-4 text-center">
-                <p class="text-xs text-muted-foreground mb-1">Remunerare neta</p>
-                <p class="text-lg font-bold text-foreground">{{ voucher()!.netRemuneration }} MDL</p>
-              </div>
-              <div class="bg-muted rounded-xl p-4 text-center">
-                <p class="text-xs text-muted-foreground mb-1">Impozit (12%)</p>
-                <p class="text-lg font-bold text-foreground">{{ voucher()!.incomeTax }} MDL</p>
-              </div>
-              <div class="bg-muted rounded-xl p-4 text-center">
-                <p class="text-xs text-muted-foreground mb-1">CNAS (6%)</p>
-                <p class="text-lg font-bold text-foreground">{{ voucher()!.cnasContribution }} MDL</p>
-              </div>
-              <div class="bg-primary/10 rounded-xl p-4 text-center">
-                <p class="text-xs text-primary mb-1">Remunerare bruta</p>
-                <p class="text-lg font-bold text-primary">{{ voucher()!.grossRemuneration }} MDL</p>
-              </div>
             </div>
           </div>
 
@@ -341,6 +298,13 @@ export class VoucherDetailComponent implements OnInit {
       CA03: 'Alt motiv',
     };
     return labels[code] || code;
+  }
+
+  protected formatDate(iso: string): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return iso;
+    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
   }
 
   private loadVoucher(id: string): void {

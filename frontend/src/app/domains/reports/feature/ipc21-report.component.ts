@@ -86,16 +86,6 @@ export interface Ipc21Report {
               </select>
             </div>
           </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium leading-none select-none">Beneficiar</label>
-            <input
-              type="text"
-              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              placeholder="ID Beneficiar"
-              [ngModel]="beneficiaryId()"
-              (ngModelChange)="beneficiaryId.set($event)"
-            />
-          </div>
           <div>
             <button
               class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
@@ -120,7 +110,6 @@ export interface Ipc21Report {
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-4">
           <div class="flex items-center gap-6 text-sm text-foreground/80">
             <span><strong class="text-foreground">Perioada:</strong> {{ r.period }}</span>
-            <span><strong class="text-foreground">Beneficiar:</strong> {{ r.beneficiaryName }}</span>
           </div>
         </div>
 
