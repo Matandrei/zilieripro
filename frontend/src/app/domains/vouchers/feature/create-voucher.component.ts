@@ -252,86 +252,45 @@ interface VoucherWorkerRow {
                       <div class="text-xs text-muted-foreground">IDNP: {{ row.idnp }} @if (row.birthDate) { · Nas.: {{ formatDate(row.birthDate) }} }</div>
                     </div>
                     <div class="flex items-center gap-1">
-                      <button type="button" (click)="editRow(i)" class="size-8 inline-flex items-center justify-center rounded-md hover:bg-accent" [title]="editingIndex() === i ? 'Gata' : 'Editeaza'">
-                        @if (editingIndex() === i) {
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-primary"><polyline points="20 6 9 17 4 12"/></svg>
-                        } @else {
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                        }
-                      </button>
                       <button type="button" (click)="removeRow(i)" class="size-8 inline-flex items-center justify-center rounded-md hover:bg-destructive/10 text-destructive" title="Sterge">
                         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                       </button>
                     </div>
                   </div>
 
-                  <!-- Edit mode: all editable fields -->
-                  @if (editingIndex() === i) {
-                    <div class="p-4 grid grid-cols-1 md:grid-cols-4 gap-3 bg-muted/10">
-                      <div class="space-y-1.5">
-                        <label class="text-xs text-muted-foreground">Remunerare neta (MDL) *</label>
-                        <input type="number" min="1" [value]="row.netRemuneration" (input)="updateRow(i, 'netRemuneration', +$any($event.target).value)"
-                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                      </div>
-                      <div class="space-y-1.5">
-                        <label class="text-xs text-muted-foreground">Ore de munca *</label>
-                        <input type="number" min="1" max="8" [value]="row.hoursWorked" (input)="updateRow(i, 'hoursWorked', +$any($event.target).value)"
-                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                      </div>
-                      <div class="space-y-1.5">
-                        <label class="text-xs text-muted-foreground">Data nasterii</label>
-                        <input type="date" [value]="row.birthDate || ''" (input)="updateRow(i, 'birthDate', $any($event.target).value)"
-                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                      </div>
-                      <div class="space-y-1.5">
-                        <label class="text-xs text-muted-foreground">Telefon</label>
-                        <input type="tel" [value]="row.phone || ''" (input)="updateRow(i, 'phone', $any($event.target).value)"
-                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                      </div>
-                      <div class="space-y-1.5 md:col-span-2">
-                        <label class="text-xs text-muted-foreground">Email</label>
-                        <input type="email" [value]="row.email || ''" (input)="updateRow(i, 'email', $any($event.target).value)"
-                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                      </div>
-                      <div class="md:col-span-4 flex justify-end">
-                        <button type="button" (click)="editingIndex.set(null)" class="text-xs font-medium text-primary hover:underline">Gata</button>
-                      </div>
+                  <!-- Always-editable fields -->
+                  <div class="p-4 grid grid-cols-1 md:grid-cols-4 gap-3">
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-muted-foreground">Remunerare (MDL) *</label>
+                      <input type="number" min="1" [value]="row.netRemuneration" (input)="updateRow(i, 'netRemuneration', +$any($event.target).value)"
+                        class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
                     </div>
-                  } @else {
-                    <!-- View mode: tax breakdown grid -->
-                    <div class="grid grid-cols-2 md:grid-cols-6 gap-4 p-4 text-sm">
-                      <div>
-                        <div class="text-xs text-muted-foreground">Remuneratie neta</div>
-                        <div class="font-semibold text-foreground">{{ row.netRemuneration }} MDL</div>
-                      </div>
-                      <div>
-                        <div class="text-xs text-muted-foreground">Impozit pe venit (12%)</div>
-                        <div class="font-semibold text-foreground">{{ taxOf(row).tax }} MDL</div>
-                      </div>
-                      <div>
-                        <div class="text-xs text-muted-foreground">Contributii CNAS (6%)</div>
-                        <div class="font-semibold text-foreground">{{ taxOf(row).cnas }} MDL</div>
-                      </div>
-                      <div>
-                        <div class="text-xs text-muted-foreground">Remuneratie bruta</div>
-                        <div class="font-semibold text-primary">{{ taxOf(row).gross }} MDL</div>
-                      </div>
-                      <div>
-                        <div class="text-xs text-muted-foreground">Ore de munca</div>
-                        <div class="font-semibold text-foreground">{{ row.hoursWorked }} ore</div>
-                      </div>
-                      <div>
-                        <div class="text-xs text-muted-foreground">Telefon</div>
-                        <div class="font-semibold text-foreground">{{ row.phone || '—' }}</div>
-                      </div>
-                      @if (row.email) {
-                        <div class="md:col-span-6">
-                          <div class="text-xs text-muted-foreground">Email</div>
-                          <div class="font-semibold text-foreground">{{ row.email }}</div>
-                        </div>
-                      }
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-muted-foreground">Ore de munca *</label>
+                      <input type="number" min="1" max="8" [value]="row.hoursWorked" (input)="updateRow(i, 'hoursWorked', +$any($event.target).value)"
+                        class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
                     </div>
-                  }
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-muted-foreground">Data nasterii</label>
+                      <input type="date" [value]="row.birthDate || ''" (input)="updateRow(i, 'birthDate', $any($event.target).value)"
+                        class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-muted-foreground">Telefon</label>
+                      <input type="tel" [value]="row.phone || ''" (input)="updateRow(i, 'phone', $any($event.target).value)"
+                        class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                    </div>
+                    <div class="space-y-1.5 md:col-span-3">
+                      <label class="text-xs text-muted-foreground">Email</label>
+                      <input type="email" [value]="row.email || ''" (input)="updateRow(i, 'email', $any($event.target).value)"
+                        class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                    </div>
+                    <div class="space-y-1.5">
+                      <label class="text-xs text-muted-foreground">Remuneratie bruta</label>
+                      <div class="flex h-9 w-full items-center rounded-md bg-primary/10 ring-1 ring-primary/20 px-3 text-sm font-semibold text-primary">{{ taxOf(row).gross }} MDL</div>
+                    </div>
+                  </div>
+
                 </div>
               }
             </div>
@@ -342,10 +301,8 @@ interface VoucherWorkerRow {
         @if (rows().length > 0) {
           <div class="bg-primary/10 rounded-xl ring-1 ring-primary/20 p-4 mb-4">
             <h3 class="text-sm font-semibold text-foreground mb-2">Sumar total</h3>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <div class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
               <div><span class="text-muted-foreground">Vouchere:</span> <strong>{{ rows().length }}</strong></div>
-              <div><span class="text-muted-foreground">Total net:</span> <strong>{{ totalNet() }} MDL</strong></div>
-              <div><span class="text-muted-foreground">Impozit + CNAS:</span> <strong>{{ totalTax() + totalCnas() }} MDL</strong></div>
               <div><span class="text-muted-foreground">Total brut:</span> <strong>{{ totalGross() }} MDL</strong></div>
             </div>
           </div>
@@ -409,7 +366,6 @@ export class CreateVoucherComponent implements OnInit {
   protected readonly csvError = signal('');
 
   protected readonly rows = signal<VoucherWorkerRow[]>([]);
-  protected readonly editingIndex = signal<number | null>(null);
 
   // Track prev default values to avoid overwriting user edits
   private prevDefaultHours = 8;
@@ -577,10 +533,6 @@ export class CreateVoucherComponent implements OnInit {
     this.csvText.set('');
   }
 
-  protected editRow(i: number): void {
-    this.editingIndex.set(this.editingIndex() === i ? null : i);
-  }
-
   protected updateRow(i: number, key: keyof VoucherWorkerRow, value: any): void {
     this.rows.update((list) => {
       const copy = [...list];
@@ -591,7 +543,6 @@ export class CreateVoucherComponent implements OnInit {
 
   protected removeRow(i: number): void {
     this.rows.update((list) => list.filter((_, idx) => idx !== i));
-    if (this.editingIndex() === i) this.editingIndex.set(null);
   }
 
   protected taxOf(row: VoucherWorkerRow) {
@@ -664,7 +615,6 @@ export class CreateVoucherComponent implements OnInit {
   protected createAnother(): void {
     this.createdSummary.set(null);
     this.rows.set([]);
-    this.editingIndex.set(null);
     this.panel.set(null);
     this.voucherForm.reset({
       workDate: new Date().toISOString().split('T')[0],
