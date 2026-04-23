@@ -29,7 +29,7 @@ interface VoucherWorkerRow {
     <div class="max-w-6xl mx-auto">
       <div class="mb-6">
         <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; Inapoi la lista</a>
-        <h1 class="text-3xl font-bold tracking-tight text-foreground mt-2">Creare voucher nou</h1>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground mt-2">Creare vouchere</h1>
       </div>
 
       @if (!createdSummary()) {

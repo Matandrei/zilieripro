@@ -150,7 +150,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                       </svg>
                     </button>
                     @if (openMenuId() === voucher.id) {
-                      <div class="absolute right-0 top-full mt-1 z-50 min-w-[180px] rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+                      <div class="absolute right-0 top-full mt-1 z-[100] min-w-[180px] rounded-md border border-foreground/10 bg-white p-1 text-foreground shadow-lg">
                         <a
                           [routerLink]="['/vouchers', voucher.id]"
                           class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
