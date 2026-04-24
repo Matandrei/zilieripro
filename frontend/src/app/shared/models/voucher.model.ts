@@ -40,6 +40,8 @@ export interface VoucherDetail {
   reportedAt?: string;
   reportPeriod?: string;
   createdAt: string;
+  signatureDataUrl?: string;
+  signedAt?: string;
   worker: WorkerModel;
   beneficiary: BeneficiaryModel;
 }

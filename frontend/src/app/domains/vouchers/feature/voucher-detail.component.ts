@@ -4,11 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
+import { SignaturePadComponent } from '../../../shared/ui/components/signature-pad.component';
 
 @Component({
   selector: 'app-voucher-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule, StatusBadgeComponent],
+  imports: [RouterLink, FormsModule, StatusBadgeComponent, SignaturePadComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-4xl mx-auto">
@@ -27,6 +28,19 @@ import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge
               </div>
             </div>
             <div class="flex items-center gap-2">
+              <!-- Chitanta download available on all statuses -->
+              <a [routerLink]="['/vouchers', voucher()!.id, 'receipt']"
+                class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                Chitanta
+              </a>
+              @if (voucher()!.status === 'Activ' || voucher()!.status === 'Executat') {
+                <button type="button" (click)="showSignModal.set(true)"
+                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                  @if (voucher()!.signatureDataUrl) { Resemneaza } @else { Semneaza }
+                </button>
+              }
               @if (voucher()!.status === 'Emis') {
                 <a
                   [routerLink]="['/vouchers', voucher()!.id, 'edit']"
@@ -237,6 +251,25 @@ import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge
           </div>
         </div>
       }
+
+      <!-- Signature modal (US-A19) -->
+      @if (showSignModal()) {
+        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="showSignModal.set(false)">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6" (click)="$event.stopPropagation()">
+            <h3 class="text-lg font-semibold text-foreground mb-1">Semnatura zilier</h3>
+            <p class="text-sm text-muted-foreground mb-4">Oferiti dispozitivul zilierului (telefon/tableta) pentru a semna. Semnatura se salveaza pe voucher si apare pe chitanta.</p>
+            <app-signature-pad (changed)="signatureData.set($event)" />
+            <div class="mt-5 flex justify-end gap-2">
+              <button type="button" (click)="showSignModal.set(false)"
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Anuleaza</button>
+              <button type="button" (click)="saveSignature()" [disabled]="!signatureData() || saving()"
+                class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
+                @if (saving()) { Se salveaza... } @else { Salveaza semnatura }
+              </button>
+            </div>
+          </div>
+        </div>
+      }
     </div>
   `,
 })
@@ -247,6 +280,9 @@ export class VoucherDetailComponent implements OnInit {
   protected readonly voucher = signal<VoucherDetail | null>(null);
   protected readonly loading = signal(true);
   protected readonly showCancelModal = signal(false);
+  protected readonly showSignModal = signal(false);
+  protected readonly signatureData = signal<string | null>(null);
+  protected readonly saving = signal(false);
   protected cancelReasonCode = 'CA01';
   protected cancelNote = '';
 
@@ -272,6 +308,21 @@ export class VoucherDetailComponent implements OnInit {
     const period = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
     this.voucherDataService.reportVoucher(this.voucher()!.id, period).subscribe({
       next: (v) => this.voucher.set(v),
+    });
+  }
+
+  protected saveSignature(): void {
+    const data = this.signatureData();
+    if (!data) return;
+    this.saving.set(true);
+    this.voucherDataService.signVoucher(this.voucher()!.id, data).subscribe({
+      next: (v) => {
+        this.voucher.set(v);
+        this.saving.set(false);
+        this.showSignModal.set(false);
+        this.signatureData.set(null);
+      },
+      error: () => this.saving.set(false),
     });
   }
 

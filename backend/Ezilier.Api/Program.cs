@@ -124,6 +124,20 @@ using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<DataContext>();
     db.Database.EnsureCreated();
+
+    // Lightweight schema sync for SQLite (no migrations infrastructure).
+    // Safe to re-run: ALTER TABLE ADD COLUMN is a no-op if the column exists
+    // (we catch and ignore the duplicate-column exception).
+    foreach (var sql in new[]
+    {
+        "ALTER TABLE Vouchers ADD COLUMN SignatureDataUrl TEXT NULL",
+        "ALTER TABLE Vouchers ADD COLUMN SignedAt TEXT NULL",
+    })
+    {
+        try { db.Database.ExecuteSqlRaw(sql); }
+        catch { /* column already exists */ }
+    }
+
     await DataSeeder.SeedAsync(db);
 }
 

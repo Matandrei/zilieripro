@@ -61,6 +61,8 @@ public class GetVoucherQueryHandler(
             ReportedAt = voucher.ReportedAt,
             ReportPeriod = voucher.ReportPeriod,
             CreatedAt = voucher.CreatedAt,
+            SignatureDataUrl = voucher.SignatureDataUrl,
+            SignedAt = voucher.SignedAt,
             Worker = new WorkerModel
             {
                 Id = voucher.Worker.Id,

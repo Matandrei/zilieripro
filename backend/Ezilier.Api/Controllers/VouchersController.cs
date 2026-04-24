@@ -64,4 +64,11 @@ public class VouchersController : BaseApiController
         var (model, errors, status) = await Mediator.Send(new CancelVoucherCommand(id, request));
         return StatusCode(status, errors is not null ? errors : model);
     }
+
+    [HttpPost("{id:guid}/sign")]
+    public async Task<IActionResult> Sign(Guid id, [FromBody] SignVoucherRequest request)
+    {
+        var (model, errors, status) = await Mediator.Send(new SignVoucherCommand(id, request));
+        return StatusCode(status, errors is not null ? errors : model);
+    }
 }

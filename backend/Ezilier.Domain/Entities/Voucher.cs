@@ -34,6 +34,10 @@ public class Voucher : EntityBase
     public bool Art5Alin1LitB { get; set; }
     public bool Art5Alin1LitG { get; set; }
 
+    // Electronic signature (US-A19): captured as data URL (PNG), shown on receipt.
+    public string? SignatureDataUrl { get; set; }
+    public DateTimeOffset? SignedAt { get; set; }
+
     public virtual Beneficiary Beneficiary { get; set; } = null!;
     public virtual Worker Worker { get; set; } = null!;
 }

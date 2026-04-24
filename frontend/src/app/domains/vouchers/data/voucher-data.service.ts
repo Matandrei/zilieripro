@@ -52,4 +52,8 @@ export class VoucherDataService {
   cancelVoucher(id: string, request: { reason: string; note?: string }): Observable<VoucherDetail> {
     return this.http.post<VoucherDetail>(`${this.baseUrl}/${id}/cancel`, request);
   }
+
+  signVoucher(id: string, signatureDataUrl: string): Observable<VoucherDetail> {
+    return this.http.post<VoucherDetail>(`${this.baseUrl}/${id}/sign`, { signatureDataUrl });
+  }
 }

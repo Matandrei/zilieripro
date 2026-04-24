@@ -43,6 +43,11 @@ public record CancelVoucherRequest
     public string? Note { get; init; }
 }
 
+public record SignVoucherRequest
+{
+    public string SignatureDataUrl { get; init; } = string.Empty;
+}
+
 public record VoucherTableItem
 {
     public Guid Id { get; init; }
@@ -83,6 +88,8 @@ public record VoucherDetailModel
     public DateTimeOffset? ReportedAt { get; init; }
     public string? ReportPeriod { get; init; }
     public DateTimeOffset CreatedAt { get; init; }
+    public string? SignatureDataUrl { get; init; }
+    public DateTimeOffset? SignedAt { get; init; }
 
     public WorkerModel Worker { get; init; } = null!;
     public BeneficiaryModel Beneficiary { get; init; } = null!;
