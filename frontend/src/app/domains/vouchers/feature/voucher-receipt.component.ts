@@ -29,156 +29,158 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
         <div class="text-center py-12 text-muted-foreground">{{ 'common.loading' | t }}</div>
       } @else if (voucher()) {
         @let v = voucher()!;
-        <div class="bg-white rounded-xl ring-1 ring-foreground/10 shadow-sm p-10 print:p-0 print:shadow-none print:ring-0">
-          <!-- Header -->
-          <div class="text-center border-b-2 border-foreground/30 pb-6 mb-6">
-            <div class="text-[10px] uppercase tracking-widest text-muted-foreground mb-1">Platforma eSOCIAL · Modulul eZilier</div>
-            <h1 class="text-2xl font-bold tracking-tight">{{ 'receipt.title' | t }}</h1>
-            <div class="mt-2 text-sm text-muted-foreground">
-              {{ 'receipt.subtitle' | t }}
-            </div>
-            <div class="mt-3 font-mono text-lg font-bold text-primary">{{ v.code }}</div>
-          </div>
+        <!-- A5 voucher sheet. On screen we show full-color card; on print we strip chrome. -->
+        <div class="voucher-sheet bg-white rounded-xl ring-1 ring-foreground/10 shadow-sm mx-auto
+                    print:rounded-none print:ring-0 print:shadow-none print:max-w-none">
 
-          <!-- Parties -->
-          <div class="grid grid-cols-2 gap-6 mb-6 text-sm">
-            <div>
-              <div class="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">{{ 'receipt.beneficiary' | t }}</div>
-              <div class="space-y-1">
-                <div class="font-semibold">{{ v.beneficiary.companyName }}</div>
-                <div class="text-muted-foreground">{{ 'field.idno' | t }}: <span class="font-mono text-foreground">{{ v.beneficiary.idno }}</span></div>
-                @if (v.beneficiary.legalForm) { <div class="text-muted-foreground">{{ v.beneficiary.legalForm }}</div> }
-                @if (v.beneficiary.address) { <div class="text-muted-foreground">{{ v.beneficiary.address }}</div> }
-              </div>
+          <!-- HEADER -->
+          <div class="px-8 pt-8 pb-4 text-center border-b border-foreground/20">
+            <div class="text-xs uppercase tracking-widest text-muted-foreground font-semibold">
+              Ministerul Muncii si Protectiei Sociale
             </div>
-            <div>
-              <div class="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-2">{{ 'receipt.zilier' | t }}</div>
-              <div class="space-y-1">
-                <div class="font-semibold">{{ v.worker.lastName }} {{ v.worker.firstName }}</div>
-                <div class="text-muted-foreground">{{ 'field.idnp' | t }}: <span class="font-mono text-foreground">{{ v.worker.idnp }}</span></div>
-                @if (v.worker.phone) { <div class="text-muted-foreground">{{ 'field.phone' | t }}: {{ v.worker.phone }}</div> }
-                @if (v.worker.email) { <div class="text-muted-foreground">{{ v.worker.email }}</div> }
+            <h1 class="mt-2 text-2xl font-bold tracking-tight uppercase">
+              Voucher digital pentru zilieri
+            </h1>
+            <div class="mt-3 flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs">
+              <div><span class="text-muted-foreground">COD:</span> <span class="font-mono font-bold text-primary">{{ v.code }}</span></div>
+              <div><span class="text-muted-foreground">EMIS:</span> <span class="font-medium">{{ formatDateTime(v.createdAt) }}</span></div>
+              <div>
+                <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider ' + statusClass(v.status)">
+                  {{ v.status }}
+                </span>
               </div>
             </div>
           </div>
 
-          <!-- Work details -->
-          <div class="rounded-md ring-1 ring-foreground/10 p-4 mb-6">
-            <div class="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">{{ 'receipt.workDetails' | t }}</div>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+          <!-- BENEFICIAR -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-primary mb-3">
+              Beneficiarul de lucrari (Angajator)
+            </h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-muted-foreground">IDNO</dt>
+              <dd class="font-mono font-semibold">{{ v.beneficiary.idno }}</dd>
+              <dt class="text-muted-foreground">Denumirea companiei</dt>
+              <dd class="font-semibold">{{ v.beneficiary.companyName }}</dd>
+            </dl>
+          </section>
+
+          <!-- ZILIER -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-primary mb-3">
+              Zilierul (Lucrator)
+            </h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-muted-foreground">IDNP</dt>
+              <dd class="font-mono font-semibold">{{ v.worker.idnp }}</dd>
+              <dt class="text-muted-foreground">Numele</dt>
+              <dd class="font-semibold uppercase">{{ v.worker.lastName }}</dd>
+              <dt class="text-muted-foreground">Prenumele</dt>
+              <dd class="font-semibold">{{ v.worker.firstName }}</dd>
+            </dl>
+          </section>
+
+          <!-- DETALII ACTIVITATE -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-primary mb-3">
+              Detalii activitate
+            </h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-muted-foreground">Ziua de activitate</dt>
+              <dd class="font-semibold">{{ formatDate(v.workDate) }}</dd>
+              <dt class="text-muted-foreground">Numarul de ore lucrate</dt>
+              <dd class="font-semibold">{{ v.hoursWorked }}</dd>
+              <dt class="text-muted-foreground">Locul exercitarii activitatii</dt>
+              <dd class="font-semibold">
+                {{ v.workLocality }}, {{ v.workDistrict }}
+                @if (v.workAddress) { <br/><span class="text-muted-foreground font-normal">{{ v.workAddress }}</span> }
+              </dd>
+              <dt class="text-muted-foreground">Activitatea realizata</dt>
+              <dd class="font-semibold">Zilier agricultura</dd>
+            </dl>
+          </section>
+
+          <!-- DATE FINANCIARE -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-primary mb-3">
+              Date financiare
+            </h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-muted-foreground">Remuneratia neta (MDL)</dt>
+              <dd class="font-semibold">{{ formatMoney(v.netRemuneration) }}</dd>
+              <dt class="text-muted-foreground">Impozit pe venit 12% (MDL)</dt>
+              <dd class="font-semibold">{{ formatMoney(v.incomeTax) }}</dd>
+              <dt class="text-muted-foreground">Contributii CNAS 6% (MDL)</dt>
+              <dd class="font-semibold">{{ formatMoney(v.cnasContribution) }}</dd>
+            </dl>
+            <div class="mt-3 pt-3 border-t-2 border-foreground/30 grid grid-cols-[180px_1fr] gap-x-4">
+              <div class="text-sm font-bold uppercase tracking-wider">Remuneratia bruta (MDL)</div>
+              <div class="text-lg font-bold text-primary">{{ formatMoney(v.grossRemuneration) }}</div>
+            </div>
+          </section>
+
+          <!-- CONFIRMARE — visible on screen + print -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider text-primary mb-2">
+              Confirmarea prestarii si primirii remuneratiei
+            </h2>
+            <p class="text-xs text-foreground/80 leading-relaxed">
+              Prin semnarea prezentului voucher, zilierul confirma prestarea activitatii
+              si primirea remuneratiei in cuantumul indicat mai sus.
+            </p>
+          </section>
+
+          <!-- SIGNATURE AREA — only on print (and in a dedicated "print preview" class) -->
+          <section class="px-8 py-6 signature-area">
+            <div class="grid grid-cols-2 gap-8">
               <div>
-                <div class="text-xs text-muted-foreground">{{ 'field.workDate' | t }}</div>
-                <div class="font-semibold">{{ formatDate(v.workDate) }}</div>
-              </div>
-              <div>
-                <div class="text-xs text-muted-foreground">{{ 'field.hours' | t }}</div>
-                <div class="font-semibold">{{ v.hoursWorked }} {{ 'common.hoursShort' | t }}</div>
-              </div>
-              <div>
-                <div class="text-xs text-muted-foreground">{{ 'field.district' | t }}</div>
-                <div class="font-semibold">{{ v.workDistrict }}</div>
-              </div>
-              <div>
-                <div class="text-xs text-muted-foreground">{{ 'field.locality' | t }}</div>
-                <div class="font-semibold">{{ v.workLocality }}</div>
-              </div>
-              @if (v.workAddress) {
-                <div class="md:col-span-4">
-                  <div class="text-xs text-muted-foreground">{{ 'field.address' | t }}</div>
-                  <div class="font-semibold">{{ v.workAddress }}</div>
+                <div class="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-6">
+                  Semnatura zilierului (olografa)
                 </div>
-              }
-            </div>
-          </div>
-
-          <!-- Financial -->
-          <div class="rounded-md ring-1 ring-foreground/10 p-4 mb-6">
-            <div class="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">{{ 'receipt.calculation' | t }}</div>
-            <table class="w-full text-sm">
-              <tbody>
-                <tr class="border-b border-foreground/5">
-                  <td class="py-2">{{ 'field.remunerationNet' | t }}</td>
-                  <td class="py-2 text-right font-semibold">{{ v.netRemuneration }} {{ 'common.mdl' | t }}</td>
-                </tr>
-                <tr class="border-b border-foreground/5">
-                  <td class="py-2 text-muted-foreground">+ {{ 'field.incomeTax' | t }}</td>
-                  <td class="py-2 text-right">{{ v.incomeTax }} {{ 'common.mdl' | t }}</td>
-                </tr>
-                <tr class="border-b border-foreground/5">
-                  <td class="py-2 text-muted-foreground">+ {{ 'field.cnas' | t }}</td>
-                  <td class="py-2 text-right">{{ v.cnasContribution }} {{ 'common.mdl' | t }}</td>
-                </tr>
-                <tr class="border-t-2 border-foreground/30">
-                  <td class="py-3 font-semibold">{{ 'field.remunerationGross' | t }} ({{ 'common.total' | t }})</td>
-                  <td class="py-3 text-right font-bold text-lg text-primary">{{ v.grossRemuneration }} {{ 'common.mdl' | t }}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <!-- Status -->
-          <div class="flex items-center justify-between mb-6 text-sm">
-            <div>
-              <span class="text-muted-foreground">{{ 'common.status' | t }}: </span>
-              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-                [class.bg-gray-100]="v.status === 'Emis'"
-                [class.text-gray-700]="v.status === 'Emis'"
-                [class.bg-blue-100]="v.status === 'Activ'"
-                [class.text-blue-700]="v.status === 'Activ'"
-                [class.bg-green-100]="v.status === 'Executat' || v.status === 'Raportat'"
-                [class.text-green-700]="v.status === 'Executat' || v.status === 'Raportat'"
-                [class.bg-red-100]="v.status === 'Anulat'"
-                [class.text-red-700]="v.status === 'Anulat'">
-                {{ v.status }}
-              </span>
-            </div>
-            <div class="text-xs text-muted-foreground">
-              Emis: {{ formatDateTime(v.createdAt) }}
-              @if (v.executedAt) { · Executat: {{ formatDateTime(v.executedAt) }} }
-            </div>
-          </div>
-
-          <!-- Signatures -->
-          <div class="grid grid-cols-2 gap-8 pt-6 border-t border-foreground/10">
-            <div>
-              <div class="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">{{ 'receipt.signBeneficiary' | t }}</div>
-              <div class="h-24 border-b border-foreground/30"></div>
-              <div class="mt-1 text-xs text-muted-foreground">L.S.</div>
-            </div>
-            <div>
-              <div class="text-xs uppercase tracking-wider text-muted-foreground font-semibold mb-3">
-                {{ 'receipt.signZilier' | t }}
-                @if (voucher()?.signatureDataUrl) {
-                  <span class="ml-2 inline-flex items-center gap-1 text-green-600 font-normal normal-case tracking-normal">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3"><polyline points="20 6 9 17 4 12"/></svg>
-                    {{ 'receipt.signedElectronically' | t }}
-                  </span>
+                <div class="h-16 border-b border-foreground/40"></div>
+              </div>
+              <div>
+                <div class="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+                  Semnatura electronica a entitatii
+                </div>
+                @if (v.signatureDataUrl) {
+                  <div class="h-16 border-b border-foreground/40 flex items-end justify-center">
+                    <img [src]="v.signatureDataUrl" alt="Semnatura electronica" class="max-h-full object-contain" />
+                  </div>
+                  <div class="text-[10px] text-muted-foreground mt-1">
+                    @if (voucher()?.signedAt; as s) { {{ formatDateTime(s) }} }
+                  </div>
+                } @else {
+                  <div class="h-16 border-b border-foreground/40 flex items-center justify-center">
+                    <span class="text-[10px] text-muted-foreground italic">[Aplicata automat la imprimare]</span>
+                  </div>
                 }
               </div>
-              <div class="h-24 border-b border-foreground/30 flex items-end justify-center">
-                @if (voucher()?.signatureDataUrl) {
-                  <img [src]="voucher()?.signatureDataUrl" alt="Semnatura" class="max-h-full object-contain" />
-                }
-              </div>
-              <div class="mt-1 text-xs text-muted-foreground">
-                @if (voucher()?.signedAt; as s) { {{ formatDateTime(s) }} }
-              </div>
             </div>
-          </div>
+          </section>
 
-          <!-- Footer -->
-          <div class="mt-8 pt-4 border-t border-foreground/10 text-[10px] text-muted-foreground text-center">
-            {{ 'receipt.footer' | t }} · eZilier.gov.md · {{ now() }}
+          <!-- FOOTER -->
+          <div class="px-8 py-4 text-[10px] text-center text-muted-foreground italic">
+            Prezentul voucher constituie dovada remuneratiei zilierului — Art. 9 alin. (3), Legea nr. 22/2018.<br/>
+            Document generat automat din sistemul informational eZilier.
           </div>
         </div>
       } @else {
-        <div class="text-center py-12 text-destructive">Voucherul nu a fost gasit.</div>
+        <div class="text-center py-12 text-destructive">{{ 'common.noResults' | t }}</div>
       }
     </div>
 
     <style>
+      /* Voucher sheet mimics A5 aspect on screen (portrait). */
+      :host ::ng-deep .voucher-sheet { max-width: 148mm; min-height: 210mm; }
+
+      /* On-screen: hide the signature section — it appears only at print. */
+      :host ::ng-deep .signature-area { display: none; }
+
       @media print {
-        @page { size: A4; margin: 15mm; }
+        :host ::ng-deep .signature-area { display: block !important; }
+        @page { size: A5 portrait; margin: 8mm; }
+        :host ::ng-deep .voucher-sheet { width: 100%; min-height: auto; box-shadow: none !important; border-radius: 0 !important; }
         body { background: white !important; }
       }
     </style>
@@ -190,22 +192,16 @@ export class VoucherReceiptComponent implements OnInit {
 
   protected readonly voucher = signal<VoucherDetail | null>(null);
   protected readonly loading = signal(true);
-  protected readonly now = computed(() => new Date().toLocaleString('ro-RO'));
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.voucherService.getVoucher(id).subscribe({
-      next: (v) => {
-        this.voucher.set(v);
-        this.loading.set(false);
-      },
+      next: (v) => { this.voucher.set(v); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
   }
 
-  protected print(): void {
-    window.print();
-  }
+  protected print(): void { window.print(); }
 
   protected formatDate(iso: string): string {
     if (!iso) return '—';
@@ -219,6 +215,23 @@ export class VoucherReceiptComponent implements OnInit {
     if (!iso) return '—';
     const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    return d.toLocaleString('ro-RO');
+    const date = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    return `${date} ${time}`;
+  }
+
+  protected formatMoney(n: number): string {
+    return (Number(n) || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  protected statusClass(status: string): string {
+    switch (status) {
+      case 'Emis': return 'bg-gray-100 text-gray-700';
+      case 'Activ': return 'bg-blue-100 text-blue-700';
+      case 'Executat': return 'bg-green-100 text-green-700';
+      case 'Raportat': return 'bg-emerald-100 text-emerald-700';
+      case 'Anulat': return 'bg-red-100 text-red-700';
+      default: return 'bg-gray-100 text-gray-700';
+    }
   }
 }
