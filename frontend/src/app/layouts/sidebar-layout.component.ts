@@ -41,20 +41,13 @@ interface NavItem {
       </div>
 
       <div class="flex items-center gap-4">
-        <!-- Company switcher (Angajator only) -->
-        @if (auth.roleType() === 'Angajator' && rsud.companies().length > 0) {
-          <button type="button" (click)="showCompanyPicker.set(true)"
-            class="hidden sm:inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground">
+        <!-- Current company (read-only — to switch, user must log out) -->
+        @if (auth.roleType() === 'Angajator' && currentCompany(); as c) {
+          <div class="hidden sm:inline-flex h-8 items-center gap-2 rounded-md bg-secondary text-secondary-foreground px-3 text-xs font-medium"
+               [title]="'Pentru a schimba compania, iesiti si intrati din nou.'">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="22" x2="9" y2="16"/><line x1="15" y1="22" x2="15" y2="16"/></svg>
-            @if (currentCompany(); as c) {
-              <span class="max-w-[180px] truncate">{{ c.companyName }}</span>
-            } @else {
-              <span>{{ 'company.selectCompany' | t }}</span>
-            }
-            @if (rsud.companies().length > 1) {
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5 opacity-60"><polyline points="6 9 12 15 18 9"/></svg>
-            }
-          </button>
+            <span class="max-w-[220px] truncate">{{ c.companyName }}</span>
+          </div>
         }
         <!-- User info -->
         <div class="hidden sm:flex items-center gap-3">
@@ -150,7 +143,7 @@ interface NavItem {
 
     <!-- Company picker modal (US-A02) -->
     @if (showCompanyPicker()) {
-      <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="showCompanyPicker.set(false)">
+      <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="dismissCompanyPicker()">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
           <div class="p-6 pb-4 border-b border-foreground/10">
             <h3 class="text-lg font-semibold">{{ 'company.selectCompany' | t }}</h3>
@@ -181,9 +174,14 @@ interface NavItem {
               </button>
             }
           </div>
-          <div class="p-4 pt-3 border-t border-foreground/10 flex justify-end">
-            <button type="button" (click)="showCompanyPicker.set(false)"
-              class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.close' | t }}</button>
+          <div class="p-4 pt-3 border-t border-foreground/10 flex justify-between items-center">
+            @if (!rsud.selectedIdno()) {
+              <span class="text-xs text-muted-foreground">Selectati o companie pentru a continua.</span>
+            } @else {
+              <span></span>
+              <button type="button" (click)="showCompanyPicker.set(false)"
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.close' | t }}</button>
+            }
           </div>
         </div>
       </div>
@@ -221,6 +219,14 @@ export class SidebarLayoutComponent implements OnInit {
   pickCompany(idno: string): void {
     this.rsud.select(idno);
     this.showCompanyPicker.set(false);
+  }
+
+  // Allow dismissing (backdrop click) only after a company has been picked.
+  // On first login with no selection, the user must pick one to continue.
+  dismissCompanyPicker(): void {
+    if (this.rsud.selectedIdno()) {
+      this.showCompanyPicker.set(false);
+    }
   }
 
   readonly employerNav: NavItem[] = [
@@ -268,6 +274,9 @@ export class SidebarLayoutComponent implements OnInit {
   }
 
   logout(): void {
+    // Clear the RSUD company selection so the next login starts fresh
+    // and the picker opens again if the user has multiple companies.
+    this.rsud.select(null);
     this.auth.logout();
   }
 }
