@@ -193,8 +193,10 @@ export class LoginComponent {
       case 'Zilier':
         this.router.navigate(['/my-vouchers']);
         break;
-      case 'Angajator':
       case 'Inspector':
+        this.router.navigate(['/inspector/dashboard']);
+        break;
+      case 'Angajator':
       default:
         this.router.navigate(['/vouchers']);
         break;
