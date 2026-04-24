@@ -3,275 +3,288 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
-import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
 import { SignaturePadComponent } from '../../../shared/ui/components/signature-pad.component';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-voucher-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule, StatusBadgeComponent, SignaturePadComponent, TranslatePipe],
+  imports: [RouterLink, FormsModule, SignaturePadComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-4xl mx-auto">
-      <div class="mb-6">
-        <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; {{ 'worker.profile.back' | t }}</a>
+    <div class="max-w-3xl mx-auto">
+      <!-- Toolbar (hidden on print) -->
+      <div class="mb-4 flex items-center justify-between print:hidden">
+        <a routerLink="/vouchers"
+           class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          &larr; {{ 'worker.profile.back' | t }}
+        </a>
+        @if (voucher()) {
+          <div class="flex items-center gap-2">
+            @if (voucher()!.status === 'Activ' || voucher()!.status === 'Executat') {
+              <button type="button" (click)="showSignModal.set(true)"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                {{ (voucher()!.signatureDataUrl ? 'action.resign' : 'action.sign') | t }}
+              </button>
+            }
+            @if (voucher()!.status === 'Emis') {
+              <a [routerLink]="['/vouchers', voucher()!.id, 'edit']"
+                 class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
+                {{ 'action.edit' | t }}
+              </a>
+              <button type="button" (click)="activate()"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium hover:bg-primary/90">
+                {{ 'action.activate' | t }}
+              </button>
+              <button type="button" (click)="showCancelModal.set(true)"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium hover:bg-destructive/90">
+                {{ 'action.cancel' | t }}
+              </button>
+            }
+            @if (voucher()!.status === 'Activ') {
+              <button type="button" (click)="execute()"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium hover:bg-primary/90">
+                {{ 'action.execute' | t }}
+              </button>
+              <button type="button" (click)="showCancelModal.set(true)"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium hover:bg-destructive/90">
+                {{ 'action.cancel' | t }}
+              </button>
+            }
+            @if (voucher()!.status === 'Executat') {
+              <button type="button" (click)="report()"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium hover:bg-primary/90">
+                {{ 'action.report' | t }}
+              </button>
+            }
+            <button type="button" (click)="print()"
+              class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium hover:bg-primary/90">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4">
+                <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+              </svg>
+              Print
+            </button>
+          </div>
+        }
       </div>
 
-      @if (voucher()) {
-        <div class="space-y-6">
-          <!-- Header -->
-          <div class="flex items-start justify-between">
-            <div>
-              <h1 class="text-3xl font-bold tracking-tight text-foreground">Voucher {{ voucher()!.code }}</h1>
-              <div class="mt-1">
-                <app-status-badge [status]="voucher()!.status" />
-              </div>
+      @if (loading()) {
+        <div class="text-center py-12 text-muted-foreground">{{ 'common.loading' | t }}</div>
+      } @else if (voucher()) {
+        @let v = voucher()!;
+        <!-- Simple anexa layout, same on screen and print (signatures only on print) -->
+        <div class="voucher-sheet bg-white ring-1 ring-foreground/10 rounded-md mx-auto
+                    print:ring-0 print:rounded-none">
+
+          <!-- HEADER -->
+          <div class="px-8 pt-8 pb-4 text-center border-b border-foreground/20">
+            <div class="text-xs uppercase tracking-widest text-foreground/70 font-semibold">
+              Ministerul Muncii si Protectiei Sociale
             </div>
-            <div class="flex items-center gap-2">
-              <!-- Chitanta download available on all statuses -->
-              <a [routerLink]="['/vouchers', voucher()!.id, 'receipt']"
-                class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                {{ 'voucher.detail.receipt' | t }}
-              </a>
-              @if (voucher()!.status === 'Activ' || voucher()!.status === 'Executat') {
-                <button type="button" (click)="showSignModal.set(true)"
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                  {{ (voucher()!.signatureDataUrl ? 'action.resign' : 'action.sign') | t }}
-                </button>
-              }
-              @if (voucher()!.status === 'Emis') {
-                <a
-                  [routerLink]="['/vouchers', voucher()!.id, 'edit']"
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
-                >
-                  {{ "action.edit" | t }}
-                </a>
-                <button
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
-                  (click)="activate()"
-                >
-                  {{ "action.activate" | t }}
-                </button>
-                <button
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium shadow-xs transition-all hover:bg-destructive/90"
-                  (click)="showCancelModal.set(true)"
-                >
-                  {{ "action.cancel" | t }}
-                </button>
-              }
-              @if (voucher()!.status === 'Activ') {
-                <a
-                  [routerLink]="['/vouchers', voucher()!.id, 'edit']"
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
-                >
-                  {{ "action.edit" | t }}
-                </a>
-                <button
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
-                  (click)="execute()"
-                >
-                  {{ "action.execute" | t }}
-                </button>
-                <button
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium shadow-xs transition-all hover:bg-destructive/90"
-                  (click)="showCancelModal.set(true)"
-                >
-                  {{ "action.cancel" | t }}
-                </button>
-              }
-              @if (voucher()!.status === 'Executat') {
-                <button
-                  class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
-                  (click)="report()"
-                >
-                  {{ "action.report" | t }}
-                </button>
-              }
+            <h1 class="mt-2 text-2xl font-bold uppercase tracking-tight">
+              Voucher digital pentru zilieri
+            </h1>
+            <div class="mt-3 flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs">
+              <div><span class="text-foreground/60">COD:</span> <span class="font-mono font-bold">{{ v.code }}</span></div>
+              <div><span class="text-foreground/60">EMIS:</span> <span class="font-medium">{{ formatDateTime(v.createdAt) }}</span></div>
+              <div>
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-foreground/30">
+                  {{ v.status }}
+                </span>
+              </div>
             </div>
           </div>
 
-          <!-- Voucher details card -->
-          <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">{{ 'voucher.detail.info' | t }}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ 'field.code' | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.code }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ 'common.status' | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.status }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ 'field.workDate' | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.workDate }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ 'field.hours' | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.hoursWorked }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ 'field.district' | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.workDistrict }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ 'field.locality' | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.workLocality }}</span>
-              </div>
-              @if (voucher()!.workAddress) {
-                <div class="flex justify-between border-b border-foreground/5 pb-2 md:col-span-2">
-                  <span class="text-sm text-muted-foreground">{{ "field.address" | t }}:</span>
-                  <span class="text-sm font-medium text-foreground">{{ voucher()!.workAddress }}</span>
-                </div>
-              }
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ "field.createdAt" | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.createdAt) }}</span>
-              </div>
-              @if (voucher()!.executedAt) {
-                <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">{{ "field.executedAt" | t }}:</span>
-                  <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.executedAt!) }}</span>
-                </div>
-              }
-              @if (voucher()!.reportedAt) {
-                <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">{{ "field.reportedAt" | t }}:</span>
-                  <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.reportedAt!) }}</span>
-                </div>
-              }
-            </div>
-          </div>
+          <!-- BENEFICIAR -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Beneficiarul de lucrari (Angajator)</h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-foreground/70">IDNO</dt>
+              <dd class="font-mono font-semibold">{{ v.beneficiary.idno }}</dd>
+              <dt class="text-foreground/70">Denumirea companiei</dt>
+              <dd class="font-semibold">{{ v.beneficiary.companyName }}</dd>
+            </dl>
+          </section>
 
-          <!-- Worker info -->
-          <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">{{ "voucher.detail.worker" | t }}</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ "field.idnp" | t }}:</span>
-                <span class="text-sm font-medium text-foreground font-mono">{{ voucher()!.worker.idnp }}</span>
-              </div>
-              <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">{{ "field.fullName" | t }}:</span>
-                <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.firstName }} {{ voucher()!.worker.lastName }}</span>
-              </div>
-              @if (voucher()!.worker.phone) {
-                <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">{{ "field.phone" | t }}:</span>
-                  <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.phone }}</span>
-                </div>
-              }
-              @if (voucher()!.worker.email) {
-                <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">Email:</span>
-                  <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.email }}</span>
-                </div>
-              }
-            </div>
-          </div>
+          <!-- ZILIER -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Zilierul (Lucrator)</h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-foreground/70">IDNP</dt>
+              <dd class="font-mono font-semibold">{{ v.worker.idnp }}</dd>
+              <dt class="text-foreground/70">Numele</dt>
+              <dd class="font-semibold uppercase">{{ v.worker.lastName }}</dd>
+              <dt class="text-foreground/70">Prenumele</dt>
+              <dd class="font-semibold">{{ v.worker.firstName }}</dd>
+            </dl>
+          </section>
 
-          <!-- Cancellation info -->
-          @if (voucher()!.status === 'Anulat') {
-            <div class="bg-destructive/10 rounded-xl ring-1 ring-destructive/20 p-6">
-              <h2 class="text-lg font-semibold text-destructive mb-4">{{ "voucher.detail.cancellation" | t }}</h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="flex justify-between">
-                  <span class="text-sm text-destructive">{{ "field.reason" | t }}:</span>
-                  <span class="text-sm font-medium text-destructive">{{ cancelReasonLabel(voucher()!.cancellationReason!) }}</span>
-                </div>
-                @if (voucher()!.cancellationNote) {
-                  <div class="flex justify-between">
-                    <span class="text-sm text-destructive">{{ "field.note" | t }}:</span>
-                    <span class="text-sm font-medium text-destructive">{{ voucher()!.cancellationNote }}</span>
-                  </div>
+          <!-- DETALII ACTIVITATE -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Detalii activitate</h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-foreground/70">Ziua de activitate</dt>
+              <dd class="font-semibold">{{ formatDate(v.workDate) }}</dd>
+              <dt class="text-foreground/70">Numarul de ore lucrate</dt>
+              <dd class="font-semibold">{{ v.hoursWorked }}</dd>
+              <dt class="text-foreground/70">Locul exercitarii activitatii</dt>
+              <dd class="font-semibold">
+                {{ v.workLocality }}, {{ v.workDistrict }}
+                @if (v.workAddress) { <br/><span class="text-foreground/70 font-normal">{{ v.workAddress }}</span> }
+              </dd>
+              <dt class="text-foreground/70">Activitatea realizata</dt>
+              <dd class="font-semibold">Zilier agricultura</dd>
+            </dl>
+          </section>
+
+          <!-- DATE FINANCIARE -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Date financiare</h2>
+            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+              <dt class="text-foreground/70">Remuneratia neta (MDL)</dt>
+              <dd class="font-semibold">{{ formatMoney(v.netRemuneration) }}</dd>
+              <dt class="text-foreground/70">Impozit pe venit 12% (MDL)</dt>
+              <dd class="font-semibold">{{ formatMoney(v.incomeTax) }}</dd>
+              <dt class="text-foreground/70">Contributii CNAS 6% (MDL)</dt>
+              <dd class="font-semibold">{{ formatMoney(v.cnasContribution) }}</dd>
+            </dl>
+            <div class="mt-3 pt-3 border-t-2 border-foreground/40 grid grid-cols-[180px_1fr] gap-x-4">
+              <div class="text-sm font-bold uppercase tracking-wider">Remuneratia bruta (MDL)</div>
+              <div class="text-lg font-bold">{{ formatMoney(v.grossRemuneration) }}</div>
+            </div>
+          </section>
+
+          <!-- CONFIRMARE -->
+          <section class="px-8 py-4 border-b border-foreground/10">
+            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-2">Confirmarea prestarii si primirii remuneratiei</h2>
+            <p class="text-xs text-foreground/80 leading-relaxed">
+              Prin semnarea prezentului voucher, zilierul confirma prestarea activitatii
+              si primirea remuneratiei in cuantumul indicat mai sus.
+            </p>
+          </section>
+
+          <!-- CANCELLATION (if applicable) -->
+          @if (v.status === 'Anulat') {
+            <section class="px-8 py-4 border-b border-foreground/10">
+              <h2 class="text-[11px] font-bold uppercase tracking-wider mb-2 text-destructive">Voucher anulat</h2>
+              <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
+                <dt class="text-foreground/70">Motiv</dt>
+                <dd class="font-semibold">{{ cancelReasonLabel(v.cancellationReason!) }}</dd>
+                @if (v.cancellationNote) {
+                  <dt class="text-foreground/70">Nota</dt>
+                  <dd>{{ v.cancellationNote }}</dd>
                 }
-                @if (voucher()!.cancellationDate) {
-                  <div class="flex justify-between">
-                    <span class="text-sm text-destructive">{{ "field.cancelledAt" | t }}:</span>
-                    <span class="text-sm font-medium text-destructive">{{ voucher()!.cancellationDate }}</span>
-                  </div>
+                @if (v.cancellationDate) {
+                  <dt class="text-foreground/70">Data anularii</dt>
+                  <dd class="font-semibold">{{ formatDateTime(v.cancellationDate) }}</dd>
                 }
-              </div>
-            </div>
+              </dl>
+            </section>
           }
-        </div>
-      } @else if (loading()) {
-        <div class="flex items-center justify-center py-12">
-          <p class="text-muted-foreground">Se incarca...</p>
-        </div>
-      } @else {
-        <div class="flex items-center justify-center py-12">
-          <p class="text-destructive text-sm font-medium">Voucherul nu a fost gasit.</p>
+
+          <!-- SIGNATURE AREA — only on print -->
+          <section class="px-8 py-6 signature-area">
+            <div class="grid grid-cols-2 gap-8">
+              <div>
+                <div class="text-[10px] uppercase tracking-widest text-foreground/70 font-semibold mb-6">
+                  Semnatura zilierului (olografa)
+                </div>
+                <div class="h-16 border-b border-foreground/40"></div>
+              </div>
+              <div>
+                <div class="text-[10px] uppercase tracking-widest text-foreground/70 font-semibold mb-2">
+                  Semnatura electronica a entitatii
+                </div>
+                @if (v.signatureDataUrl) {
+                  <div class="h-16 border-b border-foreground/40 flex items-end justify-center">
+                    <img [src]="v.signatureDataUrl" alt="Semnatura electronica" class="max-h-full object-contain" />
+                  </div>
+                  <div class="text-[10px] text-foreground/60 mt-1">
+                    @if (v.signedAt; as s) { {{ formatDateTime(s) }} }
+                  </div>
+                } @else {
+                  <div class="h-16 border-b border-foreground/40 flex items-center justify-center">
+                    <span class="text-[10px] text-foreground/60 italic">[Aplicata automat la imprimare]</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- FOOTER -->
+          <div class="px-8 py-4 text-[10px] text-center text-foreground/70 italic">
+            Prezentul voucher constituie dovada remuneratiei zilierului — Art. 9 alin. (3), Legea nr. 22/2018.<br/>
+            Document generat automat din sistemul informational eZilier.
+          </div>
         </div>
       }
 
-      <!-- Cancel Modal -->
+      <!-- Cancel modal -->
       @if (showCancelModal()) {
-        <div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-          <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold text-foreground mb-4">Anulare voucher</h3>
-            <div class="space-y-4">
-              <div class="space-y-2">
-                <label class="text-sm font-medium leading-none select-none">Motiv anulare</label>
-                <select
-                  class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  [(ngModel)]="cancelReasonCode"
-                >
-                  <option value="CA01">CA01 - Eroare la emitere</option>
-                  <option value="CA02">CA02 - Renuntare lucrator</option>
-                  <option value="CA03">CA03 - Alt motiv</option>
+        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 print:hidden" (click)="showCancelModal.set(false)">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" (click)="$event.stopPropagation()">
+            <h3 class="text-lg font-semibold mb-4">{{ 'voucher.detail.cancelModal' | t }}</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm font-medium mb-1">{{ 'field.reason' | t }}</label>
+                <select [(ngModel)]="cancelReasonCode"
+                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm">
+                  <option value="CA01">CA01 — Eroare la emitere</option>
+                  <option value="CA02">CA02 — Renuntare lucrator</option>
+                  <option value="CA03">CA03 — Alt motiv</option>
                 </select>
               </div>
-              <div class="space-y-2">
-                <label class="text-sm font-medium leading-none select-none">Nota (optional)</label>
-                <textarea
-                  class="flex w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] min-h-[80px] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                  rows="3"
-                  [(ngModel)]="cancelNote"
-                  placeholder="Adaugati o nota..."
-                ></textarea>
+              <div>
+                <label class="block text-sm font-medium mb-1">{{ 'field.note' | t }}</label>
+                <textarea [(ngModel)]="cancelNote" rows="3"
+                  class="flex w-full rounded-md border border-input bg-white px-3 py-2 text-sm"></textarea>
               </div>
             </div>
-            <div class="mt-6 flex justify-end gap-3">
-              <button
-                class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
-                (click)="showCancelModal.set(false)"
-              >
-                Renunta
-              </button>
-              <button
-                class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium shadow-xs transition-all hover:bg-destructive/90"
-                (click)="confirmCancel()"
-              >
-                Confirma anularea
-              </button>
+            <div class="mt-5 flex justify-end gap-2">
+              <button type="button" (click)="showCancelModal.set(false)"
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.close' | t }}</button>
+              <button type="button" (click)="confirmCancel()"
+                class="inline-flex h-9 items-center justify-center rounded-md bg-destructive text-white px-4 text-sm font-medium">{{ 'voucher.detail.confirmCancel' | t }}</button>
             </div>
           </div>
         </div>
       }
 
-      <!-- Signature modal (US-A19) -->
+      <!-- Signature modal -->
       @if (showSignModal()) {
-        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="showSignModal.set(false)">
+        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 print:hidden" (click)="showSignModal.set(false)">
           <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-semibold text-foreground mb-1">Semnatura zilier</h3>
-            <p class="text-sm text-muted-foreground mb-4">Oferiti dispozitivul zilierului (telefon/tableta) pentru a semna. Semnatura se salveaza pe voucher si apare pe chitanta.</p>
+            <h3 class="text-lg font-semibold mb-1">{{ 'voucher.detail.signModal' | t }}</h3>
+            <p class="text-sm text-muted-foreground mb-4">{{ 'voucher.detail.signModalHint' | t }}</p>
             <app-signature-pad (changed)="signatureData.set($event)" />
             <div class="mt-5 flex justify-end gap-2">
               <button type="button" (click)="showSignModal.set(false)"
-                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Anuleaza</button>
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.cancel' | t }}</button>
               <button type="button" (click)="saveSignature()" [disabled]="!signatureData() || saving()"
                 class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
-                @if (saving()) { Se salveaza... } @else { Salveaza semnatura }
+                @if (saving()) { {{ 'common.processing' | t }} } @else { {{ 'voucher.detail.saveSignature' | t }} }
               </button>
             </div>
           </div>
         </div>
       }
     </div>
+
+    <style>
+      /* A5 aspect on screen */
+      :host ::ng-deep .voucher-sheet { max-width: 148mm; min-height: auto; }
+
+      /* On-screen: hide the signature section — it appears only at print. */
+      :host ::ng-deep .signature-area { display: none; }
+
+      @media print {
+        :host ::ng-deep .signature-area { display: block !important; }
+        @page { size: A5 portrait; margin: 8mm; }
+        :host ::ng-deep .voucher-sheet { width: 100%; box-shadow: none !important; border-radius: 0 !important; }
+        body { background: white !important; }
+      }
+    </style>
   `,
 })
 export class VoucherDetailComponent implements OnInit {
@@ -291,6 +304,8 @@ export class VoucherDetailComponent implements OnInit {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.loadVoucher(id);
   }
+
+  protected print(): void { window.print(); }
 
   protected activate(): void {
     this.voucherDataService.activateVoucher(this.voucher()!.id).subscribe({
@@ -329,10 +344,7 @@ export class VoucherDetailComponent implements OnInit {
 
   protected confirmCancel(): void {
     this.voucherDataService
-      .cancelVoucher(this.voucher()!.id, {
-        reason: this.cancelReasonCode,
-        note: this.cancelNote || undefined,
-      })
+      .cancelVoucher(this.voucher()!.id, { reason: this.cancelReasonCode, note: this.cancelNote || undefined })
       .subscribe({
         next: (v) => {
           this.voucher.set(v);
@@ -355,20 +367,29 @@ export class VoucherDetailComponent implements OnInit {
   protected formatDate(iso: string): string {
     if (!iso) return '—';
     const d = new Date(iso);
+    if (!isNaN(d.getTime())) return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+    const [y, m, day] = iso.split('-');
+    return `${day}.${m}.${y}`;
+  }
+
+  protected formatDateTime(iso: string): string {
+    if (!iso) return '—';
+    const d = new Date(iso);
     if (isNaN(d.getTime())) return iso;
-    return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+    const date = `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
+    const time = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+    return `${date} ${time}`;
+  }
+
+  protected formatMoney(n: number): string {
+    return (Number(n) || 0).toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   }
 
   private loadVoucher(id: string): void {
     this.loading.set(true);
     this.voucherDataService.getVoucher(id).subscribe({
-      next: (v) => {
-        this.voucher.set(v);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.loading.set(false);
-      },
+      next: (v) => { this.voucher.set(v); this.loading.set(false); },
+      error: () => this.loading.set(false),
     });
   }
 }

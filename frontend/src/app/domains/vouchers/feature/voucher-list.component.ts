@@ -202,12 +202,14 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                           {{ "action.view" | t }}
                         </a>
                         <a
-                          [routerLink]="['/vouchers', voucher.id, 'receipt']"
+                          [routerLink]="['/vouchers', voucher.id]"
                           class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
                           (click)="closeMenu()"
                         >
-                          <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                          {{ "voucher.detail.receipt" | t }}
+                          <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                            <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+                          </svg>
+                          Print
                         </a>
                         @if (voucher.status === 'Emis') {
                           <button
