@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
 import { VoucherStore } from '../data/voucher.store';
 import { VoucherDataService } from '../data/voucher-data.service';
@@ -9,13 +10,13 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
 @Component({
   selector: 'app-voucher-list',
   standalone: true,
-  imports: [FormsModule, RouterLink, StatusBadgeComponent],
+  imports: [FormsModule, RouterLink, StatusBadgeComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto">
       <!-- Header: title + primary actions -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
-        <h1 class="text-3xl font-bold tracking-tight text-foreground">Vouchere</h1>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ 'voucher.list.title' | t }}</h1>
         <div class="flex items-center gap-2">
           <button type="button" (click)="exportCsv()"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
@@ -23,21 +24,21 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
             </svg>
-            Export CSV
+            {{ 'action.exportCsv' | t }}
           </button>
           <button type="button" (click)="openRegisterPicker()"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
-            Registrul zilnic
+            {{ 'voucher.list.registerBtn' | t }}
           </button>
           <a routerLink="/vouchers/create"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
             </svg>
-            Creare voucher
+            {{ 'voucher.list.createBtn' | t }}
           </a>
         </div>
       </div>
@@ -51,7 +52,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
           </svg>
           <input type="text"
             class="flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            placeholder="Cauta dupa Cod, IDNP, Lucrator"
+            [placeholder]="'voucher.list.searchPlaceholder' | t"
             [ngModel]="store.state().workerIdnp"
             (ngModelChange)="onFilterChange('workerIdnp', $event)" />
         </div>
@@ -61,12 +62,12 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
           class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:col-span-2"
           [ngModel]="store.state().status"
           (ngModelChange)="onFilterChange('status', $event)">
-          <option value="">Statut: toate</option>
-          <option value="Emis">Emis</option>
-          <option value="Activ">Activ</option>
-          <option value="Executat">Executat</option>
-          <option value="Raportat">Raportat</option>
-          <option value="Anulat">Anulat</option>
+          <option value="">{{ 'voucher.list.statusAll' | t }}</option>
+          <option value="Emis">{{ 'status.emis' | t }}</option>
+          <option value="Activ">{{ 'status.activ' | t }}</option>
+          <option value="Executat">{{ 'status.executat' | t }}</option>
+          <option value="Raportat">{{ 'status.raportat' | t }}</option>
+          <option value="Anulat">{{ 'status.anulat' | t }}</option>
         </select>
 
         <!-- Raion -->
@@ -74,7 +75,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
           class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:col-span-2"
           [ngModel]="store.state().district"
           (ngModelChange)="onFilterChange('district', $event)">
-          <option value="">Raion: toate</option>
+          <option value="">{{ 'voucher.list.districtAll' | t }}</option>
           <option value="Chisinau">Chisinau</option>
           <option value="Balti">Balti</option>
           <option value="Cahul">Cahul</option>
@@ -101,14 +102,14 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
       <!-- Bulk action bar -->
       @if (selected().size > 0) {
         <div class="mb-4 flex items-center gap-3 rounded-md bg-primary/10 ring-1 ring-primary/30 px-4 py-2 text-sm">
-          <span class="font-medium text-foreground">{{ selected().size }} voucher(e) selectate</span>
+          <span class="font-medium text-foreground">{{ selected().size }} {{ 'voucher.list.bulkSelected' | t }}</span>
           <button type="button" (click)="bulkActivate()" [disabled]="bulkRunning()"
             class="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 text-xs font-medium hover:bg-primary/90 disabled:opacity-50">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5"><polyline points="20 6 9 17 4 12"/></svg>
-            Activeaza selectate
+            {{ 'voucher.list.bulkActivate' | t }}
           </button>
           <button type="button" (click)="clearSelection()"
-            class="ml-auto text-xs text-muted-foreground hover:text-foreground">Deselecteaza tot</button>
+            class="ml-auto text-xs text-muted-foreground hover:text-foreground">{{ 'voucher.list.bulkClear' | t }}</button>
         </div>
       }
 
@@ -116,17 +117,17 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
       @if (registerPickerOpen()) {
         <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" (click)="closeRegisterPicker()">
           <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-semibold text-foreground mb-1">Registrul zilnic al zilierilor</h3>
-            <p class="text-sm text-muted-foreground mb-4">Selectati data pentru care doriti sa generati registrul.</p>
-            <label class="block text-sm font-medium mb-2">Data activitatii</label>
+            <h3 class="text-lg font-semibold text-foreground mb-1">{{ 'register.title' | t }}</h3>
+            <p class="text-sm text-muted-foreground mb-4">{{ 'register.subtitle' | t }}</p>
+            <label class="block text-sm font-medium mb-2">{{ 'register.activityDate' | t }}</label>
             <input type="date" [value]="registerDate()" (input)="registerDate.set($any($event.target).value)"
               class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
             <div class="mt-5 flex justify-end gap-2">
               <button type="button" (click)="closeRegisterPicker()"
-                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium">Anuleaza</button>
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium">{{ 'action.cancel' | t }}</button>
               <button type="button" (click)="openRegister()" [disabled]="!registerDate()"
                 class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
-                Genereaza registrul
+                {{ 'register.generate' | t }}
               </button>
             </div>
           </div>
@@ -144,14 +145,14 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                   [indeterminate]="someSelected() && !allSelected()"
                   (change)="toggleSelectAll()" />
               </th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Cod</th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Lucrator</th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">IDNP</th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Raion</th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Statut</th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Ore</th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Remunerare</th>
-              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Data</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.code' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.worker' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.idnp' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.district' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'common.status' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.hours' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.remuneration' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'common.date' | t }}</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap w-10"></th>
             </tr>
           </thead>
@@ -178,7 +179,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                   </span>
                 </td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.hoursWorked }}h</td>
-                <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.netRemuneration }} MDL</td>
+                <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.netRemuneration }} {{ 'common.mdl' | t }}</td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.workDate }}</td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap">
                   <div class="relative">
@@ -198,7 +199,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                           (click)="closeMenu()"
                         >
                           <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
-                          Vizualizeaza
+                          {{ "action.view" | t }}
                         </a>
                         <a
                           [routerLink]="['/vouchers', voucher.id, 'receipt']"
@@ -206,7 +207,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                           (click)="closeMenu()"
                         >
                           <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                          Chitanta
+                          {{ "voucher.detail.receipt" | t }}
                         </a>
                         @if (voucher.status === 'Emis') {
                           <button
@@ -214,7 +215,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                             (click)="activateVoucher(voucher); closeMenu()"
                           >
                             <svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            Activeaza
+                            {{ "action.activate" | t }}
                           </button>
                         }
                         @if (voucher.status === 'Activ') {
@@ -223,7 +224,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                             (click)="executeVoucher(voucher); closeMenu()"
                           >
                             <svg class="h-4 w-4 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-                            Executa
+                            {{ "action.execute" | t }}
                           </button>
                         }
                         @if (voucher.status === 'Executat') {
@@ -232,7 +233,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                             (click)="reportVoucher(voucher); closeMenu()"
                           >
                             <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            Raporteaza
+                            {{ "action.report" | t }}
                           </button>
                         }
                         @if (voucher.status === 'Emis' || voucher.status === 'Activ') {
@@ -241,7 +242,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                             (click)="cancelVoucher(voucher); closeMenu()"
                           >
                             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-                            Anuleaza
+                            {{ "action.cancel" | t }}
                           </button>
                         }
                       </div>
@@ -252,7 +253,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
             } @empty {
               <tr>
                 <td colspan="10" class="px-4 py-8 text-center text-sm text-muted-foreground">
-                  Nu au fost gasite vouchere.
+                  {{ "voucher.list.empty" | t }}
                 </td>
               </tr>
             }

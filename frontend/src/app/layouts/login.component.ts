@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthStore } from '../shared/auth/auth.store';
 import { RoleType } from '../shared/models/voucher.model';
+import { TranslatePipe } from '../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="min-h-screen flex items-center justify-center bg-white px-4">
@@ -15,7 +16,7 @@ import { RoleType } from '../shared/models/voucher.model';
         <!-- Logo -->
         <div class="text-center px-6">
           <h1 class="text-2xl font-bold text-primary tracking-tight">eZilier</h1>
-          <p class="text-sm text-muted-foreground mt-1">Sistem de management al voucherelor pentru zilieri</p>
+          <p class="text-sm text-muted-foreground mt-1">{{ 'login.subtitle' | t }}</p>
         </div>
 
         <!-- Error -->
@@ -29,14 +30,14 @@ import { RoleType } from '../shared/models/voucher.model';
         <form (ngSubmit)="onSubmit()" class="px-6 space-y-4">
           <!-- IDNP -->
           <div class="space-y-2">
-            <label for="idnp" class="flex items-center gap-2 text-sm font-medium leading-none select-none">IDNP</label>
+            <label for="idnp" class="flex items-center gap-2 text-sm font-medium leading-none select-none">{{ 'login.idnpLabel' | t }}</label>
             <input
               id="idnp"
               type="text"
               [(ngModel)]="idnp"
               name="idnp"
               maxlength="13"
-              placeholder="Introduceti IDNP (13 cifre)"
+              [placeholder]="'login.idnpPlaceholder' | t"
               class="flex h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
               autocomplete="username"
             />
@@ -44,13 +45,13 @@ import { RoleType } from '../shared/models/voucher.model';
 
           <!-- Password -->
           <div class="space-y-2">
-            <label for="password" class="flex items-center gap-2 text-sm font-medium leading-none select-none">Parola</label>
+            <label for="password" class="flex items-center gap-2 text-sm font-medium leading-none select-none">{{ 'login.passwordLabel' | t }}</label>
             <input
               id="password"
               type="password"
               [(ngModel)]="password"
               name="password"
-              placeholder="Introduceti parola"
+              [placeholder]="'login.passwordPlaceholder' | t"
               class="flex h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-[color,box-shadow] outline-none placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
               autocomplete="current-password"
             />
@@ -65,7 +66,7 @@ import { RoleType } from '../shared/models/voucher.model';
             @if (auth.loading()) {
               Se autentifica...
             } @else {
-              Autentificare
+              {{ 'login.submit' | t }}
             }
           </button>
         </form>
@@ -87,13 +88,13 @@ import { RoleType } from '../shared/models/voucher.model';
             (click)="loginWithMPass()"
             class="inline-flex w-full h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background text-sm font-medium shadow-xs transition-all outline-none hover:bg-accent hover:text-accent-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
           >
-            Autentificare prin MPass
+            {{ 'login.mpass' | t }}
           </button>
         </div>
 
         <!-- Quick login buttons -->
         <div class="px-6 border-t border-border pt-5">
-          <p class="text-xs text-muted-foreground text-center mb-3 uppercase tracking-wider font-medium">Autentificare rapida (demo)</p>
+          <p class="text-xs text-muted-foreground text-center mb-3 uppercase tracking-wider font-medium">{{ 'login.demo' | t }}</p>
           <div class="grid grid-cols-2 gap-2">
             <button
               type="button"

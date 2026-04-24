@@ -4,6 +4,7 @@ import { Router, RouterLink } from '@angular/router';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { WorkerDataService } from '../../workers/data/worker-data.service';
 import { VoucherCreatedSummary, WorkerModel } from '../../../shared/models/voucher.model';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 interface VoucherWorkerRow {
   id: string;
@@ -23,43 +24,39 @@ interface VoucherWorkerRow {
 @Component({
   selector: 'app-create-voucher',
   standalone: true,
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-6xl mx-auto">
       <div class="mb-6">
-        <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; Inapoi la lista</a>
-        <h1 class="text-3xl font-bold tracking-tight text-foreground mt-2">Creare vouchere</h1>
+        <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; {{ 'worker.profile.back' | t }}</a>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground mt-2">{{ 'voucher.create.title' | t }}</h1>
       </div>
 
       @if (!createdSummary()) {
         <!-- =========== SECTIUNEA 1: CAMPURI OBLIGATORII =========== -->
         <form [formGroup]="voucherForm" class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
           <div class="mb-4">
-            <h2 class="text-lg font-semibold text-foreground">Date predefinite</h2>
-            <p class="text-sm text-muted-foreground mt-1">
-              Necesare pentru crearea voucherului cu statut
-              <span class="font-semibold text-foreground">EMIS</span>.
-              Aceste valori vor fi aplicate fiecarui lucrator si pot fi editate individual.
-            </p>
+            <h2 class="text-lg font-semibold text-foreground">{{ 'voucher.create.predefinedSection' | t }}</h2>
+            <p class="text-sm text-muted-foreground mt-1">{{ 'voucher.create.predefinedHint' | t }}</p>
           </div>
 
           <!-- Row 1: Data, Ore, Remuneratie -->
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div class="space-y-2">
-              <label class="text-sm font-medium leading-none">Data lucrarilor <span class="text-destructive">*</span></label>
+              <label class="text-sm font-medium leading-none">{{ 'field.workDate' | t }} <span class="text-destructive">*</span></label>
               <input type="date" formControlName="workDate"
                 class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-medium leading-none">Nr. ore de munca predefinit <span class="text-destructive">*</span></label>
+              <label class="text-sm font-medium leading-none">{{ 'voucher.create.defaultHours' | t }} <span class="text-destructive">*</span></label>
               <input type="number" formControlName="defaultHours" min="1" max="8"
                 class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-medium leading-none">Remuneratie predefinita (MDL) <span class="text-destructive">*</span></label>
+              <label class="text-sm font-medium leading-none">{{ 'voucher.create.defaultRem' | t }} <span class="text-destructive">*</span></label>
               <input type="number" formControlName="defaultRemuneration" min="1"
                 class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
             </div>
@@ -68,7 +65,7 @@ interface VoucherWorkerRow {
           <!-- Row 2: Raion, Localitate -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div class="space-y-2">
-              <label class="text-sm font-medium leading-none">Raion <span class="text-destructive">*</span></label>
+              <label class="text-sm font-medium leading-none">{{ "field.district" | t }} <span class="text-destructive">*</span></label>
               <select formControlName="workDistrict"
                 class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
                 <option value="">Selectati raionul</option>
@@ -84,7 +81,7 @@ interface VoucherWorkerRow {
             </div>
 
             <div class="space-y-2">
-              <label class="text-sm font-medium leading-none">Localitate <span class="text-destructive">*</span></label>
+              <label class="text-sm font-medium leading-none">{{ "field.locality" | t }} <span class="text-destructive">*</span></label>
               <select formControlName="workLocality"
                 class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
                 <option value="">Selectati localitatea</option>
@@ -97,7 +94,7 @@ interface VoucherWorkerRow {
 
           <!-- Row 3: Adresa -->
           <div class="space-y-2">
-            <label class="text-sm font-medium leading-none">Adresa <span class="text-destructive">*</span></label>
+            <label class="text-sm font-medium leading-none">{{ "field.address" | t }} <span class="text-destructive">*</span></label>
             <input type="text" formControlName="workAddress" placeholder="str. Exemplu 1/2"
               class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
           </div>
@@ -106,21 +103,21 @@ interface VoucherWorkerRow {
         <!-- =========== SECTIUNEA 2: LUCRATORI =========== -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
           <div class="mb-4">
-            <h2 class="text-lg font-semibold text-foreground">Lucratori</h2>
-            <p class="text-sm text-muted-foreground mt-1">Adaugati zilierii (Nume, Prenume, IDNP). Restul datelor se completeaza automat din campurile obligatorii si pot fi editate individual.</p>
+            <h2 class="text-lg font-semibold text-foreground">{{ "voucher.create.workersSection" | t }}</h2>
+            <p class="text-sm text-muted-foreground mt-1">{{ "voucher.create.workersHint" | t }}</p>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
             <button type="button" (click)="openPanel('add')"
               class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md text-sm font-semibold transition-colors bg-primary text-primary-foreground shadow-xs hover:bg-primary/90">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-              Adauga lucratori
+              {{ 'voucher.create.addWorkers' | t }}
             </button>
 
             <button type="button" (click)="openPanel('csv')"
               class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md text-sm font-semibold transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Importa lucratori
+              {{ 'voucher.create.importWorkers' | t }}
             </button>
           </div>
 
@@ -129,7 +126,7 @@ interface VoucherWorkerRow {
             <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="panel.set(null)">
               <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
                 <div class="p-6 pb-4 border-b border-foreground/10">
-                  <h3 class="text-lg font-semibold">Adauga lucratori</h3>
+                  <h3 class="text-lg font-semibold">{{ 'voucher.create.addWorkers' | t }}</h3>
                   <p class="text-sm text-muted-foreground">Selectati lucratori din registrul RSP sau adaugati unul nou.</p>
                 </div>
 
@@ -140,13 +137,13 @@ interface VoucherWorkerRow {
                       [class]="addTab() === 'existing'
                         ? 'relative pb-3 pt-3 text-sm font-medium text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-foreground'
                         : 'pb-3 pt-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'">
-                      Lista existenta
+                      {{ 'voucher.create.tabExisting' | t }}
                     </button>
                     <button type="button" (click)="addTab.set('new')"
                       [class]="addTab() === 'new'
                         ? 'relative pb-3 pt-3 text-sm font-medium text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-foreground'
                         : 'pb-3 pt-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'">
-                      Lucrator nou
+                      {{ 'voucher.create.tabNew' | t }}
                     </button>
                   </nav>
                 </div>
@@ -193,8 +190,8 @@ interface VoucherWorkerRow {
                     <div class="mb-4 flex items-start gap-3 rounded-md bg-primary/5 ring-1 ring-primary/20 p-3 text-sm">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-primary flex-shrink-0 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                       <div>
-                        <span class="font-semibold text-foreground">Verificare RSP:</span>
-                        <span class="text-muted-foreground"> La salvare, datele se valideaza prin RSP (MConnect). Campurile eronate vor fi marcate.</span>
+                        <span class="font-semibold text-foreground">{{ 'voucher.create.rspBanner' | t }}</span>
+                        <span class="text-muted-foreground"> {{ 'voucher.create.rspBannerText' | t }}</span>
                       </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-3" [formGroup]="newWorkerForm">
@@ -238,7 +235,7 @@ interface VoucherWorkerRow {
             <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="panel.set(null)">
               <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl" (click)="$event.stopPropagation()">
                 <div class="p-6 pb-4 border-b border-foreground/10">
-                  <h3 class="text-lg font-semibold">Importa lucratori</h3>
+                  <h3 class="text-lg font-semibold">{{ 'voucher.create.importWorkers' | t }}</h3>
                   <p class="text-sm text-muted-foreground">Fiecare linie trebuie sa contina: <span class="font-mono">Nume,Prenume,IDNP</span></p>
                 </div>
                 <div class="p-6">
@@ -264,7 +261,7 @@ interface VoucherWorkerRow {
           <!-- WORKER CARDS -->
           @if (rows().length === 0) {
             <div class="rounded-md border border-dashed border-foreground/20 p-8 text-center text-sm text-muted-foreground">
-              Nu au fost adaugati lucratori. Folositi butoanele de mai sus.
+              {{ 'voucher.create.emptyWorkers' | t }}
             </div>
           } @else {
             <div class="space-y-3">
@@ -324,7 +321,7 @@ interface VoucherWorkerRow {
         <!-- TOTALS + SUBMIT -->
         @if (rows().length > 0) {
           <div class="bg-primary/10 rounded-xl ring-1 ring-primary/20 p-4 mb-4">
-            <h3 class="text-sm font-semibold text-foreground mb-2">Sumar total</h3>
+            <h3 class="text-sm font-semibold text-foreground mb-2">{{ 'voucher.create.totalSummary' | t }}</h3>
             <div class="grid grid-cols-2 md:grid-cols-2 gap-4 text-sm">
               <div><span class="text-muted-foreground">Vouchere:</span> <strong>{{ rows().length }}</strong></div>
               <div><span class="text-muted-foreground">Total brut:</span> <strong>{{ totalGross() }} MDL</strong></div>
@@ -340,13 +337,13 @@ interface VoucherWorkerRow {
           <a routerLink="/vouchers" class="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-4 text-sm font-medium">Anuleaza</a>
           <button type="button" (click)="onSubmit()" [disabled]="submitting() || rows().length === 0"
             class="inline-flex h-10 items-center justify-center rounded-md bg-primary text-primary-foreground px-6 text-sm font-semibold disabled:opacity-50">
-            @if (submitting()) { Se proceseaza... } @else { Confirmare si creare vouchere }
+            @if (submitting()) { {{ 'common.processing' | t }} } @else { {{ 'voucher.create.submit' | t }} }
           </button>
         </div>
       } @else {
         <!-- SUCCESS -->
         <div class="bg-success/10 rounded-xl ring-1 ring-success/20 p-6">
-          <h2 class="text-lg font-semibold text-success mb-4">Vouchere create cu succes!</h2>
+          <h2 class="text-lg font-semibold text-success mb-4">{{ 'voucher.create.success' | t }}</h2>
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm mb-4">
             <div><span class="text-success">Total vouchere:</span> <strong>{{ createdSummary()!.totalVouchers }}</strong></div>
             <div><span class="text-success">Total net:</span> <strong>{{ createdSummary()!.totalNet }} MDL</strong></div>
@@ -354,7 +351,7 @@ interface VoucherWorkerRow {
             <div><span class="text-success">Total brut:</span> <strong>{{ createdSummary()!.totalGross }} MDL</strong></div>
           </div>
           <div class="border-t border-success/20 pt-4">
-            <h3 class="text-sm font-medium mb-2">Coduri vouchere:</h3>
+            <h3 class="text-sm font-medium mb-2">{{ 'voucher.create.successCodes' | t }}</h3>
             <div class="flex flex-wrap gap-2">
               @for (v of createdSummary()!.vouchers; track v.id) {
                 <span class="inline-flex items-center px-3 py-1 bg-card ring-1 ring-success/30 rounded-full text-sm font-mono text-success">{{ v.code }}</span>
@@ -363,7 +360,7 @@ interface VoucherWorkerRow {
           </div>
           <div class="mt-6 flex gap-3">
             <a routerLink="/vouchers" class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium">Inapoi la lista</a>
-            <button type="button" (click)="createAnother()" class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium">Creeaza alt voucher</button>
+            <button type="button" (click)="createAnother()" class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium">{{ 'voucher.create.another' | t }}</button>
           </div>
         </div>
       }

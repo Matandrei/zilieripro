@@ -7,14 +7,16 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { TranslatePipe } from '../../i18n/translate.pipe';
 
 @Component({
   selector: 'app-signature-pad',
   standalone: true,
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="space-y-3">
-      <p class="text-sm text-muted-foreground">Semnati mai jos pe zona punctata. Folositi degetul pe telefon/tableta sau mouse-ul pe desktop.</p>
+      <p class="text-sm text-muted-foreground">{{ 'signature.pad.hint' | t }}</p>
       <div class="relative bg-white rounded-md ring-2 ring-dashed ring-foreground/20 overflow-hidden">
         <canvas
           #canvas
@@ -29,7 +31,7 @@ import {
         ></canvas>
         @if (empty()) {
           <div class="pointer-events-none absolute inset-0 flex items-center justify-center text-sm text-muted-foreground/60">
-            Semnati aici
+            {{ 'signature.pad.placeholder' | t }}
           </div>
         }
       </div>
@@ -37,9 +39,9 @@ import {
         <button type="button" (click)="clear()"
           class="inline-flex h-8 items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="m19 6-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
-          Sterge si semneaza din nou
+          {{ 'signature.pad.clear' | t }}
         </button>
-        <span class="text-xs text-muted-foreground">{{ empty() ? 'Nesemnat' : 'Semnat' }}</span>
+        <span class="text-xs text-muted-foreground">{{ (empty() ? 'signature.pad.empty' : 'signature.pad.signed') | t }}</span>
       </div>
     </div>
   `,

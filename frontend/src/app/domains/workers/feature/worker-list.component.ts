@@ -3,18 +3,19 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { WorkerDataService } from '../data/worker-data.service';
 import { PaginatedResult, WorkerModel } from '../../../shared/models/voucher.model';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-worker-list',
   standalone: true,
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
       <div class="flex flex-col gap-4 md:flex-row md:items-center mb-6">
         <div class="w-full md:mr-4 md:w-auto">
-          <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">Lucratori zilieri</h1>
+          <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">{{ 'worker.list.title' | t }}</h1>
         </div>
       </div>
 
@@ -45,7 +46,7 @@ import { PaginatedResult, WorkerModel } from '../../../shared/models/voucher.mod
       <!-- Loading -->
       @if (loading()) {
         <div class="flex justify-center py-12">
-          <div class="text-sm text-muted-foreground">Se incarca...</div>
+          <div class="text-sm text-muted-foreground">{{ 'common.loading' | t }}</div>
         </div>
       }
 

@@ -5,16 +5,17 @@ import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
 import { SignaturePadComponent } from '../../../shared/ui/components/signature-pad.component';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-voucher-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule, StatusBadgeComponent, SignaturePadComponent],
+  imports: [RouterLink, FormsModule, StatusBadgeComponent, SignaturePadComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-4xl mx-auto">
       <div class="mb-6">
-        <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; Inapoi la lista</a>
+        <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; {{ 'worker.profile.back' | t }}</a>
       </div>
 
       @if (voucher()) {
@@ -32,13 +33,13 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
               <a [routerLink]="['/vouchers', voucher()!.id, 'receipt']"
                 class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                Chitanta
+                {{ 'voucher.detail.receipt' | t }}
               </a>
               @if (voucher()!.status === 'Activ' || voucher()!.status === 'Executat') {
                 <button type="button" (click)="showSignModal.set(true)"
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
-                  @if (voucher()!.signatureDataUrl) { Resemneaza } @else { Semneaza }
+                  {{ (voucher()!.signatureDataUrl ? 'action.resign' : 'action.sign') | t }}
                 </button>
               }
               @if (voucher()!.status === 'Emis') {
@@ -46,19 +47,19 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
                   [routerLink]="['/vouchers', voucher()!.id, 'edit']"
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
                 >
-                  Editeaza
+                  {{ "action.edit" | t }}
                 </a>
                 <button
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
                   (click)="activate()"
                 >
-                  Activeaza
+                  {{ "action.activate" | t }}
                 </button>
                 <button
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium shadow-xs transition-all hover:bg-destructive/90"
                   (click)="showCancelModal.set(true)"
                 >
-                  Anuleaza
+                  {{ "action.cancel" | t }}
                 </button>
               }
               @if (voucher()!.status === 'Activ') {
@@ -66,19 +67,19 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
                   [routerLink]="['/vouchers', voucher()!.id, 'edit']"
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
                 >
-                  Editeaza
+                  {{ "action.edit" | t }}
                 </a>
                 <button
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
                   (click)="execute()"
                 >
-                  Executa
+                  {{ "action.execute" | t }}
                 </button>
                 <button
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium shadow-xs transition-all hover:bg-destructive/90"
                   (click)="showCancelModal.set(true)"
                 >
-                  Anuleaza
+                  {{ "action.cancel" | t }}
                 </button>
               }
               @if (voucher()!.status === 'Executat') {
@@ -86,7 +87,7 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
                   class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
                   (click)="report()"
                 >
-                  Raporteaza
+                  {{ "action.report" | t }}
                 </button>
               }
             </div>
@@ -94,51 +95,51 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
 
           <!-- Voucher details card -->
           <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">Informatii voucher</h2>
+            <h2 class="text-lg font-semibold text-foreground mb-4">{{ 'voucher.detail.info' | t }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Cod:</span>
+                <span class="text-sm text-muted-foreground">{{ 'field.code' | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.code }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Statut:</span>
+                <span class="text-sm text-muted-foreground">{{ 'common.status' | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.status }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Data lucrului:</span>
+                <span class="text-sm text-muted-foreground">{{ 'field.workDate' | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.workDate }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Ore lucrate:</span>
+                <span class="text-sm text-muted-foreground">{{ 'field.hours' | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.hoursWorked }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Raion:</span>
+                <span class="text-sm text-muted-foreground">{{ 'field.district' | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.workDistrict }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Localitate:</span>
+                <span class="text-sm text-muted-foreground">{{ 'field.locality' | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.workLocality }}</span>
               </div>
               @if (voucher()!.workAddress) {
                 <div class="flex justify-between border-b border-foreground/5 pb-2 md:col-span-2">
-                  <span class="text-sm text-muted-foreground">Adresa:</span>
+                  <span class="text-sm text-muted-foreground">{{ "field.address" | t }}:</span>
                   <span class="text-sm font-medium text-foreground">{{ voucher()!.workAddress }}</span>
                 </div>
               }
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Creat la:</span>
+                <span class="text-sm text-muted-foreground">{{ "field.createdAt" | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.createdAt) }}</span>
               </div>
               @if (voucher()!.executedAt) {
                 <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">Executat la:</span>
+                  <span class="text-sm text-muted-foreground">{{ "field.executedAt" | t }}:</span>
                   <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.executedAt!) }}</span>
                 </div>
               }
               @if (voucher()!.reportedAt) {
                 <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">Raportat la:</span>
+                  <span class="text-sm text-muted-foreground">{{ "field.reportedAt" | t }}:</span>
                   <span class="text-sm font-medium text-foreground">{{ formatDate(voucher()!.reportedAt!) }}</span>
                 </div>
               }
@@ -147,19 +148,19 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
 
           <!-- Worker info -->
           <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">Informatii lucrator</h2>
+            <h2 class="text-lg font-semibold text-foreground mb-4">{{ "voucher.detail.worker" | t }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">IDNP:</span>
+                <span class="text-sm text-muted-foreground">{{ "field.idnp" | t }}:</span>
                 <span class="text-sm font-medium text-foreground font-mono">{{ voucher()!.worker.idnp }}</span>
               </div>
               <div class="flex justify-between border-b border-foreground/5 pb-2">
-                <span class="text-sm text-muted-foreground">Nume complet:</span>
+                <span class="text-sm text-muted-foreground">{{ "field.fullName" | t }}:</span>
                 <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.firstName }} {{ voucher()!.worker.lastName }}</span>
               </div>
               @if (voucher()!.worker.phone) {
                 <div class="flex justify-between border-b border-foreground/5 pb-2">
-                  <span class="text-sm text-muted-foreground">Telefon:</span>
+                  <span class="text-sm text-muted-foreground">{{ "field.phone" | t }}:</span>
                   <span class="text-sm font-medium text-foreground">{{ voucher()!.worker.phone }}</span>
                 </div>
               }
@@ -175,21 +176,21 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
           <!-- Cancellation info -->
           @if (voucher()!.status === 'Anulat') {
             <div class="bg-destructive/10 rounded-xl ring-1 ring-destructive/20 p-6">
-              <h2 class="text-lg font-semibold text-destructive mb-4">Informatii anulare</h2>
+              <h2 class="text-lg font-semibold text-destructive mb-4">{{ "voucher.detail.cancellation" | t }}</h2>
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="flex justify-between">
-                  <span class="text-sm text-destructive">Motiv:</span>
+                  <span class="text-sm text-destructive">{{ "field.reason" | t }}:</span>
                   <span class="text-sm font-medium text-destructive">{{ cancelReasonLabel(voucher()!.cancellationReason!) }}</span>
                 </div>
                 @if (voucher()!.cancellationNote) {
                   <div class="flex justify-between">
-                    <span class="text-sm text-destructive">Nota:</span>
+                    <span class="text-sm text-destructive">{{ "field.note" | t }}:</span>
                     <span class="text-sm font-medium text-destructive">{{ voucher()!.cancellationNote }}</span>
                   </div>
                 }
                 @if (voucher()!.cancellationDate) {
                   <div class="flex justify-between">
-                    <span class="text-sm text-destructive">Data anulare:</span>
+                    <span class="text-sm text-destructive">{{ "field.cancelledAt" | t }}:</span>
                     <span class="text-sm font-medium text-destructive">{{ voucher()!.cancellationDate }}</span>
                   </div>
                 }

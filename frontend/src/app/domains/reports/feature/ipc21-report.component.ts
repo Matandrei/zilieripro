@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { AuthStore } from '../../../shared/auth/auth.store';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 export interface Ipc21Line {
   workerIdnp: string;
@@ -32,7 +33,7 @@ export interface Ipc21Report {
 @Component({
   selector: 'app-ipc21-report',
   standalone: true,
-  imports: [FormsModule, RouterLink, DecimalPipe],
+  imports: [FormsModule, RouterLink, DecimalPipe, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
@@ -42,12 +43,12 @@ export interface Ipc21Report {
           routerLink="/reports"
           class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
-          &larr; Inapoi la rapoarte
+          &larr; {{ 'reports.ipc21.back' | t }}
         </a>
       </div>
       <div class="flex flex-col gap-4 md:flex-row md:items-center mb-6">
         <div class="w-full md:mr-4 md:w-auto">
-          <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">Raport IPC-21</h1>
+          <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">{{ 'reports.ipc21.title' | t }}</h1>
         </div>
         <div class="w-full md:ml-auto md:w-auto">
           <button
@@ -55,7 +56,7 @@ export interface Ipc21Report {
             [disabled]="!report()"
             (click)="exportReport()"
           >
-            Exporta
+            {{ 'reports.ipc21.export' | t }}
           </button>
         </div>
       </div>
@@ -64,7 +65,7 @@ export interface Ipc21Report {
       <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div class="space-y-2">
-            <label class="text-sm font-medium leading-none select-none">Perioada</label>
+            <label class="text-sm font-medium leading-none select-none">{{ 'reports.ipc21.period' | t }}</label>
             <div class="flex gap-2">
               <select
                 class="flex-1 flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
@@ -91,14 +92,14 @@ export interface Ipc21Report {
               class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
               (click)="loadReport()"
             >
-              Genereaza
+              {{ 'reports.ipc21.generate' | t }}
             </button>
           </div>
         </div>
       </div>
 
       @if (loading()) {
-        <div class="text-center py-12 text-muted-foreground">Se incarca raportul...</div>
+        <div class="text-center py-12 text-muted-foreground">{{ 'reports.ipc21.loading' | t }}</div>
       }
 
       @if (error(); as err) {
@@ -109,7 +110,7 @@ export interface Ipc21Report {
         <!-- Report Header Info -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-4">
           <div class="flex items-center gap-6 text-sm text-foreground/80">
-            <span><strong class="text-foreground">Perioada:</strong> {{ r.period }}</span>
+            <span><strong class="text-foreground">{{ 'reports.ipc21.period' | t }}:</strong> {{ r.period }}</span>
           </div>
         </div>
 

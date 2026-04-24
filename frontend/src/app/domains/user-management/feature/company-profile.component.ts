@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } 
 import { AuthStore } from '../../../shared/auth/auth.store';
 import { ApiService } from '../../../shared/services/api.service';
 import { UserTableItem } from '../../../shared/models/voucher.model';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 interface CompanyInfo {
   idno: string;
@@ -14,36 +15,37 @@ interface CompanyInfo {
 @Component({
   selector: 'app-company-profile',
   standalone: true,
+  imports: [TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-6xl mx-auto">
       <div class="mb-6">
-        <h1 class="text-3xl font-bold tracking-tight text-foreground">Profil companie</h1>
-        <p class="text-sm text-muted-foreground mt-1">Informatii preluate din RSUD prin MConnect</p>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ 'company.title' | t }}</h1>
+        <p class="text-sm text-muted-foreground mt-1">{{ 'company.subtitle' | t }}</p>
       </div>
 
       <!-- Company card -->
       <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
-        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">Date companie</h2>
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-4">{{ 'company.dataSection' | t }}</h2>
         <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
           <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-            <dt class="text-sm text-muted-foreground">IDNO</dt>
+            <dt class="text-sm text-muted-foreground">{{ 'field.idno' | t }}</dt>
             <dd class="text-sm font-medium font-mono text-foreground">{{ company().idno }}</dd>
           </div>
           <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-            <dt class="text-sm text-muted-foreground">Denumire</dt>
+            <dt class="text-sm text-muted-foreground">{{ 'field.companyName' | t }}</dt>
             <dd class="text-sm font-medium text-foreground text-right">{{ company().name }}</dd>
           </div>
           <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-            <dt class="text-sm text-muted-foreground">Forma organizare</dt>
+            <dt class="text-sm text-muted-foreground">{{ 'field.legalForm' | t }}</dt>
             <dd class="text-sm font-medium text-foreground">{{ company().legalForm }}</dd>
           </div>
           <div class="flex justify-between items-start border-b border-foreground/5 pb-2">
-            <dt class="text-sm text-muted-foreground">Tip activitate</dt>
+            <dt class="text-sm text-muted-foreground">{{ 'field.activityType' | t }}</dt>
             <dd class="text-sm font-medium text-foreground">{{ company().activityType }}</dd>
           </div>
           <div class="flex justify-between items-start md:col-span-2">
-            <dt class="text-sm text-muted-foreground">Adresa</dt>
+            <dt class="text-sm text-muted-foreground">{{ 'field.address' | t }}</dt>
             <dd class="text-sm font-medium text-foreground text-right">{{ company().address }}</dd>
           </div>
         </dl>
@@ -53,13 +55,13 @@ interface CompanyInfo {
       <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
         <div class="flex items-start justify-between mb-4">
           <div>
-            <h2 class="text-lg font-semibold text-foreground">Conturi utilizatori</h2>
-            <p class="text-sm text-muted-foreground">Persoanele care pot crea vouchere in numele companiei</p>
+            <h2 class="text-lg font-semibold text-foreground">{{ 'company.users' | t }}</h2>
+            <p class="text-sm text-muted-foreground">{{ 'company.usersHint' | t }}</p>
           </div>
           <button type="button" (click)="openAddUser()"
             class="inline-flex h-9 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-semibold hover:bg-primary/90">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-            Adauga utilizator
+            {{ 'company.addUser' | t }}
           </button>
         </div>
 
@@ -67,12 +69,12 @@ interface CompanyInfo {
           <table class="w-full text-sm">
             <thead class="border-b border-foreground/10">
               <tr class="text-muted-foreground">
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">IDNP</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Nume</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Prenume</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Vouchere create</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Statut</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">Actiuni</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">{{ 'field.idnp' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">{{ 'field.lastName' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">{{ 'field.firstName' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">{{ 'field.vouchersCreated' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">{{ 'common.status' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide">{{ 'common.actions' | t }}</th>
               </tr>
             </thead>
             <tbody>

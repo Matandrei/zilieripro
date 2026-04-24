@@ -49,7 +49,7 @@ interface NavItem {
             @if (currentCompany(); as c) {
               <span class="max-w-[180px] truncate">{{ c.companyName }}</span>
             } @else {
-              <span>Selectati compania</span>
+              <span>{{ 'company.selectCompany' | t }}</span>
             }
             @if (rsud.companies().length > 1) {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5 opacity-60"><polyline points="6 9 12 15 18 9"/></svg>
@@ -153,12 +153,12 @@ interface NavItem {
       <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="showCompanyPicker.set(false)">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
           <div class="p-6 pb-4 border-b border-foreground/10">
-            <h3 class="text-lg font-semibold">Selectati compania</h3>
-            <p class="text-sm text-muted-foreground">Companii asociate IDNP-ului dvs. (preluate din RSUD prin MConnect).</p>
+            <h3 class="text-lg font-semibold">{{ 'company.selectCompany' | t }}</h3>
+            <p class="text-sm text-muted-foreground">{{ 'company.selectHint' | t }}</p>
           </div>
           <div class="p-2 max-h-80 overflow-auto">
             @if (rsud.companies().length === 0) {
-              <div class="p-6 text-center text-sm text-muted-foreground">Niciun RSUD nu a fost gasit.</div>
+              <div class="p-6 text-center text-sm text-muted-foreground">{{ 'common.noResults' | t }}</div>
             }
             @for (c of rsud.companies(); track c.idno) {
               <button type="button" (click)="pickCompany(c.idno)"
@@ -183,7 +183,7 @@ interface NavItem {
           </div>
           <div class="p-4 pt-3 border-t border-foreground/10 flex justify-end">
             <button type="button" (click)="showCompanyPicker.set(false)"
-              class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Inchide</button>
+              class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.close' | t }}</button>
           </div>
         </div>
       </div>

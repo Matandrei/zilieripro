@@ -3,11 +3,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
 import { WorkerDataService } from '../data/worker-data.service';
 import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.model';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-worker-profile',
   standalone: true,
-  imports: [RouterLink, StatusBadgeComponent],
+  imports: [RouterLink, StatusBadgeComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
@@ -20,13 +21,13 @@ import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.mo
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
           </svg>
-          Inapoi la lista
+          {{ 'worker.profile.back' | t }}
         </a>
       </div>
 
       @if (loading()) {
         <div class="flex justify-center py-12">
-          <div class="text-sm text-muted-foreground">Se incarca...</div>
+          <div class="text-sm text-muted-foreground">{{ "common.loading" | t }}</div>
         </div>
       }
 
@@ -36,58 +37,58 @@ import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.mo
           <h1 class="text-3xl font-bold tracking-tight text-foreground mb-6">{{ w.lastName }} {{ w.firstName }}</h1>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
             <div>
-              <dt class="text-sm text-muted-foreground">IDNP</dt>
+              <dt class="text-sm text-muted-foreground">{{ "field.idnp" | t }}</dt>
               <dd class="mt-1 text-sm font-medium text-foreground font-mono">{{ w.idnp }}</dd>
             </div>
             <div>
-              <dt class="text-sm text-muted-foreground">Nume</dt>
+              <dt class="text-sm text-muted-foreground">{{ "field.lastName" | t }}</dt>
               <dd class="mt-1 text-sm font-medium text-foreground">{{ w.lastName }}</dd>
             </div>
             <div>
-              <dt class="text-sm text-muted-foreground">Prenume</dt>
+              <dt class="text-sm text-muted-foreground">{{ "field.firstName" | t }}</dt>
               <dd class="mt-1 text-sm font-medium text-foreground">{{ w.firstName }}</dd>
             </div>
             <div>
-              <dt class="text-sm text-muted-foreground">Data nasterii</dt>
+              <dt class="text-sm text-muted-foreground">{{ "field.birthDate" | t }}</dt>
               <dd class="mt-1 text-sm font-medium text-foreground">{{ w.birthDate }}</dd>
             </div>
             <div>
-              <dt class="text-sm text-muted-foreground">Telefon</dt>
+              <dt class="text-sm text-muted-foreground">{{ "field.phone" | t }}</dt>
               <dd class="mt-1 text-sm font-medium text-foreground">{{ w.phone || '-' }}</dd>
             </div>
             <div>
-              <dt class="text-sm text-muted-foreground">Email</dt>
+              <dt class="text-sm text-muted-foreground">{{ "field.email" | t }}</dt>
               <dd class="mt-1 text-sm font-medium text-foreground">{{ w.email || '-' }}</dd>
             </div>
             <div>
-              <dt class="text-sm text-muted-foreground">RSP Validat</dt>
+              <dt class="text-sm text-muted-foreground">{{ "worker.profile.rspValidated" | t }}</dt>
               <dd class="mt-1 text-sm">
                 @if (w.rspValidated) {
                   <span class="inline-flex items-center gap-1 text-success">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                     </svg>
-                    Da
+                    {{ 'common.yes' | t }}
                   </span>
                 } @else {
                   <span class="inline-flex items-center gap-1 text-destructive">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                    Nu
+                    {{ 'common.no' | t }}
                   </span>
                 }
               </dd>
             </div>
             @if (w.rspValidatedAt) {
               <div>
-                <dt class="text-sm text-muted-foreground">Data validarii RSP</dt>
+                <dt class="text-sm text-muted-foreground">{{ "worker.profile.rspDate" | t }}</dt>
                 <dd class="mt-1 text-sm font-medium text-foreground">{{ w.rspValidatedAt }}</dd>
               </div>
             }
             @if (w.voucherCount !== undefined) {
               <div>
-                <dt class="text-sm text-muted-foreground">Numar vouchere</dt>
+                <dt class="text-sm text-muted-foreground">{{ "worker.profile.vouchersCount" | t }}</dt>
                 <dd class="mt-1 text-sm font-medium text-foreground">{{ w.voucherCount }}</dd>
               </div>
             }
@@ -97,19 +98,19 @@ import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.mo
         <!-- Voucher history table -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
           <div class="px-6 py-4 border-b border-input">
-            <h2 class="text-lg font-semibold text-foreground">Istoric vouchere</h2>
+            <h2 class="text-lg font-semibold text-foreground">{{ "worker.profile.history" | t }}</h2>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full caption-bottom text-sm">
               <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
                 <tr>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Cod</th>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Statut</th>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Data</th>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Ore</th>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Remunerare neta</th>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Remunerare bruta</th>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Raion</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">{{ 'field.code' | t }}</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">{{ 'common.status' | t }}</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">{{ 'common.date' | t }}</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">{{ 'field.hours' | t }}</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">{{ 'field.remunerationNet' | t }}</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">{{ 'field.remunerationGross' | t }}</th>
+                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">{{ 'field.district' | t }}</th>
                 </tr>
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
@@ -132,7 +133,7 @@ import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.mo
                 } @empty {
                   <tr>
                     <td colspan="7" class="p-2 align-middle py-8 text-center text-sm text-muted-foreground">
-                      Nu au fost gasite vouchere pentru acest lucrator.
+                      {{ 'common.noResults' | t }}
                     </td>
                   </tr>
                 }

@@ -4,18 +4,19 @@ import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { StatisticsModel } from '../../../shared/models/voucher.model';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [FormsModule, RouterLink, DecimalPipe],
+  imports: [FormsModule, RouterLink, DecimalPipe, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
       <!-- Header -->
       <div class="flex flex-col gap-4 md:flex-row md:items-center mb-6">
         <div class="w-full md:mr-4 md:w-auto">
-          <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">Rapoarte &amp; Statistici</h1>
+          <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">{{ 'reports.title' | t }}</h1>
         </div>
         <div class="w-full md:ml-auto md:w-auto">
           <a

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@ang
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 interface AuditItem {
   id: string;
@@ -18,15 +19,15 @@ interface AuditItem {
 @Component({
   selector: 'app-audit-log',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
       <div class="mb-6">
-        <h1 class="text-3xl font-bold tracking-tight text-foreground">Audit trail</h1>
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ 'admin.audit.title' | t }}</h1>
         <p class="text-sm text-muted-foreground mt-1">
-          Jurnalul acțiunilor utilizatorilor pentru conformitate și trasabilitate.
-          Total: <strong class="text-foreground">{{ totalCount() }}</strong> inregistrari.
+          {{ 'admin.audit.subtitle' | t }}
+          {{ 'common.total' | t }}: <strong class="text-foreground">{{ totalCount() }}</strong> {{ 'admin.audit.total' | t }}.
         </p>
       </div>
 
@@ -34,12 +35,12 @@ interface AuditItem {
         <div class="relative flex-1 max-w-md">
           <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
           <input type="text" [(ngModel)]="searchTerm" (ngModelChange)="onSearch()"
-            placeholder="Cauta dupa actiune / utilizator / IP"
+            [placeholder]="'admin.audit.searchPlaceholder' | t"
             class="flex h-9 w-full rounded-md border border-input bg-white pl-9 pr-3 py-1 text-sm" />
         </div>
         <button type="button" (click)="reload()"
           class="inline-flex h-9 items-center gap-2 rounded-md border border-input bg-background px-3 text-sm hover:bg-accent hover:text-accent-foreground">
-          Actualizeaza
+          {{ 'admin.audit.refresh' | t }}
         </button>
       </div>
 
@@ -48,18 +49,18 @@ interface AuditItem {
           <table class="w-full text-sm">
             <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
               <tr>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">Data</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">Utilizator</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">Actiune</th>
-                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">Detalii</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">{{ 'common.date' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">{{ 'admin.audit.user' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">{{ 'admin.audit.action' | t }}</th>
+                <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">{{ 'common.details' | t }}</th>
                 <th class="h-10 px-3 text-start align-middle font-medium text-xs uppercase tracking-wide text-muted-foreground">IP</th>
               </tr>
             </thead>
             <tbody>
               @if (loading()) {
-                <tr><td colspan="5" class="p-6 text-center text-muted-foreground">Se incarca...</td></tr>
+                <tr><td colspan="5" class="p-6 text-center text-muted-foreground">{{ 'common.loading' | t }}</td></tr>
               } @else if (items().length === 0) {
-                <tr><td colspan="5" class="p-6 text-center text-muted-foreground">Niciun eveniment gasit.</td></tr>
+                <tr><td colspan="5" class="p-6 text-center text-muted-foreground">{{ 'admin.audit.empty' | t }}</td></tr>
               } @else {
                 @for (it of items(); track it.id) {
                   <tr class="border-b border-foreground/5 hover:bg-muted/30">

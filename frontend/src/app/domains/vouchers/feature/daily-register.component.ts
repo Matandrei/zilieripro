@@ -5,20 +5,21 @@ import { AuthStore } from '../../../shared/auth/auth.store';
 import { VoucherDetail, VoucherTableItem } from '../../../shared/models/voucher.model';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
 @Component({
   selector: 'app-daily-register',
   standalone: true,
-  imports: [RouterLink],
+  imports: [RouterLink, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-[1400px] mx-auto">
       <!-- No-print header -->
       <div class="mb-4 flex items-center justify-between print:hidden">
         <div>
-          <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; Inapoi la vouchere</a>
-          <h1 class="text-3xl font-bold tracking-tight text-foreground mt-2">Registrul zilnic al zilierilor</h1>
-          <p class="text-sm text-muted-foreground mt-1">Data activitatii: <strong class="text-foreground">{{ formatRoDate(date()) }}</strong></p>
+          <a routerLink="/vouchers" class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">&larr; {{ 'register.back' | t }}</a>
+          <h1 class="text-3xl font-bold tracking-tight text-foreground mt-2">{{ 'register.title' | t }}</h1>
+          <p class="text-sm text-muted-foreground mt-1">{{ 'register.activityDate' | t }}: <strong class="text-foreground">{{ formatRoDate(date()) }}</strong></p>
         </div>
         <div class="flex items-center gap-2">
           <input type="date" [value]="date()" (change)="onDateChange($any($event.target).value)"
@@ -26,7 +27,7 @@ import { catchError } from 'rxjs/operators';
           <button type="button" (click)="print()"
             class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-            Tipareste
+            {{ 'action.print' | t }}
           </button>
         </div>
       </div>
@@ -35,19 +36,19 @@ import { catchError } from 'rxjs/operators';
       <div class="bg-white rounded-xl ring-1 ring-foreground/10 shadow-sm p-6 print:p-0 print:shadow-none print:ring-0">
         <!-- Register header: Beneficiar -->
         <div class="mb-4 pb-4 border-b border-foreground/10">
-          <h2 class="text-center text-base font-bold uppercase mb-2">Registru de evidenta a zilierilor</h2>
+          <h2 class="text-center text-base font-bold uppercase mb-2">{{ 'register.header' | t }}</h2>
           <div class="text-sm space-y-1">
-            <div><strong>Beneficiar:</strong> {{ beneficiary().name || '—' }}</div>
-            <div><strong>Cod fiscal (IDNO):</strong> {{ beneficiary().idno || '—' }}</div>
-            <div><strong>Adresa:</strong> {{ beneficiary().address || '—' }}</div>
-            <div><strong>Data activitatii:</strong> {{ formatRoDate(date()) }}</div>
+            <div><strong>{{ 'receipt.beneficiary' | t }}:</strong> {{ beneficiary().name || '—' }}</div>
+            <div><strong>{{ 'field.idno' | t }}:</strong> {{ beneficiary().idno || '—' }}</div>
+            <div><strong>{{ 'field.address' | t }}:</strong> {{ beneficiary().address || '—' }}</div>
+            <div><strong>{{ 'register.activityDate' | t }}:</strong> {{ formatRoDate(date()) }}</div>
           </div>
         </div>
 
         @if (loading()) {
-          <div class="p-8 text-center text-sm text-muted-foreground">Se incarca...</div>
+          <div class="p-8 text-center text-sm text-muted-foreground">{{ 'common.loading' | t }}</div>
         } @else if (rows().length === 0) {
-          <div class="p-8 text-center text-sm text-muted-foreground">Nu sunt vouchere pentru data selectata.</div>
+          <div class="p-8 text-center text-sm text-muted-foreground">{{ 'register.empty' | t }}</div>
         } @else {
           <!-- 14-column register table -->
           <div class="overflow-x-auto">
