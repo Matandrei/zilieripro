@@ -21,26 +21,6 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
         </p>
       </div>
 
-      <!-- Summary cards -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-        <div class="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
-          <div class="text-xs uppercase tracking-wider text-muted-foreground">{{ 'zilier.totalVouchers' | t }}</div>
-          <div class="mt-1 text-2xl font-bold">{{ vouchers().length }}</div>
-        </div>
-        <div class="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
-          <div class="text-xs uppercase tracking-wider text-muted-foreground">{{ 'zilier.daysWorked' | t }}</div>
-          <div class="mt-1 text-2xl font-bold">{{ executedCount() }}</div>
-        </div>
-        <div class="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
-          <div class="text-xs uppercase tracking-wider text-muted-foreground">{{ 'zilier.totalReceived' | t }}</div>
-          <div class="mt-1 text-2xl font-bold text-primary">{{ totalNet() }} {{ 'common.mdl' | t }}</div>
-        </div>
-        <div class="rounded-xl bg-card ring-1 ring-foreground/10 p-4">
-          <div class="text-xs uppercase tracking-wider text-muted-foreground">{{ 'zilier.hoursWorked' | t }}</div>
-          <div class="mt-1 text-2xl font-bold">{{ totalHours() }}</div>
-        </div>
-      </div>
-
       <!-- Filters -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
         <input type="text" [ngModel]="searchTerm()" (ngModelChange)="searchTerm.set($event)"
