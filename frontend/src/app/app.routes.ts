@@ -15,6 +15,9 @@ export const routes: Routes = [
       { path: 'vouchers/:id/receipt', loadComponent: () => import('./domains/vouchers/feature/voucher-receipt.component').then(m => m.VoucherReceiptComponent) },
       { path: 'vouchers/:id', loadComponent: () => import('./domains/vouchers/feature/voucher-detail.component').then(m => m.VoucherDetailComponent) },
       { path: 'vouchers/:id/edit', loadComponent: () => import('./domains/vouchers/feature/voucher-edit.component').then(m => m.VoucherEditComponent) },
+      // Zilier portal
+      { path: 'my-vouchers', loadComponent: () => import('./domains/vouchers/feature/zilier-portal.component').then(m => m.ZilierPortalComponent) },
+      { path: 'my-vouchers/:id/receipt', loadComponent: () => import('./domains/vouchers/feature/voucher-receipt.component').then(m => m.VoucherReceiptComponent) },
       // Workers
       { path: 'workers', loadComponent: () => import('./domains/workers/feature/worker-list.component').then(m => m.WorkerListComponent) },
       { path: 'workers/:id', loadComponent: () => import('./domains/workers/feature/worker-profile.component').then(m => m.WorkerProfileComponent) },

@@ -59,6 +59,7 @@ public record VoucherTableItem
     public decimal GrossRemuneration { get; init; }
     public string WorkerIdnp { get; init; } = string.Empty;
     public string WorkerFullName { get; init; } = string.Empty;
+    public string BeneficiaryName { get; init; } = string.Empty;
     public string WorkDistrict { get; init; } = string.Empty;
     public DateTimeOffset CreatedAt { get; init; }
 }

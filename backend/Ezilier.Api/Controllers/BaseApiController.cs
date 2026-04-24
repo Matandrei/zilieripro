@@ -14,4 +14,8 @@ public abstract class BaseApiController : ControllerBase
     protected Guid CurrentUserId => Guid.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out var id) ? id : Guid.Empty;
     protected string CurrentRole => User.FindFirstValue(ClaimTypes.Role) ?? string.Empty;
     protected Guid? CurrentBeneficiaryId => Guid.TryParse(User.FindFirstValue("beneficiary_id"), out var id) ? id : null;
+    protected string CurrentIdnp => User.FindFirstValue("idnp") ?? string.Empty;
+
+    protected bool IsZilier => string.Equals(CurrentRole, "zilier", StringComparison.OrdinalIgnoreCase);
+    protected bool IsInspector => string.Equals(CurrentRole, "inspector", StringComparison.OrdinalIgnoreCase);
 }

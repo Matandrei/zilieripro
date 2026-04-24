@@ -150,7 +150,7 @@ export class SidebarLayoutComponent {
   ];
 
   readonly zilierNav: NavItem[] = [
-    { label: 'Voucherele mele', route: '/vouchers', icon: '\u{1F4CB}' },
+    { label: 'Voucherele mele', route: '/my-vouchers', icon: '\u{1F4CB}' },
   ];
 
   toggleSidebar(): void {

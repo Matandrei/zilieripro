@@ -190,9 +190,11 @@ export class LoginComponent {
       case 'Administrator':
         this.router.navigate(['/admin/users']);
         break;
+      case 'Zilier':
+        this.router.navigate(['/my-vouchers']);
+        break;
       case 'Angajator':
       case 'Inspector':
-      case 'Zilier':
       default:
         this.router.navigate(['/vouchers']);
         break;

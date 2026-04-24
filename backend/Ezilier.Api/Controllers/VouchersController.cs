@@ -11,7 +11,20 @@ public class VouchersController : BaseApiController
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] VouchersQueryParams queryParams)
     {
-        var (model, errors, status) = await Mediator.Send(new GetVouchersQuery(queryParams, CurrentBeneficiaryId));
+        // Zilier: force scope to their own IDNP (ignore any other beneficiary filter)
+        // Inspector: no beneficiary scope (cross-beneficiary access)
+        // Angajator: scope by current beneficiary
+        Guid? scopeBeneficiaryId = null;
+        if (IsZilier)
+        {
+            queryParams = queryParams with { WorkerIdnp = CurrentIdnp };
+        }
+        else if (!IsInspector)
+        {
+            scopeBeneficiaryId = CurrentBeneficiaryId;
+        }
+
+        var (model, errors, status) = await Mediator.Send(new GetVouchersQuery(queryParams, scopeBeneficiaryId));
         return StatusCode(status, errors is not null ? errors : model);
     }
 

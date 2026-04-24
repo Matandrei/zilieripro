@@ -12,6 +12,7 @@ export interface VoucherTableItem {
   grossRemuneration: number;
   workerIdnp: string;
   workerFullName: string;
+  beneficiaryName?: string;
   workDistrict: string;
   createdAt: string;
 }

@@ -24,6 +24,7 @@ public class GetVouchersQueryHandler(
         var q = context.Vouchers
             .AsNoTracking()
             .Include(v => v.Worker)
+            .Include(v => v.Beneficiary)
             .AsQueryable();
 
         // Scope to beneficiary if provided (employer view)
@@ -97,6 +98,7 @@ public class GetVouchersQueryHandler(
                 GrossRemuneration = v.GrossRemuneration,
                 WorkerIdnp = v.Worker.Idnp,
                 WorkerFullName = v.Worker.FirstName + " " + v.Worker.LastName,
+                BeneficiaryName = v.Beneficiary != null ? v.Beneficiary.CompanyName : string.Empty,
                 WorkDistrict = v.WorkDistrict,
                 CreatedAt = v.CreatedAt
             })
