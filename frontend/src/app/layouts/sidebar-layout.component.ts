@@ -3,6 +3,8 @@ import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthStore } from '../shared/auth/auth.store';
 import { RsudService } from '../shared/services/rsud.service';
+import { I18nService, Lang } from '../shared/i18n/i18n.service';
+import { TranslatePipe } from '../shared/i18n/translate.pipe';
 
 interface NavItem {
   label: string;
@@ -13,7 +15,7 @@ interface NavItem {
 @Component({
   selector: 'app-sidebar-layout',
   standalone: true,
-  imports: [NgTemplateOutlet, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [NgTemplateOutlet, RouterOutlet, RouterLink, RouterLinkActive, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Header (OWA-style: white, fixed, shadow) -->
@@ -64,6 +66,15 @@ interface NavItem {
             </span>
           }
         </div>
+        <!-- Language switcher -->
+        <div class="inline-flex items-center rounded-md border border-input overflow-hidden text-xs font-medium">
+          @for (l of langs; track l) {
+            <button type="button" (click)="setLang(l)"
+              [class]="(i18n.lang() === l ? 'bg-primary text-primary-foreground' : 'bg-background hover:bg-accent hover:text-accent-foreground') + ' h-8 px-2.5 transition-colors'">
+              {{ l.toUpperCase() }}
+            </button>
+          }
+        </div>
         <!-- Logout -->
         <button
           class="inline-flex h-8 shrink-0 items-center justify-center gap-1.5 rounded-md border border-input bg-background px-3 text-xs font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
@@ -72,7 +83,7 @@ interface NavItem {
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
           </svg>
-          Iesire
+          {{ 'action.logout' | t }}
         </button>
       </div>
     </header>
@@ -125,7 +136,7 @@ interface NavItem {
           (click)="closeSidebar()"
         >
           <span class="text-base leading-none">{{ item.icon }}</span>
-          <span>{{ item.label }}</span>
+          <span>{{ item.label | t }}</span>
         </a>
       </ng-template>
     </aside>
@@ -185,8 +196,12 @@ interface NavItem {
 export class SidebarLayoutComponent implements OnInit {
   readonly auth = inject(AuthStore);
   readonly rsud = inject(RsudService);
+  readonly i18n = inject(I18nService);
   readonly sidebarOpen = signal(false);
   readonly showCompanyPicker = signal(false);
+
+  readonly langs: Lang[] = ['ro', 'ru', 'en'];
+  setLang(l: Lang): void { this.i18n.setLang(l); }
 
   readonly currentCompany = computed(() => this.rsud.selectedCompany());
 
@@ -209,29 +224,29 @@ export class SidebarLayoutComponent implements OnInit {
   }
 
   readonly employerNav: NavItem[] = [
-    { label: 'Vouchere', route: '/vouchers', icon: '\u{1F4CB}' },
-    { label: 'Lucratori', route: '/workers', icon: '\u{1F465}' },
-    { label: 'Rapoarte', route: '/reports', icon: '\u{1F4CA}' },
-    { label: 'IPC-21', route: '/reports/ipc21', icon: '\u{1F4C4}' },
-    { label: 'Profil companie', route: '/company', icon: '\u{1F3E2}' },
+    { label: 'nav.vouchers', route: '/vouchers', icon: '\u{1F4CB}' },
+    { label: 'nav.workers', route: '/workers', icon: '\u{1F465}' },
+    { label: 'nav.reports', route: '/reports', icon: '\u{1F4CA}' },
+    { label: 'nav.ipc21', route: '/reports/ipc21', icon: '\u{1F4C4}' },
+    { label: 'nav.company', route: '/company', icon: '\u{1F3E2}' },
   ];
 
   readonly inspectorNav: NavItem[] = [
-    { label: 'Dashboard', route: '/inspector/dashboard', icon: '\u{1F4CA}' },
-    { label: 'Vouchere', route: '/vouchers', icon: '\u{1F4CB}' },
-    { label: 'Lucratori', route: '/workers', icon: '\u{1F465}' },
-    { label: 'Rapoarte', route: '/reports', icon: '\u{1F4C8}' },
+    { label: 'nav.dashboard', route: '/inspector/dashboard', icon: '\u{1F4CA}' },
+    { label: 'nav.vouchers', route: '/vouchers', icon: '\u{1F4CB}' },
+    { label: 'nav.workers', route: '/workers', icon: '\u{1F465}' },
+    { label: 'nav.reports', route: '/reports', icon: '\u{1F4C8}' },
   ];
 
   readonly adminNav: NavItem[] = [
-    { label: 'Utilizatori', route: '/admin/users', icon: '\u{1F464}' },
-    { label: 'Parametri sistem', route: '/admin/params', icon: '\u{2699}\u{FE0F}' },
-    { label: 'Nomenclatoare', route: '/admin/nomenclators', icon: '\u{1F4D6}' },
-    { label: 'Audit trail', route: '/admin/audit', icon: '\u{1F50D}' },
+    { label: 'nav.users', route: '/admin/users', icon: '\u{1F464}' },
+    { label: 'nav.params', route: '/admin/params', icon: '\u{2699}\u{FE0F}' },
+    { label: 'nav.nomenclators', route: '/admin/nomenclators', icon: '\u{1F4D6}' },
+    { label: 'nav.audit', route: '/admin/audit', icon: '\u{1F50D}' },
   ];
 
   readonly zilierNav: NavItem[] = [
-    { label: 'Voucherele mele', route: '/my-vouchers', icon: '\u{1F4CB}' },
+    { label: 'nav.myVouchers', route: '/my-vouchers', icon: '\u{1F4CB}' },
   ];
 
   toggleSidebar(): void {
