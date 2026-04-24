@@ -151,6 +151,7 @@ if (app.Environment.IsDevelopment())
 app.UseCors();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseMiddleware<Ezilier.Api.Middleware.AuditLoggingMiddleware>();
 app.MapControllers();
 
 app.Run();

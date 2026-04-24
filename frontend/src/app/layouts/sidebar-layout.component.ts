@@ -227,6 +227,7 @@ export class SidebarLayoutComponent implements OnInit {
     { label: 'Utilizatori', route: '/admin/users', icon: '\u{1F464}' },
     { label: 'Parametri sistem', route: '/admin/params', icon: '\u{2699}\u{FE0F}' },
     { label: 'Nomenclatoare', route: '/admin/nomenclators', icon: '\u{1F4D6}' },
+    { label: 'Audit trail', route: '/admin/audit', icon: '\u{1F50D}' },
   ];
 
   readonly zilierNav: NavItem[] = [

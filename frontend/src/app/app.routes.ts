@@ -33,6 +33,7 @@ export const routes: Routes = [
       { path: 'admin/users/:id', loadComponent: () => import('./domains/user-management/feature/user-detail.component').then(m => m.UserDetailComponent) },
       { path: 'admin/params', loadComponent: () => import('./domains/user-management/feature/system-params.component').then(m => m.SystemParamsComponent) },
       { path: 'admin/nomenclators', loadComponent: () => import('./domains/user-management/feature/nomenclators.component').then(m => m.NomenclatorsComponent) },
+      { path: 'admin/audit', loadComponent: () => import('./domains/user-management/feature/audit-log.component').then(m => m.AuditLogComponent) },
       // Default
       { path: '', redirectTo: 'vouchers', pathMatch: 'full' },
     ],
