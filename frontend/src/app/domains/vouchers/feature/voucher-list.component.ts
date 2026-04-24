@@ -13,85 +13,16 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto">
-      <!-- Header -->
-      <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20 mb-6">Vouchere</h1>
-
-      <!-- Search + Date Filters Row (like eSocial) -->
-      <div class="flex flex-col gap-4 lg:flex-row lg:items-end mb-4">
-        <div class="relative flex-1 max-w-2xl">
-          <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input
-            type="text"
-            class="flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            placeholder="Cauta dupa Cod, IDNP, Lucrator"
-            [ngModel]="store.state().workerIdnp"
-            (ngModelChange)="onFilterChange('workerIdnp', $event)"
-          />
-        </div>
-        <div class="flex items-end gap-3">
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-muted-foreground">De la</label>
-            <input
-              type="date"
-              class="flex h-9 w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              [ngModel]="store.state().dateFrom"
-              (ngModelChange)="onFilterChange('dateFrom', $event)"
-            />
-          </div>
-          <div class="space-y-1">
-            <label class="text-xs font-medium text-muted-foreground">Pana la</label>
-            <input
-              type="date"
-              class="flex h-9 w-36 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              [ngModel]="store.state().dateTo"
-              (ngModelChange)="onFilterChange('dateTo', $event)"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- Filter Dropdowns Row -->
-      <div class="flex flex-wrap items-end gap-4 mb-6">
-        <div class="space-y-1">
-          <label class="text-xs font-medium text-muted-foreground">Statut</label>
-          <select
-            class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 min-w-[160px]"
-            [ngModel]="store.state().status"
-            (ngModelChange)="onFilterChange('status', $event)"
-          >
-            <option value="">Selecteaza ...</option>
-            <option value="Emis">Emis</option>
-            <option value="Activ">Activ</option>
-            <option value="Executat">Executat</option>
-            <option value="Raportat">Raportat</option>
-            <option value="Anulat">Anulat</option>
-          </select>
-        </div>
-        <div class="space-y-1">
-          <label class="text-xs font-medium text-muted-foreground">Raion</label>
-          <select
-            class="flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 min-w-[160px]"
-            [ngModel]="store.state().district"
-            (ngModelChange)="onFilterChange('district', $event)"
-          >
-            <option value="">Selecteaza ...</option>
-            <option value="Chisinau">Chisinau</option>
-            <option value="Balti">Balti</option>
-            <option value="Cahul">Cahul</option>
-            <option value="Orhei">Orhei</option>
-            <option value="Ungheni">Ungheni</option>
-            <option value="Soroca">Soroca</option>
-          </select>
-        </div>
-        <div class="ml-auto flex items-center gap-2">
+      <!-- Header: title + primary actions -->
+      <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
+        <h1 class="text-3xl font-bold tracking-tight text-foreground">Vouchere</h1>
+        <div class="flex items-center gap-2">
           <button type="button" (click)="openRegisterPicker()"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
             </svg>
-            Registrul zilnic al zilierilor
+            Registrul zilnic
           </button>
           <a routerLink="/vouchers/create"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90">
@@ -101,6 +32,62 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
             Creare voucher
           </a>
         </div>
+      </div>
+
+      <!-- Filters: single responsive row -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-3 mb-6">
+        <!-- Search: takes remaining space -->
+        <div class="relative lg:col-span-4">
+          <svg class="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+          <input type="text"
+            class="flex h-9 w-full rounded-md border border-input bg-transparent pl-9 pr-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            placeholder="Cauta dupa Cod, IDNP, Lucrator"
+            [ngModel]="store.state().workerIdnp"
+            (ngModelChange)="onFilterChange('workerIdnp', $event)" />
+        </div>
+
+        <!-- Statut -->
+        <select
+          class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:col-span-2"
+          [ngModel]="store.state().status"
+          (ngModelChange)="onFilterChange('status', $event)">
+          <option value="">Statut: toate</option>
+          <option value="Emis">Emis</option>
+          <option value="Activ">Activ</option>
+          <option value="Executat">Executat</option>
+          <option value="Raportat">Raportat</option>
+          <option value="Anulat">Anulat</option>
+        </select>
+
+        <!-- Raion -->
+        <select
+          class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:col-span-2"
+          [ngModel]="store.state().district"
+          (ngModelChange)="onFilterChange('district', $event)">
+          <option value="">Raion: toate</option>
+          <option value="Chisinau">Chisinau</option>
+          <option value="Balti">Balti</option>
+          <option value="Cahul">Cahul</option>
+          <option value="Orhei">Orhei</option>
+          <option value="Ungheni">Ungheni</option>
+          <option value="Soroca">Soroca</option>
+        </select>
+
+        <!-- Date from -->
+        <input type="date"
+          class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:col-span-2"
+          placeholder="De la"
+          [ngModel]="store.state().dateFrom"
+          (ngModelChange)="onFilterChange('dateFrom', $event)" />
+
+        <!-- Date to -->
+        <input type="date"
+          class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:col-span-2"
+          placeholder="Pana la"
+          [ngModel]="store.state().dateTo"
+          (ngModelChange)="onFilterChange('dateTo', $event)" />
       </div>
 
       <!-- Register date picker modal -->

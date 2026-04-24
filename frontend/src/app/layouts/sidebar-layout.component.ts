@@ -131,7 +131,6 @@ export class SidebarLayoutComponent {
 
   readonly employerNav: NavItem[] = [
     { label: 'Vouchere', route: '/vouchers', icon: '\u{1F4CB}' },
-    { label: 'Creare vouchere', route: '/vouchers/create', icon: '\u{2795}' },
     { label: 'Lucratori', route: '/workers', icon: '\u{1F465}' },
     { label: 'Rapoarte', route: '/reports', icon: '\u{1F4CA}' },
     { label: 'IPC-21', route: '/reports/ipc21', icon: '\u{1F4C4}' },
