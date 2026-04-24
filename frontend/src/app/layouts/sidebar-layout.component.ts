@@ -1,7 +1,8 @@
-import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnInit, computed, signal, inject } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AuthStore } from '../shared/auth/auth.store';
+import { RsudService } from '../shared/services/rsud.service';
 
 interface NavItem {
   label: string;
@@ -38,6 +39,21 @@ interface NavItem {
       </div>
 
       <div class="flex items-center gap-4">
+        <!-- Company switcher (Angajator only) -->
+        @if (auth.roleType() === 'Angajator' && rsud.companies().length > 0) {
+          <button type="button" (click)="showCompanyPicker.set(true)"
+            class="hidden sm:inline-flex h-8 items-center gap-2 rounded-md border border-input bg-background px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="9" y1="22" x2="9" y2="16"/><line x1="15" y1="22" x2="15" y2="16"/></svg>
+            @if (currentCompany(); as c) {
+              <span class="max-w-[180px] truncate">{{ c.companyName }}</span>
+            } @else {
+              <span>Selectati compania</span>
+            }
+            @if (rsud.companies().length > 1) {
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5 opacity-60"><polyline points="6 9 12 15 18 9"/></svg>
+            }
+          </button>
+        }
         <!-- User info -->
         <div class="hidden sm:flex items-center gap-3">
           <span class="text-sm text-foreground font-medium">{{ auth.fullName() }}</span>
@@ -120,14 +136,77 @@ interface NavItem {
         <router-outlet />
       </div>
     </main>
+
+    <!-- Company picker modal (US-A02) -->
+    @if (showCompanyPicker()) {
+      <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="showCompanyPicker.set(false)">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
+          <div class="p-6 pb-4 border-b border-foreground/10">
+            <h3 class="text-lg font-semibold">Selectati compania</h3>
+            <p class="text-sm text-muted-foreground">Companii asociate IDNP-ului dvs. (preluate din RSUD prin MConnect).</p>
+          </div>
+          <div class="p-2 max-h-80 overflow-auto">
+            @if (rsud.companies().length === 0) {
+              <div class="p-6 text-center text-sm text-muted-foreground">Niciun RSUD nu a fost gasit.</div>
+            }
+            @for (c of rsud.companies(); track c.idno) {
+              <button type="button" (click)="pickCompany(c.idno)"
+                [class]="'w-full text-left px-4 py-3 rounded-md flex items-start gap-3 transition-colors ' + (c.idno === rsud.selectedIdno() ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-accent')">
+                <div class="size-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm flex-shrink-0">
+                  {{ c.companyName.charAt(0) }}
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-semibold text-foreground">{{ c.companyName }}</div>
+                  <div class="text-xs text-muted-foreground">
+                    IDNO: <span class="font-mono text-foreground">{{ c.idno }}</span>
+                    · {{ c.legalForm }}
+                    · {{ c.activityType }}
+                  </div>
+                  <div class="text-xs text-muted-foreground mt-0.5">{{ c.address }}</div>
+                </div>
+                @if (c.idno === rsud.selectedIdno()) {
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-primary flex-shrink-0 mt-1"><polyline points="20 6 9 17 4 12"/></svg>
+                }
+              </button>
+            }
+          </div>
+          <div class="p-4 pt-3 border-t border-foreground/10 flex justify-end">
+            <button type="button" (click)="showCompanyPicker.set(false)"
+              class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Inchide</button>
+          </div>
+        </div>
+      </div>
+    }
   `,
   styles: [`
     :host { display: block; }
   `],
 })
-export class SidebarLayoutComponent {
+export class SidebarLayoutComponent implements OnInit {
   readonly auth = inject(AuthStore);
+  readonly rsud = inject(RsudService);
   readonly sidebarOpen = signal(false);
+  readonly showCompanyPicker = signal(false);
+
+  readonly currentCompany = computed(() => this.rsud.selectedCompany());
+
+  ngOnInit(): void {
+    if (this.auth.roleType() === 'Angajator') {
+      this.rsud.loadCompanies().subscribe({
+        next: (list) => {
+          // Show picker automatically if user has multiple companies and none selected
+          if (list.length > 1 && !this.rsud.selectedIdno()) {
+            this.showCompanyPicker.set(true);
+          }
+        },
+      });
+    }
+  }
+
+  pickCompany(idno: string): void {
+    this.rsud.select(idno);
+    this.showCompanyPicker.set(false);
+  }
 
   readonly employerNav: NavItem[] = [
     { label: 'Vouchere', route: '/vouchers', icon: '\u{1F4CB}' },
