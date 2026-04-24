@@ -612,6 +612,19 @@ export class CreateVoucherComponent implements OnInit {
     return `${(row.lastName?.[0] || '').toUpperCase()}${(row.firstName?.[0] || '').toUpperCase()}` || '?';
   }
 
+  private ageFromIso(birthIso: string, atIso?: string): number | null {
+    if (!birthIso) return null;
+    const [by, bm, bd] = birthIso.split('-').map(Number);
+    if (!by || !bm || !bd) return null;
+    const ref = atIso ? new Date(atIso) : new Date();
+    if (isNaN(ref.getTime())) return null;
+    let age = ref.getFullYear() - by;
+    const rm = ref.getMonth() + 1;
+    const rd = ref.getDate();
+    if (rm < bm || (rm === bm && rd < bd)) age--;
+    return age;
+  }
+
   protected formatDate(iso: string): string {
     if (!iso) return '—';
     const [y, m, d] = iso.split('-');
@@ -631,6 +644,25 @@ export class CreateVoucherComponent implements OnInit {
     if (this.rows().some((r) => !r.netRemuneration || r.netRemuneration < 1)) {
       this.errorMessage.set('Completati remunerarea neta pentru toti lucratorii.');
       return;
+    }
+
+    // Art. 13 validation — hours per age:
+    //   15-16 ani: max 5h
+    //   16-18 ani: max 7h
+    //   18+ ani:   max 8h
+    for (const r of this.rows()) {
+      if (!r.birthDate) continue; // will be verified via RSP on backend
+      const age = this.ageFromIso(r.birthDate, this.voucherForm.value.workDate || undefined);
+      if (age == null) continue;
+      if (age < 15) {
+        this.errorMessage.set(`Lucrator ${r.lastName} ${r.firstName}: virsta sub 15 ani nu este permisa conform Art. 13.`);
+        return;
+      }
+      const maxHours = age < 16 ? 5 : age < 18 ? 7 : 8;
+      if (r.hoursWorked > maxHours) {
+        this.errorMessage.set(`Lucrator ${r.lastName} ${r.firstName} (${age} ani): maxim ${maxHours}h permise conform Art. 13 (ati introdus ${r.hoursWorked}h).`);
+        return;
+      }
     }
 
     this.submitting.set(true);

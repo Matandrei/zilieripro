@@ -17,6 +17,14 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 class="text-3xl font-bold tracking-tight text-foreground">Vouchere</h1>
         <div class="flex items-center gap-2">
+          <button type="button" (click)="exportCsv()"
+            class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
+            title="Exporta CSV">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Export CSV
+          </button>
           <button type="button" (click)="openRegisterPicker()"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -90,6 +98,20 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
           (ngModelChange)="onFilterChange('dateTo', $event)" />
       </div>
 
+      <!-- Bulk action bar -->
+      @if (selected().size > 0) {
+        <div class="mb-4 flex items-center gap-3 rounded-md bg-primary/10 ring-1 ring-primary/30 px-4 py-2 text-sm">
+          <span class="font-medium text-foreground">{{ selected().size }} voucher(e) selectate</span>
+          <button type="button" (click)="bulkActivate()" [disabled]="bulkRunning()"
+            class="inline-flex h-8 items-center gap-1.5 rounded-md bg-primary text-primary-foreground px-3 text-xs font-medium hover:bg-primary/90 disabled:opacity-50">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Activeaza selectate
+          </button>
+          <button type="button" (click)="clearSelection()"
+            class="ml-auto text-xs text-muted-foreground hover:text-foreground">Deselecteaza tot</button>
+        </div>
+      }
+
       <!-- Register date picker modal -->
       @if (registerPickerOpen()) {
         <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40" (click)="closeRegisterPicker()">
@@ -116,6 +138,12 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
         <table class="w-full caption-bottom text-sm">
           <thead class="[&_tr]:border-b [&_tr]:border-foreground/10 bg-background sticky top-0 z-10">
             <tr>
+              <th class="h-10 px-4 align-middle w-10">
+                <input type="checkbox" class="rounded border-input"
+                  [checked]="allSelected()"
+                  [indeterminate]="someSelected() && !allSelected()"
+                  (change)="toggleSelectAll()" />
+              </th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Cod</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Lucrator</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">IDNP</th>
@@ -129,7 +157,12 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
           </thead>
           <tbody class="[&_tr:last-child]:border-0">
             @for (voucher of vouchers(); track voucher.id) {
-              <tr class="hover:bg-muted/30 border-b border-foreground/5 transition-colors">
+              <tr [class]="'border-b border-foreground/5 transition-colors ' + (selected().has(voucher.id) ? 'bg-primary/5' : 'hover:bg-muted/30')">
+                <td class="px-4 py-3 align-middle w-10">
+                  <input type="checkbox" class="rounded border-input"
+                    [checked]="selected().has(voucher.id)"
+                    (change)="toggleSelect(voucher.id)" />
+                </td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap">
                   <a [routerLink]="['/vouchers', voucher.id]" class="text-primary hover:underline underline-offset-4 font-medium text-sm">
                     {{ voucher.code }}
@@ -292,6 +325,87 @@ export class VoucherListComponent implements OnInit {
   protected readonly totalCount = signal(0);
   protected readonly loading = signal(false);
   protected readonly openMenuId = signal('');
+
+  // Bulk selection
+  protected readonly selected = signal<Set<string>>(new Set<string>());
+  protected readonly bulkRunning = signal(false);
+
+  protected readonly allSelected = computed(() => {
+    const ids = this.vouchers().map((v) => v.id);
+    const sel = this.selected();
+    return ids.length > 0 && ids.every((id) => sel.has(id));
+  });
+  protected readonly someSelected = computed(() => this.selected().size > 0);
+
+  protected toggleSelect(id: string): void {
+    const next = new Set(this.selected());
+    if (next.has(id)) next.delete(id); else next.add(id);
+    this.selected.set(next);
+  }
+
+  protected toggleSelectAll(): void {
+    if (this.allSelected()) {
+      this.selected.set(new Set());
+    } else {
+      this.selected.set(new Set(this.vouchers().map((v) => v.id)));
+    }
+  }
+
+  protected clearSelection(): void {
+    this.selected.set(new Set());
+  }
+
+  protected bulkActivate(): void {
+    const ids = [...this.selected()].filter((id) => {
+      const v = this.vouchers().find((x) => x.id === id);
+      return v && v.status === 'Emis';
+    });
+    if (ids.length === 0) return;
+    this.bulkRunning.set(true);
+    let pending = ids.length;
+    ids.forEach((id) => {
+      this.voucherDataService.activateVoucher(id).subscribe({
+        next: () => {
+          if (--pending === 0) {
+            this.selected.set(new Set());
+            this.bulkRunning.set(false);
+            this.loadVouchers();
+          }
+        },
+        error: () => {
+          if (--pending === 0) {
+            this.bulkRunning.set(false);
+            this.loadVouchers();
+          }
+        },
+      });
+    });
+  }
+
+  protected exportCsv(): void {
+    const rows = this.vouchers();
+    const header = ['Cod', 'Lucrator', 'IDNP', 'Raion', 'Statut', 'Ore', 'Remunerare neta', 'Remunerare bruta', 'Data lucru'];
+    const csv = [header.join(',')]
+      .concat(rows.map((v) => [
+        v.code,
+        `"${(v.workerFullName || '').replace(/"/g, '""')}"`,
+        v.workerIdnp ?? '',
+        v.workDistrict,
+        v.status,
+        v.hoursWorked,
+        v.netRemuneration,
+        v.grossRemuneration,
+        v.workDate,
+      ].join(',')))
+      .join('\n');
+    const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `vouchere-${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   protected readonly registerPickerOpen = signal(false);
   protected readonly registerDate = signal(new Date().toISOString().split('T')[0]);
