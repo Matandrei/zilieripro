@@ -44,7 +44,8 @@ interface VoucherWorkerRow {
             </p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- Row 1: Data, Ore, Remuneratie -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
             <div class="space-y-2">
               <label class="text-sm font-medium leading-none">Data lucrarilor <span class="text-destructive">*</span></label>
               <input type="date" formControlName="workDate"
@@ -62,7 +63,10 @@ interface VoucherWorkerRow {
               <input type="number" formControlName="defaultRemuneration" min="1"
                 class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
             </div>
+          </div>
 
+          <!-- Row 2: Raion, Localitate -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div class="space-y-2">
               <label class="text-sm font-medium leading-none">Raion <span class="text-destructive">*</span></label>
               <select formControlName="workDistrict"
@@ -89,12 +93,13 @@ interface VoucherWorkerRow {
                 }
               </select>
             </div>
+          </div>
 
-            <div class="space-y-2 md:col-span-2 lg:col-span-3">
-              <label class="text-sm font-medium leading-none">Adresa <span class="text-destructive">*</span></label>
-              <input type="text" formControlName="workAddress" placeholder="str. Exemplu 1/2"
-                class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
-            </div>
+          <!-- Row 3: Adresa -->
+          <div class="space-y-2">
+            <label class="text-sm font-medium leading-none">Adresa <span class="text-destructive">*</span></label>
+            <input type="text" formControlName="workAddress" placeholder="str. Exemplu 1/2"
+              class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
           </div>
         </form>
 
@@ -105,132 +110,154 @@ interface VoucherWorkerRow {
             <p class="text-sm text-muted-foreground mt-1">Adaugati zilierii (Nume, Prenume, IDNP). Restul datelor se completeaza automat din campurile obligatorii si pot fi editate individual.</p>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-4">
-            <button type="button" (click)="openPanel('new')"
-              [class]="'inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md text-sm font-semibold transition-colors ' + (panel() === 'new' ? 'bg-primary text-primary-foreground shadow-xs' : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground')">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+            <button type="button" (click)="openPanel('add')"
+              class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md text-sm font-semibold transition-colors bg-primary text-primary-foreground shadow-xs hover:bg-primary/90">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
-              Lucrator nou
-            </button>
-
-            <button type="button" (click)="openPanel('existing')"
-              [class]="'inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md text-sm font-semibold transition-colors ' + (panel() === 'existing' ? 'bg-primary text-primary-foreground shadow-xs' : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground')">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Din lista existenta
+              Adauga lucratori
             </button>
 
             <button type="button" (click)="openPanel('csv')"
-              [class]="'inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md text-sm font-semibold transition-colors ' + (panel() === 'csv' ? 'bg-primary text-primary-foreground shadow-xs' : 'border border-input bg-background hover:bg-accent hover:text-accent-foreground')">
+              class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md text-sm font-semibold transition-colors border border-input bg-background hover:bg-accent hover:text-accent-foreground">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-              Import IDNP (CSV)
+              Importa lucratori
             </button>
           </div>
 
-          <!-- INLINE PANEL: NEW WORKER -->
-          @if (panel() === 'new') {
-            <div class="mb-4 rounded-md ring-1 ring-foreground/10 p-4 bg-muted/20">
-              <h3 class="text-sm font-semibold mb-3">Adauga lucrator nou</h3>
+          <!-- MODAL: ADAUGA LUCRATORI (with two tabs) -->
+          @if (panel() === 'add') {
+            <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="panel.set(null)">
+              <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" (click)="$event.stopPropagation()">
+                <div class="p-6 pb-4 border-b border-foreground/10">
+                  <h3 class="text-lg font-semibold">Adauga lucratori</h3>
+                  <p class="text-sm text-muted-foreground">Selectati lucratori din registrul RSP sau adaugati unul nou.</p>
+                </div>
 
-              <!-- RSP info banner (inside the new-worker panel) -->
-              <div class="mb-4 flex items-start gap-3 rounded-md bg-primary/5 ring-1 ring-primary/20 p-3 text-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-primary flex-shrink-0 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
-                <div>
-                  <span class="font-semibold text-foreground">Verificare RSP:</span>
-                  <span class="text-muted-foreground"> La salvare, datele se valideaza prin RSP (MConnect). Campurile eronate vor fi marcate.</span>
+                <!-- Tabs -->
+                <div class="px-6 border-b border-foreground/10">
+                  <nav class="flex gap-6">
+                    <button type="button" (click)="addTab.set('existing')"
+                      [class]="addTab() === 'existing'
+                        ? 'relative pb-3 pt-3 text-sm font-medium text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-foreground'
+                        : 'pb-3 pt-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'">
+                      Lista existenta
+                    </button>
+                    <button type="button" (click)="addTab.set('new')"
+                      [class]="addTab() === 'new'
+                        ? 'relative pb-3 pt-3 text-sm font-medium text-foreground after:absolute after:bottom-0 after:left-0 after:right-0 after:h-0.5 after:bg-foreground'
+                        : 'pb-3 pt-3 text-sm font-medium text-muted-foreground hover:text-foreground transition-colors'">
+                      Lucrator nou
+                    </button>
+                  </nav>
                 </div>
-              </div>
 
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-3" [formGroup]="newWorkerForm">
-                <div class="space-y-1.5">
-                  <label class="text-xs text-muted-foreground">Nume *</label>
-                  <input type="text" formControlName="lastName" placeholder="Popescu"
-                    class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                </div>
-                <div class="space-y-1.5">
-                  <label class="text-xs text-muted-foreground">Prenume *</label>
-                  <input type="text" formControlName="firstName" placeholder="Ion"
-                    class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                </div>
-                <div class="space-y-1.5">
-                  <label class="text-xs text-muted-foreground">IDNP *</label>
-                  <input type="text" formControlName="idnp" maxlength="13" placeholder="13 cifre"
-                    class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
-                </div>
-              </div>
-              <div class="flex justify-end gap-2 mt-3">
-                <button type="button" (click)="panel.set(null)"
-                  class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Anuleaza</button>
-                <button type="button" (click)="addNewWorker()" [disabled]="newWorkerForm.invalid"
-                  class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
-                  + Adauga in voucher
-                </button>
-              </div>
-            </div>
-          }
-
-          <!-- INLINE PANEL: FROM EXISTING LIST -->
-          @if (panel() === 'existing') {
-            <div class="mb-4 rounded-md ring-1 ring-foreground/10 p-4 bg-muted/20">
-              <h3 class="text-sm font-semibold mb-3">Selectati lucratori din registrul RSP</h3>
-              <div class="relative mb-3">
-                <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-                <input type="text" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)"
-                  placeholder="Cauta dupa IDNP, nume, prenume..."
-                  class="flex h-9 w-full rounded-md border border-input bg-white pl-9 pr-3 py-1 text-sm" />
-              </div>
-              <div class="max-h-80 overflow-auto rounded-md ring-1 ring-foreground/10 bg-white">
-                @if (loadingWorkers()) {
-                  <div class="p-6 text-center text-sm text-muted-foreground">Se incarca...</div>
-                } @else if (filteredAvailableWorkers().length === 0) {
-                  <div class="p-6 text-center text-sm text-muted-foreground">Nu au fost gasiti lucratori.</div>
-                } @else {
-                  <table class="w-full text-sm">
-                    <tbody>
-                      @for (w of filteredAvailableWorkers(); track w.id) {
-                        <tr class="border-t border-foreground/10 hover:bg-muted/30 cursor-pointer first:border-t-0" (click)="addFromExisting(w)">
-                          <td class="p-3">
-                            <div class="font-medium">{{ w.lastName }} {{ w.firstName }}</div>
-                            <div class="text-xs text-muted-foreground font-mono">{{ w.idnp }}</div>
-                          </td>
-                          <td class="p-3 text-right">
-                            @if (w.rspValidated) {
-                              <span class="inline-flex items-center gap-1 text-xs text-green-600"><span class="size-1.5 rounded-full bg-green-500"></span>RSP validat</span>
+                <!-- Tab content -->
+                <div class="p-6 overflow-y-auto flex-1">
+                  @if (addTab() === 'existing') {
+                    <div class="relative mb-3">
+                      <svg class="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                      <input type="text" [value]="searchTerm()" (input)="searchTerm.set($any($event.target).value)"
+                        placeholder="Cauta dupa IDNP, nume, prenume..."
+                        class="flex h-9 w-full rounded-md border border-input bg-white pl-9 pr-3 py-1 text-sm" />
+                    </div>
+                    <div class="max-h-80 overflow-auto rounded-md ring-1 ring-foreground/10 bg-white">
+                      @if (loadingWorkers()) {
+                        <div class="p-6 text-center text-sm text-muted-foreground">Se incarca...</div>
+                      } @else if (filteredAvailableWorkers().length === 0) {
+                        <div class="p-6 text-center text-sm text-muted-foreground">Nu au fost gasiti lucratori.</div>
+                      } @else {
+                        <table class="w-full text-sm">
+                          <tbody>
+                            @for (w of filteredAvailableWorkers(); track w.id) {
+                              <tr class="border-t border-foreground/5 hover:bg-muted/30 cursor-pointer first:border-t-0" (click)="addFromExisting(w)">
+                                <td class="p-3">
+                                  <div class="font-medium">{{ w.lastName }} {{ w.firstName }}</div>
+                                  <div class="text-xs text-muted-foreground font-mono">{{ w.idnp }}</div>
+                                </td>
+                                <td class="p-3 text-right">
+                                  @if (w.rspValidated) {
+                                    <span class="inline-flex items-center gap-1 text-xs text-green-600"><span class="size-1.5 rounded-full bg-green-500"></span>RSP validat</span>
+                                  }
+                                </td>
+                                <td class="p-3 w-24 text-right">
+                                  <span class="inline-flex items-center gap-1 text-sm font-medium text-primary">+ Adauga</span>
+                                </td>
+                              </tr>
                             }
-                          </td>
-                          <td class="p-3 w-24 text-right">
-                            <span class="inline-flex items-center gap-1 text-sm font-medium text-primary">+ Adauga</span>
-                          </td>
-                        </tr>
+                          </tbody>
+                        </table>
                       }
-                    </tbody>
-                  </table>
-                }
-              </div>
-              <div class="flex justify-end mt-3">
-                <button type="button" (click)="panel.set(null)"
-                  class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Inchide</button>
+                    </div>
+                  } @else {
+                    <!-- RSP info banner -->
+                    <div class="mb-4 flex items-start gap-3 rounded-md bg-primary/5 ring-1 ring-primary/20 p-3 text-sm">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-primary flex-shrink-0 mt-0.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                      <div>
+                        <span class="font-semibold text-foreground">Verificare RSP:</span>
+                        <span class="text-muted-foreground"> La salvare, datele se valideaza prin RSP (MConnect). Campurile eronate vor fi marcate.</span>
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3" [formGroup]="newWorkerForm">
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-muted-foreground">Nume *</label>
+                        <input type="text" formControlName="lastName" placeholder="Popescu"
+                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                      </div>
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-muted-foreground">Prenume *</label>
+                        <input type="text" formControlName="firstName" placeholder="Ion"
+                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                      </div>
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-muted-foreground">IDNP *</label>
+                        <input type="text" formControlName="idnp" maxlength="13" placeholder="13 cifre"
+                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                      </div>
+                    </div>
+                  }
+                </div>
+
+                <div class="p-6 pt-4 border-t border-foreground/10 flex justify-end gap-2">
+                  <button type="button" (click)="panel.set(null)"
+                    class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">
+                    @if (addTab() === 'existing') { Inchide } @else { Anuleaza }
+                  </button>
+                  @if (addTab() === 'new') {
+                    <button type="button" (click)="addNewWorker()" [disabled]="newWorkerForm.invalid"
+                      class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
+                      + Adauga in voucher
+                    </button>
+                  }
+                </div>
               </div>
             </div>
           }
 
-          <!-- INLINE PANEL: CSV IMPORT -->
+          <!-- MODAL: CSV IMPORT -->
           @if (panel() === 'csv') {
-            <div class="mb-4 rounded-md ring-1 ring-foreground/10 p-4 bg-muted/20">
-              <h3 class="text-sm font-semibold mb-2">Import lucratori prin CSV</h3>
-              <p class="text-xs text-muted-foreground mb-3">Fiecare linie trebuie sa contina: <span class="font-mono">Nume,Prenume,IDNP</span></p>
-              <textarea rows="6" [value]="csvText()" (input)="csvText.set($any($event.target).value)"
-                placeholder="Popescu,Ion,2001234567890&#10;Codreanu,Maria,2009876543210"
-                class="w-full rounded-md border border-input bg-white px-3 py-2 text-sm font-mono"></textarea>
-              <div class="flex justify-end gap-2 mt-3">
-                <button type="button" (click)="panel.set(null)"
-                  class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Anuleaza</button>
-                <button type="button" (click)="importCsv()"
-                  class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium">
-                  Importa
-                </button>
+            <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="panel.set(null)">
+              <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl" (click)="$event.stopPropagation()">
+                <div class="p-6 pb-4 border-b border-foreground/10">
+                  <h3 class="text-lg font-semibold">Importa lucratori</h3>
+                  <p class="text-sm text-muted-foreground">Fiecare linie trebuie sa contina: <span class="font-mono">Nume,Prenume,IDNP</span></p>
+                </div>
+                <div class="p-6">
+                  <textarea rows="8" [value]="csvText()" (input)="csvText.set($any($event.target).value)"
+                    placeholder="Popescu,Ion,2001234567890&#10;Codreanu,Maria,2009876543210"
+                    class="w-full rounded-md border border-input bg-white px-3 py-2 text-sm font-mono"></textarea>
+                  @if (csvError()) {
+                    <div class="mt-2 text-xs text-destructive">{{ csvError() }}</div>
+                  }
+                </div>
+                <div class="p-6 pt-4 border-t border-foreground/10 flex justify-end gap-2">
+                  <button type="button" (click)="panel.set(null)"
+                    class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Anuleaza</button>
+                  <button type="button" (click)="importCsv()"
+                    class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium">
+                    Importa
+                  </button>
+                </div>
               </div>
-              @if (csvError()) {
-                <div class="mt-2 text-xs text-destructive">{{ csvError() }}</div>
-              }
             </div>
           }
 
@@ -255,7 +282,7 @@ interface VoucherWorkerRow {
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-green-500" title="RSP validat"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
                         }
                       </div>
-                      <div class="text-xs text-muted-foreground">IDNP: {{ row.idnp }} @if (row.birthDate) { · Nas.: {{ formatDate(row.birthDate) }} }</div>
+                      <div class="text-xs text-muted-foreground">IDNP: {{ row.idnp }}</div>
                     </div>
                     <div class="flex items-center gap-1">
                       <button type="button" (click)="removeRow(i)" class="size-8 inline-flex items-center justify-center rounded-md hover:bg-destructive/10 text-destructive" title="Sterge">
@@ -357,7 +384,8 @@ export class CreateVoucherComponent implements OnInit {
   protected readonly allWorkers = signal<WorkerModel[]>([]);
   protected readonly searchTerm = signal('');
 
-  protected readonly panel = signal<null | 'new' | 'existing' | 'csv'>(null);
+  protected readonly panel = signal<null | 'add' | 'csv'>(null);
+  protected readonly addTab = signal<'existing' | 'new'>('existing');
 
   protected readonly csvText = signal('');
   protected readonly csvError = signal('');
@@ -464,10 +492,13 @@ export class CreateVoucherComponent implements OnInit {
     });
   }
 
-  protected openPanel(p: 'new' | 'existing' | 'csv'): void {
+  protected openPanel(p: 'add' | 'csv'): void {
     this.panel.set(this.panel() === p ? null : p);
-    if (p === 'existing') this.searchTerm.set('');
-    if (p === 'new') this.newWorkerForm.reset();
+    if (p === 'add') {
+      this.addTab.set('existing');
+      this.searchTerm.set('');
+      this.newWorkerForm.reset();
+    }
     if (p === 'csv') {
       this.csvText.set('');
       this.csvError.set('');
