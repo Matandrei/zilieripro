@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
+import { UpperCasePipe } from '@angular/common';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
 import { SignaturePadComponent } from '../../../shared/ui/components/signature-pad.component';
@@ -9,7 +10,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 @Component({
   selector: 'app-voucher-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule, SignaturePadComponent, TranslatePipe],
+  imports: [RouterLink, FormsModule, UpperCasePipe, SignaturePadComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-3xl mx-auto">
@@ -73,92 +74,72 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
         <div class="text-center py-12 text-muted-foreground">{{ 'common.loading' | t }}</div>
       } @else if (voucher()) {
         @let v = voucher()!;
-        <!-- Simple anexa layout, same on screen and print (signatures only on print) -->
-        <div class="voucher-sheet bg-white ring-1 ring-foreground/10 rounded-md mx-auto
-                    print:ring-0 print:rounded-none">
+        <!-- Plain anexa layout — no rings, no shadows, no rounded corners, no colored backgrounds -->
+        <div class="voucher-sheet mx-auto text-black">
 
           <!-- HEADER -->
-          <div class="px-8 pt-8 pb-4 text-center border-b border-foreground/20">
-            <div class="text-xs uppercase tracking-widest text-foreground/70 font-semibold">
-              Ministerul Muncii si Protectiei Sociale
-            </div>
-            <h1 class="mt-2 text-2xl font-bold uppercase tracking-tight">
-              Voucher digital pentru zilieri
-            </h1>
-            <div class="mt-3 flex flex-wrap justify-center items-center gap-x-4 gap-y-1 text-xs">
-              <div><span class="text-foreground/60">COD:</span> <span class="font-mono font-bold">{{ v.code }}</span></div>
-              <div><span class="text-foreground/60">EMIS:</span> <span class="font-medium">{{ formatDateTime(v.createdAt) }}</span></div>
-              <div>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wider border border-foreground/30">
-                  {{ v.status }}
-                </span>
-              </div>
+          <div class="text-center pb-3 mb-4 border-b border-black">
+            <div class="text-xs">Ministerul Muncii si Protectiei Sociale</div>
+            <h1 class="mt-1 text-xl font-bold uppercase">Voucher digital pentru zilieri</h1>
+            <div class="mt-2 text-xs">
+              COD: <span class="font-mono">{{ v.code }}</span>
+              &nbsp; · &nbsp;
+              EMIS: {{ formatDateTime(v.createdAt) }}
+              &nbsp; · &nbsp;
+              {{ v.status | uppercase }}
             </div>
           </div>
 
           <!-- BENEFICIAR -->
-          <section class="px-8 py-4 border-b border-foreground/10">
-            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Beneficiarul de lucrari (Angajator)</h2>
-            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
-              <dt class="text-foreground/70">IDNO</dt>
-              <dd class="font-mono font-semibold">{{ v.beneficiary.idno }}</dd>
-              <dt class="text-foreground/70">Denumirea companiei</dt>
-              <dd class="font-semibold">{{ v.beneficiary.companyName }}</dd>
+          <section class="mb-4">
+            <h2 class="text-sm font-bold uppercase mb-2">Beneficiarul de lucrari (Angajator)</h2>
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+              <dt>IDNO</dt><dd>{{ v.beneficiary.idno }}</dd>
+              <dt>Denumirea companiei</dt><dd>{{ v.beneficiary.companyName }}</dd>
             </dl>
           </section>
 
           <!-- ZILIER -->
-          <section class="px-8 py-4 border-b border-foreground/10">
-            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Zilierul (Lucrator)</h2>
-            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
-              <dt class="text-foreground/70">IDNP</dt>
-              <dd class="font-mono font-semibold">{{ v.worker.idnp }}</dd>
-              <dt class="text-foreground/70">Numele</dt>
-              <dd class="font-semibold uppercase">{{ v.worker.lastName }}</dd>
-              <dt class="text-foreground/70">Prenumele</dt>
-              <dd class="font-semibold">{{ v.worker.firstName }}</dd>
+          <section class="mb-4">
+            <h2 class="text-sm font-bold uppercase mb-2">Zilierul (Lucrator)</h2>
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+              <dt>IDNP</dt><dd>{{ v.worker.idnp }}</dd>
+              <dt>Numele</dt><dd>{{ v.worker.lastName }}</dd>
+              <dt>Prenumele</dt><dd>{{ v.worker.firstName }}</dd>
             </dl>
           </section>
 
           <!-- DETALII ACTIVITATE -->
-          <section class="px-8 py-4 border-b border-foreground/10">
-            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Detalii activitate</h2>
-            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
-              <dt class="text-foreground/70">Ziua de activitate</dt>
-              <dd class="font-semibold">{{ formatDate(v.workDate) }}</dd>
-              <dt class="text-foreground/70">Numarul de ore lucrate</dt>
-              <dd class="font-semibold">{{ v.hoursWorked }}</dd>
-              <dt class="text-foreground/70">Locul exercitarii activitatii</dt>
-              <dd class="font-semibold">
+          <section class="mb-4">
+            <h2 class="text-sm font-bold uppercase mb-2">Detalii activitate</h2>
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+              <dt>Ziua de activitate</dt><dd>{{ formatDate(v.workDate) }}</dd>
+              <dt>Numarul de ore lucrate</dt><dd>{{ v.hoursWorked }}</dd>
+              <dt>Locul exercitarii activitatii</dt>
+              <dd>
                 {{ v.workLocality }}, {{ v.workDistrict }}
-                @if (v.workAddress) { <br/><span class="text-foreground/70 font-normal">{{ v.workAddress }}</span> }
+                @if (v.workAddress) { <br/>{{ v.workAddress }} }
               </dd>
-              <dt class="text-foreground/70">Activitatea realizata</dt>
-              <dd class="font-semibold">Zilier agricultura</dd>
+              <dt>Activitatea realizata</dt><dd>Zilier agricultura</dd>
             </dl>
           </section>
 
           <!-- DATE FINANCIARE -->
-          <section class="px-8 py-4 border-b border-foreground/10">
-            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-3">Date financiare</h2>
-            <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
-              <dt class="text-foreground/70">Remuneratia neta (MDL)</dt>
-              <dd class="font-semibold">{{ formatMoney(v.netRemuneration) }}</dd>
-              <dt class="text-foreground/70">Impozit pe venit 12% (MDL)</dt>
-              <dd class="font-semibold">{{ formatMoney(v.incomeTax) }}</dd>
-              <dt class="text-foreground/70">Contributii CNAS 6% (MDL)</dt>
-              <dd class="font-semibold">{{ formatMoney(v.cnasContribution) }}</dd>
+          <section class="mb-4">
+            <h2 class="text-sm font-bold uppercase mb-2">Date financiare</h2>
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+              <dt>Remuneratia neta (MDL)</dt><dd>{{ formatMoney(v.netRemuneration) }}</dd>
+              <dt>Impozit pe venit 12% (MDL)</dt><dd>{{ formatMoney(v.incomeTax) }}</dd>
+              <dt>Contributii CNAS 6% (MDL)</dt><dd>{{ formatMoney(v.cnasContribution) }}</dd>
+              <dt class="font-bold uppercase pt-1 border-t border-black">Remuneratia bruta (MDL)</dt>
+              <dd class="font-bold pt-1 border-t border-black">{{ formatMoney(v.grossRemuneration) }}</dd>
             </dl>
-            <div class="mt-3 pt-3 border-t-2 border-foreground/40 grid grid-cols-[180px_1fr] gap-x-4">
-              <div class="text-sm font-bold uppercase tracking-wider">Remuneratia bruta (MDL)</div>
-              <div class="text-lg font-bold">{{ formatMoney(v.grossRemuneration) }}</div>
-            </div>
           </section>
 
           <!-- CONFIRMARE -->
-          <section class="px-8 py-4 border-b border-foreground/10">
-            <h2 class="text-[11px] font-bold uppercase tracking-wider mb-2">Confirmarea prestarii si primirii remuneratiei</h2>
-            <p class="text-xs text-foreground/80 leading-relaxed">
+          <section class="mb-4">
+            <h2 class="text-sm font-bold uppercase mb-1">Confirmarea prestarii si primirii remuneratiei</h2>
+            <p class="text-sm">
               Prin semnarea prezentului voucher, zilierul confirma prestarea activitatii
               si primirea remuneratiei in cuantumul indicat mai sus.
             </p>
@@ -166,46 +147,35 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
           <!-- CANCELLATION (if applicable) -->
           @if (v.status === 'Anulat') {
-            <section class="px-8 py-4 border-b border-foreground/10">
-              <h2 class="text-[11px] font-bold uppercase tracking-wider mb-2 text-destructive">Voucher anulat</h2>
-              <dl class="grid grid-cols-[180px_1fr] gap-y-2 gap-x-4 text-sm">
-                <dt class="text-foreground/70">Motiv</dt>
-                <dd class="font-semibold">{{ cancelReasonLabel(v.cancellationReason!) }}</dd>
-                @if (v.cancellationNote) {
-                  <dt class="text-foreground/70">Nota</dt>
-                  <dd>{{ v.cancellationNote }}</dd>
-                }
-                @if (v.cancellationDate) {
-                  <dt class="text-foreground/70">Data anularii</dt>
-                  <dd class="font-semibold">{{ formatDateTime(v.cancellationDate) }}</dd>
-                }
+            <section class="mb-4">
+              <h2 class="text-sm font-bold uppercase mb-2">Voucher anulat</h2>
+              <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+                <dt>Motiv</dt><dd>{{ cancelReasonLabel(v.cancellationReason!) }}</dd>
+                @if (v.cancellationNote) { <dt>Nota</dt><dd>{{ v.cancellationNote }}</dd> }
+                @if (v.cancellationDate) { <dt>Data anularii</dt><dd>{{ formatDateTime(v.cancellationDate) }}</dd> }
               </dl>
             </section>
           }
 
           <!-- SIGNATURE AREA — only on print -->
-          <section class="px-8 py-6 signature-area">
+          <section class="signature-area mt-8 mb-4">
             <div class="grid grid-cols-2 gap-8">
               <div>
-                <div class="text-[10px] uppercase tracking-widest text-foreground/70 font-semibold mb-6">
-                  Semnatura zilierului (olografa)
-                </div>
-                <div class="h-16 border-b border-foreground/40"></div>
+                <div class="text-xs mb-8">Semnatura zilierului (olografa)</div>
+                <div class="h-12 border-b border-black"></div>
               </div>
               <div>
-                <div class="text-[10px] uppercase tracking-widest text-foreground/70 font-semibold mb-2">
-                  Semnatura electronica a entitatii
-                </div>
+                <div class="text-xs mb-2">Semnatura electronica a entitatii</div>
                 @if (v.signatureDataUrl) {
-                  <div class="h-16 border-b border-foreground/40 flex items-end justify-center">
-                    <img [src]="v.signatureDataUrl" alt="Semnatura electronica" class="max-h-full object-contain" />
+                  <div class="h-12 border-b border-black flex items-end justify-center">
+                    <img [src]="v.signatureDataUrl" alt="Semnatura" class="max-h-full object-contain" />
                   </div>
-                  <div class="text-[10px] text-foreground/60 mt-1">
+                  <div class="text-[10px] mt-1">
                     @if (v.signedAt; as s) { {{ formatDateTime(s) }} }
                   </div>
                 } @else {
-                  <div class="h-16 border-b border-foreground/40 flex items-center justify-center">
-                    <span class="text-[10px] text-foreground/60 italic">[Aplicata automat la imprimare]</span>
+                  <div class="h-12 border-b border-black flex items-center justify-center">
+                    <span class="text-[10px] italic">[Aplicata automat la imprimare]</span>
                   </div>
                 }
               </div>
@@ -213,7 +183,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
           </section>
 
           <!-- FOOTER -->
-          <div class="px-8 py-4 text-[10px] text-center text-foreground/70 italic">
+          <div class="mt-6 pt-3 border-t border-black text-[10px] text-center">
             Prezentul voucher constituie dovada remuneratiei zilierului — Art. 9 alin. (3), Legea nr. 22/2018.<br/>
             Document generat automat din sistemul informational eZilier.
           </div>
