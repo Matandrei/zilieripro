@@ -75,25 +75,21 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
       } @else if (voucher()) {
         @let v = voucher()!;
         <!-- Plain anexa layout — no rings, no shadows, no rounded corners, no colored backgrounds -->
-        <div class="voucher-sheet mx-auto text-black">
+        <div class="voucher-sheet mx-auto text-black text-sm">
 
-          <!-- HEADER -->
-          <div class="text-center pb-3 mb-4 border-b border-black">
-            <div class="text-xs">Ministerul Muncii si Protectiei Sociale</div>
-            <h1 class="mt-1 text-xl font-bold uppercase">Voucher digital pentru zilieri</h1>
-            <div class="mt-2 text-xs">
-              COD: <span class="font-mono">{{ v.code }}</span>
-              &nbsp; · &nbsp;
-              EMIS: {{ formatDateTime(v.createdAt) }}
-              &nbsp; · &nbsp;
-              {{ v.status | uppercase }}
-            </div>
-          </div>
+          <!-- METADATA -->
+          <section class="mb-4">
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1">
+              <dt>COD</dt><dd>{{ v.code }}</dd>
+              <dt>EMIS</dt><dd>{{ formatDateTime(v.createdAt) }}</dd>
+              <dt>STATUT</dt><dd>{{ v.status | uppercase }}</dd>
+            </dl>
+          </section>
 
           <!-- BENEFICIAR -->
           <section class="mb-4">
             <h2 class="text-sm font-bold uppercase mb-2">Beneficiarul de lucrari (Angajator)</h2>
-            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1">
               <dt>IDNO</dt><dd>{{ v.beneficiary.idno }}</dd>
               <dt>Denumirea companiei</dt><dd>{{ v.beneficiary.companyName }}</dd>
             </dl>
@@ -102,7 +98,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
           <!-- ZILIER -->
           <section class="mb-4">
             <h2 class="text-sm font-bold uppercase mb-2">Zilierul (Lucrator)</h2>
-            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1">
               <dt>IDNP</dt><dd>{{ v.worker.idnp }}</dd>
               <dt>Numele</dt><dd>{{ v.worker.lastName }}</dd>
               <dt>Prenumele</dt><dd>{{ v.worker.firstName }}</dd>
@@ -112,7 +108,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
           <!-- DETALII ACTIVITATE -->
           <section class="mb-4">
             <h2 class="text-sm font-bold uppercase mb-2">Detalii activitate</h2>
-            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1">
               <dt>Ziua de activitate</dt><dd>{{ formatDate(v.workDate) }}</dd>
               <dt>Numarul de ore lucrate</dt><dd>{{ v.hoursWorked }}</dd>
               <dt>Locul exercitarii activitatii</dt>
@@ -127,19 +123,18 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
           <!-- DATE FINANCIARE -->
           <section class="mb-4">
             <h2 class="text-sm font-bold uppercase mb-2">Date financiare</h2>
-            <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+            <dl class="grid grid-cols-[200px_1fr] gap-y-1">
               <dt>Remuneratia neta (MDL)</dt><dd>{{ formatMoney(v.netRemuneration) }}</dd>
               <dt>Impozit pe venit 12% (MDL)</dt><dd>{{ formatMoney(v.incomeTax) }}</dd>
               <dt>Contributii CNAS 6% (MDL)</dt><dd>{{ formatMoney(v.cnasContribution) }}</dd>
-              <dt class="font-bold uppercase pt-1 border-t border-black">Remuneratia bruta (MDL)</dt>
-              <dd class="font-bold pt-1 border-t border-black">{{ formatMoney(v.grossRemuneration) }}</dd>
+              <dt>Remuneratia bruta (MDL)</dt><dd>{{ formatMoney(v.grossRemuneration) }}</dd>
             </dl>
           </section>
 
           <!-- CONFIRMARE -->
           <section class="mb-4">
             <h2 class="text-sm font-bold uppercase mb-1">Confirmarea prestarii si primirii remuneratiei</h2>
-            <p class="text-sm">
+            <p>
               Prin semnarea prezentului voucher, zilierul confirma prestarea activitatii
               si primirea remuneratiei in cuantumul indicat mai sus.
             </p>
@@ -149,7 +144,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
           @if (v.status === 'Anulat') {
             <section class="mb-4">
               <h2 class="text-sm font-bold uppercase mb-2">Voucher anulat</h2>
-              <dl class="grid grid-cols-[200px_1fr] gap-y-1 text-sm">
+              <dl class="grid grid-cols-[200px_1fr] gap-y-1">
                 <dt>Motiv</dt><dd>{{ cancelReasonLabel(v.cancellationReason!) }}</dd>
                 @if (v.cancellationNote) { <dt>Nota</dt><dd>{{ v.cancellationNote }}</dd> }
                 @if (v.cancellationDate) { <dt>Data anularii</dt><dd>{{ formatDateTime(v.cancellationDate) }}</dd> }
@@ -183,7 +178,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
           </section>
 
           <!-- FOOTER -->
-          <div class="mt-6 pt-3 border-t border-black text-[10px] text-center">
+          <div class="mt-6">
             Prezentul voucher constituie dovada remuneratiei zilierului — Art. 9 alin. (3), Legea nr. 22/2018.<br/>
             Document generat automat din sistemul informational eZilier.
           </div>
