@@ -13,7 +13,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
   imports: [RouterLink, FormsModule, UpperCasePipe, SignaturePadComponent, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-3xl mx-auto">
+    <div class="max-w-7xl mx-auto">
       <!-- Toolbar (hidden on print) -->
       <div class="mb-4 flex items-center justify-between print:hidden">
         <a routerLink="/vouchers"
@@ -240,8 +240,9 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
     </div>
 
     <style>
-      /* A5 aspect on screen */
-      :host ::ng-deep .voucher-sheet { max-width: 148mm; min-height: auto; }
+      /* On screen the voucher uses the full content width like the other
+         pages; A5 sizing applies only when printing. */
+      :host ::ng-deep .voucher-sheet { width: 100%; }
 
       /* On-screen: hide the signature section — it appears only at print. */
       :host ::ng-deep .signature-area { display: none; }
@@ -249,7 +250,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
       @media print {
         :host ::ng-deep .signature-area { display: block !important; }
         @page { size: A5 portrait; margin: 8mm; }
-        :host ::ng-deep .voucher-sheet { width: 100%; box-shadow: none !important; border-radius: 0 !important; }
+        :host ::ng-deep .voucher-sheet { max-width: 148mm; box-shadow: none !important; border-radius: 0 !important; }
         body { background: white !important; }
       }
     </style>
