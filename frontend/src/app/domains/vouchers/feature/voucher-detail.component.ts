@@ -249,8 +249,12 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
       @media print {
         :host ::ng-deep .signature-area { display: block !important; }
-        @page { size: A5 portrait; margin: 8mm; }
-        :host ::ng-deep .voucher-sheet { max-width: 148mm; box-shadow: none !important; border-radius: 0 !important; }
+        @page { size: A4 portrait; margin: 12mm; }
+        :host ::ng-deep .voucher-sheet { max-width: 100%; box-shadow: none !important; border-radius: 0 !important; font-size: 11pt; }
+        :host ::ng-deep .voucher-sheet h1 { font-size: 16pt; margin-bottom: 8mm; }
+        :host ::ng-deep .voucher-sheet h2 { font-size: 11pt; margin-bottom: 2mm; }
+        :host ::ng-deep .voucher-sheet section { margin-bottom: 4mm; page-break-inside: avoid; }
+        :host ::ng-deep .voucher-sheet dl { row-gap: 0.5mm; }
         body { background: white !important; }
       }
     </style>

@@ -19,7 +19,7 @@ interface NavItem {
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <!-- Header (OWA-style: white, fixed, shadow) -->
-    <header class="fixed top-0 left-0 right-0 h-[72px] bg-white z-[1000] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] flex items-center justify-between px-6">
+    <header class="fixed top-0 left-0 right-0 h-[72px] bg-white z-[1000] shadow-[0_10px_40px_-15px_rgba(0,0,0,0.1)] flex items-center justify-between px-6 print:hidden">
       <div class="flex items-center gap-3">
         <!-- Hamburger (mobile) -->
         <button
@@ -91,7 +91,7 @@ interface NavItem {
 
     <!-- Sidebar -->
     <aside
-      class="fixed top-[72px] left-0 bottom-0 w-60 bg-card border-r border-border z-40 overflow-y-auto transition-transform duration-200"
+      class="fixed top-[72px] left-0 bottom-0 w-60 bg-card border-r border-border z-40 overflow-y-auto transition-transform duration-200 print:hidden"
       [class.max-lg:-translate-x-full]="!sidebarOpen()"
       [class.max-lg:translate-x-0]="sidebarOpen()"
     >
@@ -135,8 +135,8 @@ interface NavItem {
     </aside>
 
     <!-- Main content -->
-    <main class="mt-[72px] lg:ml-60 min-h-[calc(100vh-72px)] bg-white">
-      <div class="px-2 sm:px-4 md:px-6 py-8">
+    <main class="mt-[72px] lg:ml-60 min-h-[calc(100vh-72px)] bg-white print:m-0 print:min-h-0">
+      <div class="px-2 sm:px-4 md:px-6 py-8 print:p-0">
         <router-outlet />
       </div>
     </main>
