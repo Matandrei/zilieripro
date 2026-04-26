@@ -74,8 +74,11 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
         <div class="text-center py-12 text-muted-foreground">{{ 'common.loading' | t }}</div>
       } @else if (voucher()) {
         @let v = voucher()!;
-        <!-- Plain anexa layout — no rings, no shadows, no rounded corners, no colored backgrounds -->
-        <div class="voucher-sheet mx-auto text-black text-sm">
+        <!-- Plain anexa layout — left-aligned, no rings, no shadows, no separator lines -->
+        <div class="voucher-sheet text-black text-sm">
+
+          <!-- TITLE -->
+          <h1 class="text-2xl font-bold mb-4">Voucher {{ v.code }}</h1>
 
           <!-- METADATA -->
           <section class="mb-4">
