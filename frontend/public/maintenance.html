@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>eZilier — Site in dezvoltare</title>
+  <meta name="description" content="Platforma eZilier este in dezvoltare." />
+  <meta name="robots" content="noindex, nofollow" />
+  <!-- Reincarca automat la fiecare 2 minute -->
+  <meta http-equiv="refresh" content="120" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+    body {
+      font-family: 'Onest', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(36,99,235,0.10) 0, transparent 40%),
+        radial-gradient(circle at 80% 90%, rgba(36,99,235,0.08) 0, transparent 50%),
+        #ffffff;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      min-height: 100vh;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid rgba(15, 23, 42, 0.08);
+      border-radius: 16px;
+      box-shadow: 0 20px 50px -25px rgba(15, 23, 42, 0.15);
+      max-width: 560px;
+      width: 100%;
+      padding: 40px 36px;
+      text-align: center;
+    }
+    .brand { font-size: 22px; font-weight: 700; color: #1d4ed8; letter-spacing: -0.02em; }
+    .badge { font-size: 11px; color: #64748b; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 4px; }
+
+    .icon {
+      margin: 24px auto 16px;
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(29, 78, 216, 0.08);
+      display: flex; align-items: center; justify-content: center;
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    .icon svg { width: 40px; height: 40px; color: #1d4ed8; }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(29,78,216,0.18); }
+      50%      { transform: scale(1.05); box-shadow: 0 0 0 16px rgba(29,78,216,0); }
+    }
+
+    h1 { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 8px; }
+    p.lead { font-size: 16px; color: #475569; line-height: 1.55; margin-bottom: 8px; }
+    p.sub  { font-size: 14px; color: #64748b; line-height: 1.55; }
+
+    .lang {
+      display: flex; gap: 6px; justify-content: center;
+      margin-top: 24px; padding-top: 20px;
+      border-top: 1px solid rgba(15,23,42,0.08);
+    }
+    .lang button {
+      cursor: pointer; font: inherit; font-size: 12px; font-weight: 500;
+      background: #fff; color: #475569;
+      border: 1px solid #e2e8f0; border-radius: 6px;
+      padding: 6px 12px;
+      transition: all 0.15s ease;
+    }
+    .lang button:hover { background: #f1f5f9; color: #0f172a; }
+    .lang button.active { background: #1d4ed8; color: #fff; border-color: #1d4ed8; }
+
+    .contact { margin-top: 16px; font-size: 13px; color: #64748b; }
+    .contact a { color: #1d4ed8; text-decoration: none; }
+    .contact a:hover { text-decoration: underline; }
+
+    .footer { margin-top: 24px; font-size: 11px; color: #94a3b8; }
+  </style>
+</head>
+<body>
+  <main class="card" role="alert" aria-live="polite">
+    <div class="brand">eZilier</div>
+    <div class="badge">SIVZ · MMPS</div>
+
+    <div class="icon" aria-hidden="true">
+      <!-- Tools / development icon -->
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+      </svg>
+    </div>
+
+    <h1 data-i18n="title">Site-ul este in dezvoltare</h1>
+    <p class="lead" data-i18n="lead">
+      Platforma eZilier este in proces de dezvoltare si va fi disponibila in curand.
+    </p>
+    <p class="sub" data-i18n="sub">
+      Va multumim pentru rabdare. Reveniti, va rugam, mai tarziu.
+    </p>
+
+    <div class="contact" data-i18n-html="contact">
+      Pentru intrebari: <a href="mailto:suport@ezilier.gov.md">suport&#64;ezilier.gov.md</a>
+    </div>
+
+    <div class="lang">
+      <button type="button" data-lang="ro" class="active">RO</button>
+      <button type="button" data-lang="ru">RU</button>
+    </div>
+
+    <div class="footer">© Ministerul Muncii si Protectiei Sociale · Platforma eSOCIAL</div>
+  </main>
+
+  <script>
+    const I18N = {
+      ro: {
+        title:   'Site-ul este in dezvoltare',
+        lead:    'Platforma eZilier este in proces de dezvoltare si va fi disponibila in curand.',
+        sub:     'Va multumim pentru rabdare. Reveniti, va rugam, mai tarziu.',
+        contact: 'Pentru intrebari: <a href="mailto:suport@ezilier.gov.md">suport&#64;ezilier.gov.md</a>',
+      },
+      ru: {
+        title:   'Сайт в разработке',
+        lead:    'Платформа eZilier находится в разработке и скоро будет доступна.',
+        sub:     'Благодарим за терпение. Пожалуйста, зайдите позже.',
+        contact: 'По вопросам: <a href="mailto:suport@ezilier.gov.md">suport&#64;ezilier.gov.md</a>',
+      },
+    };
+    function setLang(l) {
+      const dict = I18N[l] || I18N.ro;
+      document.documentElement.lang = l;
+      document.title = `eZilier — ${dict.title}`;
+      document.querySelectorAll('[data-i18n]').forEach((el) => {
+        const key = el.getAttribute('data-i18n');
+        if (dict[key]) el.textContent = dict[key];
+      });
+      document.querySelectorAll('[data-i18n-html]').forEach((el) => {
+        const key = el.getAttribute('data-i18n-html');
+        if (dict[key]) el.innerHTML = dict[key];
+      });
+      document.querySelectorAll('.lang button').forEach((b) => {
+        b.classList.toggle('active', b.getAttribute('data-lang') === l);
+      });
+      try { localStorage.setItem('ez_lang', l); } catch (e) {}
+    }
+    document.querySelectorAll('.lang button').forEach((b) => {
+      b.addEventListener('click', () => setLang(b.getAttribute('data-lang')));
+    });
+    // Restore preferred language if known.
+    try {
+      const saved = localStorage.getItem('ez_lang');
+      if (saved && I18N[saved]) setLang(saved);
+    } catch (e) {}
+  </script>
+</body>
+</html>
