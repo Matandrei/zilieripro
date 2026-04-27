@@ -9,6 +9,7 @@ public record CreateVoucherRequest
     public string WorkDistrict { get; init; } = string.Empty;
     public string WorkLocality { get; init; } = string.Empty;
     public string? WorkAddress { get; init; }
+    public string? ActivityType { get; init; }
     public bool Art5Alin1LitB { get; init; }
     public bool Art5Alin1LitG { get; init; }
     public List<VoucherWorkerRequest> Workers { get; init; } = [];
@@ -78,6 +79,7 @@ public record VoucherDetailModel
     public string WorkDistrict { get; init; } = string.Empty;
     public string WorkLocality { get; init; } = string.Empty;
     public string? WorkAddress { get; init; }
+    public string? ActivityType { get; init; }
     public bool RspValidated { get; init; }
     public bool Art5Alin1LitB { get; init; }
     public bool Art5Alin1LitG { get; init; }

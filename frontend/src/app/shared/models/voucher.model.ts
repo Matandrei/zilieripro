@@ -30,6 +30,7 @@ export interface VoucherDetail {
   workDistrict: string;
   workLocality: string;
   workAddress?: string;
+  activityType?: string;
   rspValidated: boolean;
   art5Alin1LitB: boolean;
   art5Alin1LitG: boolean;
@@ -84,6 +85,7 @@ export interface CreateVoucherRequest {
   workDistrict: string;
   workLocality: string;
   workAddress?: string;
+  activityType?: string;
   art5Alin1LitB: boolean;
   art5Alin1LitG: boolean;
   workers: VoucherWorkerRequest[];

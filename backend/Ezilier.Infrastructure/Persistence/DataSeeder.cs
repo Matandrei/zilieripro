@@ -9,6 +9,10 @@ public static class DataSeeder
 {
     public static async Task SeedAsync(DataContext context)
     {
+        // Idempotent additive seed for activity-type nomenclators (runs every startup
+        // so that existing prod DBs pick up the expanded list without a full re-seed).
+        await SeedActivityTypesAsync(context);
+
         if (await context.Roles.AnyAsync())
             return;
 
@@ -171,6 +175,52 @@ public static class DataSeeder
             new Nomenclator { Category = Constants.NomenclatorCategories.LegalForms, Code = "GC", TitleRo = "Gospodarie taraneasca", TitleRu = "КХ", TitleEn = "Farm household", SortOrder = 4 }
         );
 
+        await context.SaveChangesAsync();
+    }
+
+    // Adds Art. 13-aligned activity types if the corresponding code is missing.
+    // Safe to run on every startup — only inserts what's not yet present.
+    private static async Task SeedActivityTypesAsync(DataContext context)
+    {
+        var desired = new[]
+        {
+            new { Code = "AGR-CULES",     Ro = "Cules de fructe / legume",       Ru = "Сбор фруктов / овощей",          En = "Fruit / vegetable picking",   Order = 10 },
+            new { Code = "AGR-PLANTARE",  Ro = "Plantare si rasadire",           Ru = "Посадка и рассада",              En = "Planting and seedlings",      Order = 11 },
+            new { Code = "AGR-PRASIT",    Ro = "Prasit, plivit, sapat",          Ru = "Прополка, рыхление",             En = "Hoeing and weeding",          Order = 12 },
+            new { Code = "AGR-VITICOL",   Ro = "Lucrari in vie",                 Ru = "Работы в винограднике",          En = "Vineyard work",               Order = 13 },
+            new { Code = "AGR-LIVADA",    Ro = "Lucrari in livada",              Ru = "Работы в саду",                  En = "Orchard work",                Order = 14 },
+            new { Code = "AGR-GRADINA",   Ro = "Lucrari de gradinarit",          Ru = "Садовые работы",                 En = "Gardening",                   Order = 15 },
+            new { Code = "AGR-ZOOTEH",    Ro = "Ingrijirea animalelor",          Ru = "Уход за животными",              En = "Animal care",                 Order = 16 },
+            new { Code = "AGR-FAN",       Ro = "Coasa si recolta de fan",        Ru = "Косьба и заготовка сена",        En = "Mowing and haymaking",        Order = 17 },
+            new { Code = "SILV-LEMN",     Ro = "Tairea / colectarea lemnului",   Ru = "Рубка / сбор древесины",         En = "Wood cutting / collection",   Order = 20 },
+            new { Code = "INC-DESC",      Ro = "Incarcare si descarcare",        Ru = "Погрузка и разгрузка",           En = "Loading and unloading",       Order = 30 },
+            new { Code = "CURATENIE",     Ro = "Curatenie",                      Ru = "Уборка",                         En = "Cleaning",                    Order = 31 },
+            new { Code = "INTRETIN",      Ro = "Lucrari de intretinere",         Ru = "Работы по обслуживанию",         En = "Maintenance work",            Order = 32 },
+        };
+
+        var category = Constants.NomenclatorCategories.ActivityTypes;
+        var existingCodes = await context.Nomenclators
+            .Where(n => n.Category == category)
+            .Select(n => n.Code)
+            .ToListAsync();
+
+        var toAdd = desired
+            .Where(d => !existingCodes.Contains(d.Code))
+            .Select(d => new Nomenclator
+            {
+                Category = category,
+                Code = d.Code,
+                TitleRo = d.Ro,
+                TitleRu = d.Ru,
+                TitleEn = d.En,
+                SortOrder = d.Order,
+                IsActive = true,
+            })
+            .ToList();
+
+        if (toAdd.Count == 0) return;
+
+        context.Nomenclators.AddRange(toAdd);
         await context.SaveChangesAsync();
     }
 }

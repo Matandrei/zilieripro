@@ -150,6 +150,7 @@ public class CreateVouchersCommandHandler(
                 WorkDistrict = request.WorkDistrict,
                 WorkLocality = request.WorkLocality,
                 WorkAddress = request.WorkAddress,
+                ActivityType = request.ActivityType,
                 RspValidated = rspResult.IsValid,
                 Art5Alin1LitB = request.Art5Alin1LitB,
                 Art5Alin1LitG = request.Art5Alin1LitG,

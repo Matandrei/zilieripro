@@ -3,6 +3,8 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { WorkerDataService } from '../../workers/data/worker-data.service';
+import { ApiService } from '../../../shared/services/api.service';
+import { NomenclatorModel } from '../../../shared/models/voucher.model';
 import { VoucherCreatedSummary, WorkerModel } from '../../../shared/models/voucher.model';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 
@@ -92,11 +94,23 @@ interface VoucherWorkerRow {
             </div>
           </div>
 
-          <!-- Row 3: Adresa -->
-          <div class="space-y-2">
-            <label class="text-sm font-medium leading-none">{{ "field.address" | t }} <span class="text-destructive">*</span></label>
-            <input type="text" formControlName="workAddress" placeholder="str. Exemplu 1/2"
-              class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
+          <!-- Row 3: Adresa + Activitate -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none">{{ "field.address" | t }} <span class="text-destructive">*</span></label>
+              <input type="text" formControlName="workAddress" placeholder="str. Exemplu 1/2"
+                class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
+            </div>
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none">Activitatea realizata <span class="text-destructive">*</span></label>
+              <select formControlName="activityType"
+                class="flex h-10 w-full rounded-md border border-input bg-white px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50">
+                <option value="">Selectati activitatea</option>
+                @for (a of activityTypes(); track a.id) {
+                  <option [value]="a.code">{{ a.titleRo }}</option>
+                }
+              </select>
+            </div>
           </div>
         </form>
 
@@ -372,6 +386,9 @@ export class CreateVoucherComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly voucherDataService = inject(VoucherDataService);
   private readonly workerDataService = inject(WorkerDataService);
+  private readonly api = inject(ApiService);
+
+  protected readonly activityTypes = signal<NomenclatorModel[]>([]);
 
   protected readonly submitting = signal(false);
   protected readonly errorMessage = signal('');
@@ -438,6 +455,7 @@ export class CreateVoucherComponent implements OnInit {
     workDistrict: ['', Validators.required],
     workLocality: ['', Validators.required],
     workAddress: ['', Validators.required],
+    activityType: ['', Validators.required],
   });
 
   protected readonly newWorkerForm = this.fb.group({
@@ -486,6 +504,9 @@ export class CreateVoucherComponent implements OnInit {
         this.loadingWorkers.set(false);
       },
       error: () => this.loadingWorkers.set(false),
+    });
+    this.api.getNomenclators('activity_types').subscribe({
+      next: (list) => this.activityTypes.set((list ?? []).filter((n) => n.isActive)),
     });
   }
 
@@ -672,6 +693,7 @@ export class CreateVoucherComponent implements OnInit {
       workDistrict: v.workDistrict!,
       workLocality: v.workLocality!,
       workAddress: v.workAddress || undefined,
+      activityType: v.activityType || undefined,
       art5Alin1LitB: false,
       art5Alin1LitG: false,
       workers: this.rows().map((r) => ({

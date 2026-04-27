@@ -50,6 +50,7 @@ public class GetVoucherQueryHandler(
             WorkDistrict = voucher.WorkDistrict,
             WorkLocality = voucher.WorkLocality,
             WorkAddress = voucher.WorkAddress,
+            ActivityType = voucher.ActivityType,
             RspValidated = voucher.RspValidated,
             Art5Alin1LitB = voucher.Art5Alin1LitB,
             Art5Alin1LitG = voucher.Art5Alin1LitG,

@@ -21,6 +21,9 @@ public class Voucher : EntityBase
     public string WorkLocality { get; set; } = string.Empty;
     public string? WorkAddress { get; set; }
 
+    // Activity performed (Art. 5(4) lit. f). Nomenclator code from category 'activity_types'.
+    public string? ActivityType { get; set; }
+
     public CancellationReasonCode? CancellationReason { get; set; }
     public DateTimeOffset? CancellationDate { get; set; }
     public string? CancellationNote { get; set; }

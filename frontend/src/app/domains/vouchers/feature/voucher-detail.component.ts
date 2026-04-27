@@ -2,6 +2,8 @@ import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@ang
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
+import { ApiService } from '../../../shared/services/api.service';
+import { NomenclatorModel } from '../../../shared/models/voucher.model';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
 import { SignaturePadComponent } from '../../../shared/ui/components/signature-pad.component';
@@ -119,7 +121,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
                 {{ v.workLocality }}, {{ v.workDistrict }}
                 @if (v.workAddress) { <br/>{{ v.workAddress }} }
               </dd>
-              <dt>Activitatea realizata</dt><dd>Zilier agricultura</dd>
+              <dt>Activitatea realizata</dt><dd>{{ activityLabel(v.activityType) }}</dd>
             </dl>
           </section>
 
@@ -263,6 +265,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 export class VoucherDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly voucherDataService = inject(VoucherDataService);
+  private readonly api = inject(ApiService);
 
   protected readonly voucher = signal<VoucherDetail | null>(null);
   protected readonly loading = signal(true);
@@ -270,12 +273,22 @@ export class VoucherDetailComponent implements OnInit {
   protected readonly showSignModal = signal(false);
   protected readonly signatureData = signal<string | null>(null);
   protected readonly saving = signal(false);
+  protected readonly activityTypes = signal<NomenclatorModel[]>([]);
   protected cancelReasonCode = 'CA01';
   protected cancelNote = '';
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.loadVoucher(id);
+    this.api.getNomenclators('activity_types').subscribe({
+      next: (list) => this.activityTypes.set(list ?? []),
+    });
+  }
+
+  protected activityLabel(code?: string): string {
+    if (!code) return '—';
+    const found = this.activityTypes().find((n) => n.code === code);
+    return found?.titleRo || code;
   }
 
   protected print(): void { window.print(); }
