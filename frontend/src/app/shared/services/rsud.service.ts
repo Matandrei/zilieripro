@@ -9,6 +9,8 @@ export interface RsudCompany {
   legalForm: string;
   activityType: string;
   address: string;
+  role: string;
+  status: 'Activ' | 'Radiat';
 }
 
 const SELECTED_KEY = 'ez_selected_company_idno';
@@ -27,13 +29,11 @@ export class RsudService {
     return this.http.get<RsudCompany[]>(`${this.baseUrl}/companies`).pipe(
       tap((list) => {
         this.companies.set(list);
-        // If only one company, auto-select it.
-        if (list.length === 1 && !this.selectedIdno()) {
-          this.select(list[0].idno);
-        }
-        // If current selection is stale, clear it.
-        if (this.selectedIdno() && !list.some((c) => c.idno === this.selectedIdno())) {
-          this.select(null);
+        // If current selection is stale (not in the list, or now Radiat), clear it.
+        const sel = this.selectedIdno();
+        if (sel) {
+          const match = list.find((c) => c.idno === sel);
+          if (!match || match.status !== 'Activ') this.select(null);
         }
       })
     );

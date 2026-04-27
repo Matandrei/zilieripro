@@ -195,6 +195,9 @@ export class LoginComponent {
         this.router.navigate(['/my-vouchers']);
         break;
       case 'Angajator':
+        // Angajator must select a company first (mandatory each session).
+        this.router.navigate(['/select-company']);
+        break;
       case 'Inspector':
       default:
         this.router.navigate(['/vouchers']);

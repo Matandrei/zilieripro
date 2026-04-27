@@ -4,6 +4,11 @@ import { authGuard } from './shared/auth/auth.guard';
 export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./layouts/login.component').then(m => m.LoginComponent) },
   {
+    path: 'select-company',
+    loadComponent: () => import('./layouts/company-select.component').then(m => m.CompanySelectComponent),
+    canActivate: [authGuard],
+  },
+  {
     path: '',
     loadComponent: () => import('./layouts/sidebar-layout.component').then(m => m.SidebarLayoutComponent),
     canActivate: [authGuard],

@@ -141,51 +141,6 @@ interface NavItem {
       </div>
     </main>
 
-    <!-- Company picker modal (US-A02) -->
-    @if (showCompanyPicker()) {
-      <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4" (click)="dismissCompanyPicker()">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-lg" (click)="$event.stopPropagation()">
-          <div class="p-6 pb-4 border-b border-foreground/10">
-            <h3 class="text-lg font-semibold">{{ 'company.selectCompany' | t }}</h3>
-            <p class="text-sm text-muted-foreground">{{ 'company.selectHint' | t }}</p>
-          </div>
-          <div class="p-2 max-h-80 overflow-auto">
-            @if (rsud.companies().length === 0) {
-              <div class="p-6 text-center text-sm text-muted-foreground">{{ 'common.noResults' | t }}</div>
-            }
-            @for (c of rsud.companies(); track c.idno) {
-              <button type="button" (click)="pickCompany(c.idno)"
-                [class]="'w-full text-left px-4 py-3 rounded-md flex items-start gap-3 transition-colors ' + (c.idno === rsud.selectedIdno() ? 'bg-primary/10 ring-1 ring-primary/30' : 'hover:bg-accent')">
-                <div class="size-9 rounded-full bg-primary/10 text-primary flex items-center justify-center font-semibold text-sm flex-shrink-0">
-                  {{ c.companyName.charAt(0) }}
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-semibold text-foreground">{{ c.companyName }}</div>
-                  <div class="text-xs text-muted-foreground">
-                    IDNO: <span class="font-mono text-foreground">{{ c.idno }}</span>
-                    · {{ c.legalForm }}
-                    · {{ c.activityType }}
-                  </div>
-                  <div class="text-xs text-muted-foreground mt-0.5">{{ c.address }}</div>
-                </div>
-                @if (c.idno === rsud.selectedIdno()) {
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-primary flex-shrink-0 mt-1"><polyline points="20 6 9 17 4 12"/></svg>
-                }
-              </button>
-            }
-          </div>
-          <div class="p-4 pt-3 border-t border-foreground/10 flex justify-between items-center">
-            @if (!rsud.selectedIdno()) {
-              <span class="text-xs text-muted-foreground">Selectati o companie pentru a continua.</span>
-            } @else {
-              <span></span>
-              <button type="button" (click)="showCompanyPicker.set(false)"
-                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.close' | t }}</button>
-            }
-          </div>
-        </div>
-      </div>
-    }
   `,
   styles: [`
     :host { display: block; }
@@ -196,7 +151,6 @@ export class SidebarLayoutComponent implements OnInit {
   readonly rsud = inject(RsudService);
   readonly i18n = inject(I18nService);
   readonly sidebarOpen = signal(false);
-  readonly showCompanyPicker = signal(false);
 
   readonly langs: Lang[] = ['ro', 'ru', 'en'];
   setLang(l: Lang): void { this.i18n.setLang(l); }
@@ -204,28 +158,10 @@ export class SidebarLayoutComponent implements OnInit {
   readonly currentCompany = computed(() => this.rsud.selectedCompany());
 
   ngOnInit(): void {
-    if (this.auth.roleType() === 'Angajator') {
-      this.rsud.loadCompanies().subscribe({
-        next: (list) => {
-          // Show picker automatically if user has multiple companies and none selected
-          if (list.length > 1 && !this.rsud.selectedIdno()) {
-            this.showCompanyPicker.set(true);
-          }
-        },
-      });
-    }
-  }
-
-  pickCompany(idno: string): void {
-    this.rsud.select(idno);
-    this.showCompanyPicker.set(false);
-  }
-
-  // Allow dismissing (backdrop click) only after a company has been picked.
-  // On first login with no selection, the user must pick one to continue.
-  dismissCompanyPicker(): void {
-    if (this.rsud.selectedIdno()) {
-      this.showCompanyPicker.set(false);
+    // Load the RSUD companies list so the header badge can show the
+    // currently selected company. The mandatory picker lives at /select-company.
+    if (this.auth.roleType() === 'Angajator' && this.rsud.companies().length === 0) {
+      this.rsud.loadCompanies().subscribe();
     }
   }
 

@@ -62,25 +62,10 @@ export const AuthStore = signalStore(
       clearAuth(): void {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
+        // Clear the previously selected company so the next login goes through
+        // the company picker again.
+        try { localStorage.removeItem('ez_selected_company_idno'); } catch {}
         patchState(store, { user: null, token: null, refreshToken: null });
-      },
-
-      async login(idnp: string, password: string): Promise<void> {
-        patchState(store, { loading: true });
-        try {
-          const response = await firstValueFrom(api.login(idnp, password));
-          localStorage.setItem(TOKEN_KEY, response.token);
-          localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
-          patchState(store, {
-            user: response.user,
-            token: response.token,
-            refreshToken: response.refreshToken,
-            loading: false,
-          });
-        } catch (error) {
-          patchState(store, { loading: false });
-          throw error;
-        }
       },
 
       async loadUser(): Promise<void> {
@@ -98,8 +83,30 @@ export const AuthStore = signalStore(
       async logout(): Promise<void> {
         localStorage.removeItem(TOKEN_KEY);
         localStorage.removeItem(REFRESH_TOKEN_KEY);
+        try { localStorage.removeItem('ez_selected_company_idno'); } catch {}
         patchState(store, { user: null, token: null, refreshToken: null });
         await router.navigate(['/login']);
+      },
+
+      async login(idnp: string, password: string): Promise<void> {
+        // Make sure any previous company selection is wiped before re-login,
+        // so the picker is shown for the new session.
+        try { localStorage.removeItem('ez_selected_company_idno'); } catch {}
+        patchState(store, { loading: true });
+        try {
+          const response = await firstValueFrom(api.login(idnp, password));
+          localStorage.setItem(TOKEN_KEY, response.token);
+          localStorage.setItem(REFRESH_TOKEN_KEY, response.refreshToken);
+          patchState(store, {
+            user: response.user,
+            token: response.token,
+            refreshToken: response.refreshToken,
+            loading: false,
+          });
+        } catch (error) {
+          patchState(store, { loading: false });
+          throw error;
+        }
       },
 
       hasPermission(permission: string): boolean {

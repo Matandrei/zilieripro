@@ -26,6 +26,7 @@ public class RsudController : BaseApiController
         var results = new List<object>();
         var activities = new[] { "Agricultura", "Horticultura", "Constructii", "Comert cu amanuntul", "Silvicultura" };
         var legalForms = new[] { "SRL", "II", "GTG", "SA", "Cooperativa" };
+        var roles = new[] { "Administrator", "Fondator", "Asociat", "Reprezentant" };
         var cities = new[] { "mun. Chisinau", "mun. Balti", "or. Orhei", "or. Ungheni", "or. Cahul" };
         var streets = new[] { "str. Stefan cel Mare 1", "str. Calea Iesilor 25", "str. 31 August 12", "str. Vasile Lupu 7" };
 
@@ -33,6 +34,9 @@ public class RsudController : BaseApiController
         {
             var seed = hash + i * 7919;
             var idno = $"10{((seed % 90_000_000) + 10_000_000):00000000}";
+            // Roughly 1-in-3 entries are 'Radiat' (legal entity de-registered) so
+            // the picker can show them as disabled, mirroring real RSUD scenarios.
+            var status = ((seed / 7) % 3) == 0 ? "Radiat" : "Activ";
             results.Add(new
             {
                 Idno = idno,
@@ -40,6 +44,8 @@ public class RsudController : BaseApiController
                 LegalForm = legalForms[seed % legalForms.Length],
                 ActivityType = activities[seed % activities.Length],
                 Address = $"{cities[seed % cities.Length]}, {streets[seed % streets.Length]}",
+                Role = roles[seed % roles.Length],
+                Status = status,
             });
         }
 
