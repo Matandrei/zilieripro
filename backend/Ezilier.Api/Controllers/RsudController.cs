@@ -35,8 +35,10 @@ public class RsudController : BaseApiController
             var seed = hash + i * 7919;
             var idno = $"10{((seed % 90_000_000) + 10_000_000):00000000}";
             // Roughly 1-in-3 entries are 'Radiat' (legal entity de-registered) so
-            // the picker can show them as disabled, mirroring real RSUD scenarios.
-            var status = ((seed / 7) % 3) == 0 ? "Radiat" : "Activ";
+            // the picker can show them as disabled — but we always guarantee that
+            // the FIRST company is Activ, so every user has at least one usable
+            // option.
+            var status = i == 0 ? "Activ" : (((seed / 7) % 3) == 0 ? "Radiat" : "Activ");
             results.Add(new
             {
                 Idno = idno,
