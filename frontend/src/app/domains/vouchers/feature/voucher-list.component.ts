@@ -108,6 +108,13 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5"><polyline points="20 6 9 17 4 12"/></svg>
             {{ 'voucher.list.bulkActivate' | t }}
           </button>
+          <button type="button" (click)="bulkPrint()"
+            class="inline-flex h-8 items-center gap-1.5 rounded-md border border-input bg-background px-3 text-xs font-medium hover:bg-accent hover:text-accent-foreground">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3.5">
+              <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
+            </svg>
+            Printeaza selectate
+          </button>
           <button type="button" (click)="clearSelection()"
             class="ml-auto text-xs text-muted-foreground hover:text-foreground">{{ 'voucher.list.bulkClear' | t }}</button>
         </div>
@@ -356,6 +363,12 @@ export class VoucherListComponent implements OnInit {
 
   protected clearSelection(): void {
     this.selected.set(new Set());
+  }
+
+  protected bulkPrint(): void {
+    const ids = [...this.selected()];
+    if (ids.length === 0) return;
+    this.router.navigate(['/vouchers/print'], { queryParams: { ids: ids.join(',') } });
   }
 
   protected bulkActivate(): void {

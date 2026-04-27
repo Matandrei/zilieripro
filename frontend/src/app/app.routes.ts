@@ -12,6 +12,7 @@ export const routes: Routes = [
       { path: 'vouchers', loadComponent: () => import('./domains/vouchers/feature/voucher-list.component').then(m => m.VoucherListComponent) },
       { path: 'vouchers/create', loadComponent: () => import('./domains/vouchers/feature/create-voucher.component').then(m => m.CreateVoucherComponent) },
       { path: 'vouchers/register', loadComponent: () => import('./domains/vouchers/feature/daily-register.component').then(m => m.DailyRegisterComponent) },
+      { path: 'vouchers/print', loadComponent: () => import('./domains/vouchers/feature/voucher-bulk-print.component').then(m => m.VoucherBulkPrintComponent) },
       { path: 'vouchers/:id/receipt', loadComponent: () => import('./domains/vouchers/feature/voucher-receipt.component').then(m => m.VoucherReceiptComponent) },
       { path: 'vouchers/:id', loadComponent: () => import('./domains/vouchers/feature/voucher-detail.component').then(m => m.VoucherDetailComponent) },
       { path: 'vouchers/:id/edit', loadComponent: () => import('./domains/vouchers/feature/voucher-edit.component').then(m => m.VoucherEditComponent) },
