@@ -658,10 +658,23 @@ export class CreateVoucherComponent implements OnInit {
     return `${d}.${m}.${y}`;
   }
 
+  private focusFirstInvalid(): void {
+    queueMicrotask(() => {
+      const el = document.querySelector<HTMLElement>(
+        'input.ng-invalid[formcontrolname], select.ng-invalid[formcontrolname], textarea.ng-invalid[formcontrolname]'
+      );
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (typeof (el as HTMLInputElement).focus === 'function') (el as HTMLInputElement).focus();
+      }
+    });
+  }
+
   protected onSubmit(): void {
     if (this.voucherForm.invalid) {
       this.voucherForm.markAllAsTouched();
       this.errorMessage.set('Completati toate campurile obligatorii.');
+      this.focusFirstInvalid();
       return;
     }
     if (this.rows().length === 0) {
