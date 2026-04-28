@@ -208,7 +208,7 @@ interface VoucherWorkerRow {
                         <span class="text-muted-foreground"> {{ 'voucher.create.rspBannerText' | t }}</span>
                       </div>
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3" [formGroup]="newWorkerForm">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3" [formGroup]="newWorkerForm">
                       <div class="space-y-1.5">
                         <label class="text-xs text-muted-foreground">Nume *</label>
                         <input type="text" formControlName="lastName" placeholder="Popescu"
@@ -222,6 +222,11 @@ interface VoucherWorkerRow {
                       <div class="space-y-1.5">
                         <label class="text-xs text-muted-foreground">IDNP *</label>
                         <input type="text" formControlName="idnp" maxlength="13" placeholder="13 cifre"
+                          class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                      </div>
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-muted-foreground">Data nașterii *</label>
+                        <input type="date" formControlName="birthDate" [max]="todayIso"
                           class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
                       </div>
                     </div>
@@ -462,7 +467,10 @@ export class CreateVoucherComponent implements OnInit {
     lastName: ['', Validators.required],
     firstName: ['', Validators.required],
     idnp: ['', [Validators.required, Validators.minLength(13), Validators.maxLength(13)]],
+    birthDate: ['', Validators.required],
   });
+
+  protected readonly todayIso = new Date().toISOString().split('T')[0];
 
   constructor() {
     // Propagate default values to worker rows — only overwrite if the row still has the previous default
@@ -543,6 +551,7 @@ export class CreateVoucherComponent implements OnInit {
       idnp: v.idnp!,
       firstName: v.firstName!,
       lastName: v.lastName!,
+      birthDate: v.birthDate!,
       netRemuneration: rem,
       hoursWorked: hours,
       rspValidated: false,
