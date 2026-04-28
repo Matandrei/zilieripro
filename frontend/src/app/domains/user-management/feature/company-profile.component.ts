@@ -157,11 +157,16 @@ interface CompanyInfo {
                   class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
               </div>
             </div>
+            @if (addUserError()) {
+              <div class="mt-3 p-2.5 bg-destructive/10 border border-destructive/20 rounded-md text-xs text-destructive">{{ addUserError() }}</div>
+            }
             <div class="mt-5 flex justify-end gap-2">
-              <button type="button" (click)="addUserOpen.set(false)"
-                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">Anuleaza</button>
-              <button type="button" (click)="saveNewUser()"
-                class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium">Salveaza</button>
+              <button type="button" (click)="addUserOpen.set(false)" [disabled]="addUserSubmitting()"
+                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm disabled:opacity-50">Anuleaza</button>
+              <button type="button" (click)="saveNewUser()" [disabled]="addUserSubmitting()"
+                class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
+                @if (addUserSubmitting()) { Se salveaza... } @else { Salveaza }
+              </button>
             </div>
           </div>
         </div>
@@ -176,7 +181,11 @@ export class CompanyProfileComponent implements OnInit {
   protected readonly loading = signal(true);
   protected readonly users = signal<UserTableItem[]>([]);
   protected readonly addUserOpen = signal(false);
+  protected readonly addUserError = signal('');
+  protected readonly addUserSubmitting = signal(false);
   protected readonly newUser = signal({ idnp: '', firstName: '', lastName: '', email: '', phone: '' });
+
+  private static readonly ANGAJATOR_ROLE_ID = 'a1000000-0000-0000-0000-000000000001';
 
   protected readonly company = computed<CompanyInfo>(() => {
     const u = this.auth.user();
@@ -245,6 +254,7 @@ export class CompanyProfileComponent implements OnInit {
 
   protected openAddUser(): void {
     this.newUser.set({ idnp: '', firstName: '', lastName: '', email: '', phone: '' });
+    this.addUserError.set('');
     this.addUserOpen.set(true);
   }
 
@@ -253,20 +263,46 @@ export class CompanyProfileComponent implements OnInit {
   }
 
   protected saveNewUser(): void {
+    this.addUserError.set('');
     const u = this.newUser();
-    if (!u.idnp || u.idnp.length !== 13 || !u.firstName || !u.lastName) return;
+    if (!u.idnp || u.idnp.length !== 13) {
+      this.addUserError.set('IDNP-ul trebuie sa contina exact 13 cifre.');
+      return;
+    }
+    if (!u.firstName.trim() || !u.lastName.trim()) {
+      this.addUserError.set('Numele si prenumele sunt obligatorii.');
+      return;
+    }
+    const beneficiaryId = this.auth.user()?.beneficiaryId;
+    if (!beneficiaryId) {
+      this.addUserError.set('Nicio companie selectata in sesiune. Reautentificati-va.');
+      return;
+    }
+    this.addUserSubmitting.set(true);
     this.api.createUser({
       idnp: u.idnp,
-      firstName: u.firstName,
-      lastName: u.lastName,
+      firstName: u.firstName.trim(),
+      lastName: u.lastName.trim(),
       email: u.email || undefined,
       phone: u.phone || undefined,
-      roleName: 'angajator',
+      roleId: CompanyProfileComponent.ANGAJATOR_ROLE_ID,
+      beneficiaryId,
       password: 'TempPass123!',
     } as any).subscribe({
       next: () => {
+        this.addUserSubmitting.set(false);
         this.addUserOpen.set(false);
         this.loadUsers();
+      },
+      error: (err) => {
+        this.addUserSubmitting.set(false);
+        const fieldErr = err?.error?.errors;
+        const msg = (fieldErr && Object.values(fieldErr).flat()[0])
+          || err?.error?.message
+          || (err?.status === 409 ? 'Un utilizator cu acest IDNP exista deja.' : '')
+          || (err?.status === 400 ? 'Datele introduse nu sunt valide.' : '')
+          || 'Eroare la salvarea utilizatorului. Incercati din nou.';
+        this.addUserError.set(String(msg));
       },
     });
   }
