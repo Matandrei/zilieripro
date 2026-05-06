@@ -69,6 +69,24 @@ public class GetVouchersQueryHandler(
             q = q.Where(v => v.WorkDistrict == p.District);
         }
 
+        if (!string.IsNullOrWhiteSpace(p.Locality))
+        {
+            // Multi-select: frontend trimite CSV (ex: "Balti,Cahul"). Daca un singur item, fallback Contains pentru flexibilitate.
+            var localities = p.Locality
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .ToArray();
+
+            if (localities.Length == 1)
+            {
+                var single = localities[0];
+                q = q.Where(v => v.WorkLocality.Contains(single));
+            }
+            else if (localities.Length > 1)
+            {
+                q = q.Where(v => localities.Contains(v.WorkLocality));
+            }
+        }
+
         // Sorting (SQLite doesn't support DateTimeOffset in ORDER BY, use WorkDate/Id instead)
         q = p.SortBy?.ToLowerInvariant() switch
         {

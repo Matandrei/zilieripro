@@ -118,6 +118,7 @@ public record VouchersQueryParams
     public DateOnly? DateFrom { get; init; }
     public DateOnly? DateTo { get; init; }
     public string? District { get; init; }
+    public string? Locality { get; init; }
     public Guid? BeneficiaryId { get; init; }
     public string? SortBy { get; init; }
     public bool SortDesc { get; init; }

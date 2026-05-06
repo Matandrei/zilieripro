@@ -9,6 +9,7 @@ export interface VoucherQueryState {
   dateFrom: string;
   dateTo: string;
   district: string;
+  locality: string;
   sortBy: string;
   sortDesc: boolean;
 }
@@ -22,6 +23,7 @@ const initialState: VoucherQueryState = {
   dateFrom: '',
   dateTo: '',
   district: '',
+  locality: '',
   sortBy: 'createdAt',
   sortDesc: true,
 };
@@ -46,6 +48,7 @@ export class VoucherStore {
     if (s.dateFrom) params['dateFrom'] = s.dateFrom;
     if (s.dateTo) params['dateTo'] = s.dateTo;
     if (s.district) params['district'] = s.district;
+    if (s.locality) params['locality'] = s.locality;
     return params;
   });
 

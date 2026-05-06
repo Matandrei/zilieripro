@@ -5,6 +5,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
 import { VoucherStore } from '../data/voucher.store';
 import { VoucherDataService } from '../data/voucher-data.service';
+import { AuthStore } from '../../../shared/auth/auth.store';
 import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../shared/models/voucher.model';
 
 @Component({
@@ -17,6 +18,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
       <!-- Header: title + primary actions -->
       <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between mb-6">
         <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ 'voucher.list.title' | t }}</h1>
+        @if (!isInspector()) {
         <div class="flex items-center gap-2">
           <button type="button" (click)="exportCsv()"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground"
@@ -41,6 +43,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
             {{ 'voucher.list.createBtn' | t }}
           </a>
         </div>
+        }
       </div>
 
       <!-- Filters: single responsive row -->
@@ -84,6 +87,86 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
           <option value="Soroca">Soroca</option>
         </select>
 
+        @if (isInspector()) {
+        <!-- Locality multi-select dropdown with search (Inspector only).
+             Flat list (toate localitatile), supports multi-select via CSV in store.locality. -->
+        <div class="relative lg:col-span-2">
+          <button type="button" (click)="toggleLocalityDropdown(); $event.stopPropagation()"
+            class="h-9 w-full rounded-md border border-input bg-transparent pl-3 pr-8 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 text-left cursor-pointer">
+            <span class="block truncate">
+              @if (selectedLocalitiesList().length === 0) {
+                Localitate: toate
+              } @else if (selectedLocalitiesList().length === 1) {
+                {{ selectedLocalitiesList()[0] }}
+              } @else {
+                {{ selectedLocalitiesList().length }} selectate
+              }
+            </span>
+            <!-- chevron absolute, small — mimic native <select> arrow -->
+            <svg class="absolute right-2.5 top-1/2 -translate-y-1/2 h-3 w-3 text-foreground/60 pointer-events-none" fill="currentColor" viewBox="0 0 12 12">
+              <path d="M3 4.5L6 7.5L9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+            </svg>
+          </button>
+
+          @if (localityDropdownOpen()) {
+            <!-- backdrop to close on outside click -->
+            <div class="fixed inset-0 z-[40]" (click)="closeLocalityDropdown()"></div>
+            <!-- panel -->
+            <div class="absolute left-0 right-0 top-full mt-1 z-[50] max-h-80 overflow-hidden flex flex-col rounded-md border border-foreground/10 bg-white shadow-lg"
+                 (click)="$event.stopPropagation()">
+              <!-- search -->
+              <div class="p-2 border-b border-foreground/10">
+                <div class="relative">
+                  <svg class="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                  <input type="text" placeholder="Cauta"
+                    [ngModel]="localitySearch()"
+                    (ngModelChange)="localitySearch.set($event)"
+                    class="w-full h-8 pl-8 pr-2 text-sm border border-input rounded outline-none focus-visible:border-ring" />
+                </div>
+              </div>
+              <!-- list -->
+              <div class="overflow-y-auto flex-1">
+                @if (filteredLocalitiesList().length > 0) {
+                  <label class="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer border-b border-foreground/5">
+                    <input type="checkbox" [checked]="isAllLocalitiesSelected()" (change)="toggleAllLocalities()" />
+                    <span class="text-sm font-medium">Selecteaza tot</span>
+                  </label>
+                  @for (loc of filteredLocalitiesList(); track loc) {
+                    <label class="flex items-center gap-2 px-3 py-2 hover:bg-accent cursor-pointer">
+                      <input type="checkbox"
+                        [checked]="selectedLocalitiesList().includes(loc)"
+                        (change)="toggleLocality(loc)" />
+                      <span class="text-sm">{{ loc }}</span>
+                    </label>
+                  }
+                } @else {
+                  <div class="px-3 py-4 text-sm text-muted-foreground text-center">Nicio localitate gasita</div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Date from with label, Inspector only — self-end aligns inputs to row baseline -->
+        <div class="flex flex-col gap-1 lg:col-span-2 self-end">
+          <label class="text-xs font-medium text-muted-foreground leading-none">De la</label>
+          <input type="date"
+            class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            [ngModel]="store.state().dateFrom"
+            (ngModelChange)="onFilterChange('dateFrom', $event)" />
+        </div>
+
+        <!-- Date to with label, Inspector only -->
+        <div class="flex flex-col gap-1 lg:col-span-2 self-end">
+          <label class="text-xs font-medium text-muted-foreground leading-none">Pana la</label>
+          <input type="date"
+            class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+            [ngModel]="store.state().dateTo"
+            (ngModelChange)="onFilterChange('dateTo', $event)" />
+        </div>
+        } @else {
         <!-- Date from -->
         <input type="date"
           class="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 lg:col-span-2"
@@ -97,6 +180,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
           placeholder="Pana la"
           [ngModel]="store.state().dateTo"
           (ngModelChange)="onFilterChange('dateTo', $event)" />
+        }
       </div>
 
       <!-- Bulk action bar -->
@@ -208,6 +292,7 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                           <svg class="h-4 w-4 text-muted-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
                           {{ "action.view" | t }}
                         </a>
+                        @if (!isInspector()) {
                         <a
                           [routerLink]="['/vouchers', voucher.id]"
                           class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -218,41 +303,44 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                           </svg>
                           Print
                         </a>
-                        @if (voucher.status === 'Emis') {
-                          <button
-                            class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
-                            (click)="activateVoucher(voucher); closeMenu()"
-                          >
-                            <svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
-                            {{ "action.activate" | t }}
-                          </button>
                         }
-                        @if (voucher.status === 'Activ') {
-                          <button
-                            class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
-                            (click)="executeVoucher(voucher); closeMenu()"
-                          >
-                            <svg class="h-4 w-4 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
-                            {{ "action.execute" | t }}
-                          </button>
-                        }
-                        @if (voucher.status === 'Executat') {
-                          <button
-                            class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
-                            (click)="reportVoucher(voucher); closeMenu()"
-                          >
-                            <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            {{ "action.report" | t }}
-                          </button>
-                        }
-                        @if (voucher.status === 'Emis' || voucher.status === 'Activ') {
-                          <button
-                            class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none text-destructive hover:bg-destructive/10 transition-colors"
-                            (click)="cancelVoucher(voucher); closeMenu()"
-                          >
-                            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-                            {{ "action.cancel" | t }}
-                          </button>
+                        @if (!isInspector()) {
+                          @if (voucher.status === 'Emis') {
+                            <button
+                              class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
+                              (click)="activateVoucher(voucher); closeMenu()"
+                            >
+                              <svg class="h-4 w-4 text-success" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+                              {{ "action.activate" | t }}
+                            </button>
+                          }
+                          @if (voucher.status === 'Activ') {
+                            <button
+                              class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
+                              (click)="executeVoucher(voucher); closeMenu()"
+                            >
+                              <svg class="h-4 w-4 text-warning" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>
+                              {{ "action.execute" | t }}
+                            </button>
+                          }
+                          @if (voucher.status === 'Executat') {
+                            <button
+                              class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
+                              (click)="reportVoucher(voucher); closeMenu()"
+                            >
+                              <svg class="h-4 w-4 text-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                              {{ "action.report" | t }}
+                            </button>
+                          }
+                          @if (voucher.status === 'Emis' || voucher.status === 'Activ') {
+                            <button
+                              class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none text-destructive hover:bg-destructive/10 transition-colors"
+                              (click)="cancelVoucher(voucher); closeMenu()"
+                            >
+                              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                              {{ "action.cancel" | t }}
+                            </button>
+                          }
                         }
                       </div>
                     }
@@ -330,6 +418,86 @@ export class VoucherListComponent implements OnInit {
   protected readonly store = inject(VoucherStore);
   private readonly voucherDataService = inject(VoucherDataService);
   private readonly router = inject(Router);
+  private readonly auth = inject(AuthStore);
+  protected readonly isInspector = computed(() => this.auth.roleType() === 'Inspector');
+
+  /** Localitati per raion - vizibile in filtrul Localitate (Inspector only). Cateva exemple per raion. */
+  protected readonly localitiesByDistrict: Record<string, string[]> = {
+    Chisinau: ['Chisinau', 'Durlesti', 'Codru', 'Cricova', 'Sangera', 'Ciorescu'],
+    Balti: ['Balti', 'Sadovoe', 'Elizaveta'],
+    Cahul: ['Cahul', 'Slobozia Mare', 'Vulcanesti'],
+    Orhei: ['Orhei', 'Branesti', 'Peresecina', 'Pohrebeni'],
+    Ungheni: ['Ungheni', 'Cornesti', 'Sculeni', 'Petresti'],
+    Soroca: ['Soroca', 'Cosauti', 'Rublenita', 'Vasilcau'],
+  };
+
+  /** Toate localitatile (flat) - sortate alfabetic. Sursa unica de adevar pentru dropdown-ul multi-select. */
+  protected readonly allLocalitiesList = computed(() => {
+    return Object.values(this.localitiesByDistrict).flat().sort((a, b) => a.localeCompare(b));
+  });
+
+  /** Localitatile selectate (parsate din CSV-ul stocat in store.locality). */
+  protected readonly selectedLocalitiesList = computed(() => {
+    const v = this.store.state().locality;
+    return v ? v.split(',').map(s => s.trim()).filter(Boolean) : [];
+  });
+
+  /** Search local in dropdown-ul multi-select (Inspector only). */
+  protected readonly localitySearch = signal('');
+  protected readonly localityDropdownOpen = signal(false);
+
+  /** Localitatile filtrate dupa termenul de cautare. */
+  protected readonly filteredLocalitiesList = computed(() => {
+    const term = this.localitySearch().trim().toLowerCase();
+    const all = this.allLocalitiesList();
+    return term ? all.filter(l => l.toLowerCase().includes(term)) : all;
+  });
+
+  protected readonly isAllLocalitiesSelected = computed(() => {
+    const all = this.filteredLocalitiesList();
+    if (all.length === 0) return false;
+    const selected = this.selectedLocalitiesList();
+    return all.every(l => selected.includes(l));
+  });
+
+  protected toggleLocalityDropdown(): void {
+    this.localityDropdownOpen.update(v => !v);
+    if (!this.localityDropdownOpen()) {
+      this.localitySearch.set('');
+    }
+  }
+
+  protected closeLocalityDropdown(): void {
+    this.localityDropdownOpen.set(false);
+    this.localitySearch.set('');
+  }
+
+  protected toggleLocality(loc: string): void {
+    const current = this.selectedLocalitiesList();
+    const next = current.includes(loc)
+      ? current.filter(l => l !== loc)
+      : [...current, loc];
+    this.applyLocalitiesFilter(next);
+  }
+
+  protected toggleAllLocalities(): void {
+    const filtered = this.filteredLocalitiesList();
+    const allSelected = this.isAllLocalitiesSelected();
+    if (allSelected) {
+      // remove the visible filtered ones from selection
+      const next = this.selectedLocalitiesList().filter(l => !filtered.includes(l));
+      this.applyLocalitiesFilter(next);
+    } else {
+      // add all visible filtered ones to selection (deduplicated)
+      const merged = Array.from(new Set([...this.selectedLocalitiesList(), ...filtered]));
+      this.applyLocalitiesFilter(merged);
+    }
+  }
+
+  private applyLocalitiesFilter(localities: string[]): void {
+    this.store.setQuery({ locality: localities.join(','), offset: 0 });
+    this.loadVouchers();
+  }
 
   protected readonly vouchers = signal<VoucherTableItem[]>([]);
   protected readonly totalCount = signal(0);
