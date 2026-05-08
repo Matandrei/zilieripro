@@ -250,6 +250,11 @@ import { AuthStore } from '../../../shared/auth/auth.store';
             <h3 class="text-lg font-semibold mb-4 text-gray-900">{{ 'voucher.detail.cancelModal' | t }}</h3>
             <div class="space-y-4">
               <div>
+                <label class="block text-sm font-medium mb-1">Data anularii <span class="text-destructive">*</span></label>
+                <input type="date" [(ngModel)]="cancelDate"
+                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+              </div>
+              <div>
                 <label class="block text-sm font-medium mb-1">Motiv anulare <span class="text-destructive">*</span></label>
                 <select [(ngModel)]="cancelReasonCode"
                   class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm">
@@ -258,11 +263,6 @@ import { AuthStore } from '../../../shared/auth/auth.store';
                     <option [value]="r.code">{{ r.titleRo }}</option>
                   }
                 </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium mb-1">Data anularii <span class="text-destructive">*</span></label>
-                <input type="date" [(ngModel)]="cancelDate"
-                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
               </div>
               <div>
                 <label class="block text-sm font-medium mb-1">Comentarii</label>
