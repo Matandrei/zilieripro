@@ -1,5 +1,6 @@
 using Ezilier.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Ezilier.Application.Interfaces;
 
@@ -17,4 +18,5 @@ public interface IDataContext
     DbSet<SystemParameter> SystemParameters { get; }
     DbSet<AuditLog> AuditLogs { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default);
 }

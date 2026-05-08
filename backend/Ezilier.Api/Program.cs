@@ -9,6 +9,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using QuestPDF.Infrastructure;
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +68,7 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddSingleton<ITaxCalculationService, TaxCalculationService>();
 builder.Services.AddScoped<IRspVerificationService, MockRspVerificationService>();
 builder.Services.AddScoped<IRsudService, MockRsudService>();
+builder.Services.AddScoped<IIpc21PdfGenerator, Ipc21PdfGenerator>();
 
 // ── Controllers & JSON ──
 builder.Services.AddControllers()

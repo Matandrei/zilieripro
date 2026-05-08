@@ -62,6 +62,7 @@ public class GetWorkersQueryHandler(
                 RspValidated = w.RspValidated,
                 RspValidatedAt = w.RspValidatedAt,
                 RspErrorMessage = w.RspErrorMessage,
+                IsActive = w.IsActive,
                 VoucherCount = w.Vouchers.Count,
                 CreatedAt = w.CreatedAt
             })

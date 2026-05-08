@@ -6,20 +6,18 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Ezilier.Application.Handlers.Workers;
 
-public record UpdateWorkerCommand(
+public record UpdateWorkerStatusCommand(
     Guid Id,
-    UpdateWorkerRequest Request
+    bool IsActive
 ) : IRequest<(WorkerModel? Model, ValidationResult? ValidationResult, int StatusCode)>;
 
-public class UpdateWorkerCommandHandler(
+public class UpdateWorkerStatusCommandHandler(
     IDataContext context
-) : IRequestHandler<UpdateWorkerCommand, (WorkerModel? Model, ValidationResult? ValidationResult, int StatusCode)>
+) : IRequestHandler<UpdateWorkerStatusCommand, (WorkerModel? Model, ValidationResult? ValidationResult, int StatusCode)>
 {
     public async Task<(WorkerModel? Model, ValidationResult? ValidationResult, int StatusCode)> Handle(
-        UpdateWorkerCommand command, CancellationToken cancellationToken)
+        UpdateWorkerStatusCommand command, CancellationToken cancellationToken)
     {
-        var request = command.Request;
-
         var worker = await context.Workers
             .Include(w => w.Vouchers)
             .FirstOrDefaultAsync(w => w.Id == command.Id && !w.IsDeleted, cancellationToken);
@@ -30,19 +28,12 @@ public class UpdateWorkerCommandHandler(
                 [new ValidationFailure("Id", "Lucratorul nu a fost gasit.")]), 404);
         }
 
-        if (request.Phone is not null)
+        if (worker.IsActive != command.IsActive)
         {
-            worker.Phone = request.Phone;
+            worker.IsActive = command.IsActive;
+            worker.UpdatedAt = DateTimeOffset.UtcNow;
+            await context.SaveChangesAsync(cancellationToken);
         }
-
-        if (request.Email is not null)
-        {
-            worker.Email = request.Email;
-        }
-
-        worker.UpdatedAt = DateTimeOffset.UtcNow;
-
-        await context.SaveChangesAsync(cancellationToken);
 
         var model = new WorkerModel
         {

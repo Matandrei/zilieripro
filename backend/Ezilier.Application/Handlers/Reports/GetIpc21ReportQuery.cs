@@ -1,3 +1,4 @@
+using Ezilier.Application.Constants;
 using Ezilier.Application.Interfaces;
 using Ezilier.Application.Models;
 using Ezilier.Domain.Enums;
@@ -38,14 +39,14 @@ public class GetIpc21ReportQueryHandler(
                 [new ValidationFailure("BeneficiaryId", "Beneficiarul nu a fost gasit.")]), 404);
         }
 
-        // Get all reported vouchers for the period grouped by worker
+        // Vouchere incluse in raport: doar Executat sau Raportat (US-4 AC3)
         var vouchers = await context.Vouchers
             .AsNoTracking()
             .Include(v => v.Worker)
             .Where(v => v.BeneficiaryId == query.BeneficiaryId
                 && v.WorkDate >= periodStart
                 && v.WorkDate <= periodEnd
-                && v.Status != VoucherStatus.Anulat)
+                && (v.Status == VoucherStatus.Executat || v.Status == VoucherStatus.Raportat))
             .ToListAsync(cancellationToken);
 
         var lines = vouchers
@@ -53,6 +54,8 @@ public class GetIpc21ReportQueryHandler(
             .Select(g =>
             {
                 var worker = g.First().Worker;
+                var grossSum = g.Sum(v => v.GrossRemuneration);
+                var cnasSum = g.Sum(v => v.CnasContribution);
                 return new Ipc21LineItem
                 {
                     WorkerIdnp = worker.Idnp,
@@ -61,16 +64,33 @@ public class GetIpc21ReportQueryHandler(
                     TotalHours = g.Sum(v => v.HoursWorked),
                     NetRemuneration = g.Sum(v => v.NetRemuneration),
                     IncomeTax = g.Sum(v => v.IncomeTax),
-                    CnasContribution = g.Sum(v => v.CnasContribution),
-                    GrossRemuneration = g.Sum(v => v.GrossRemuneration)
+                    CnasContribution = cnasSum,
+                    GrossRemuneration = grossSum,
+                    Cpas = null,
+                    InsuredPersonCategoryCode = Ipc21Constants.INSURED_CATEGORY_CODE,
+                    InsuredPersonCategoryDescription = Ipc21Constants.INSURED_CATEGORY_DESCRIPTION,
+                    ContributionRate = Ipc21Constants.CONTRIBUTION_RATE,
+                    FunctionCode = Ipc21Constants.FUNCTION_CODE,
+                    FunctionDescription = Ipc21Constants.FUNCTION_DESCRIPTION,
+                    ContributionBase = grossSum,
+                    TemporaryIncapacityIndemnity = Ipc21Constants.INDEMNITY_DEFAULT,
+                    CalculatedContribution = cnasSum
                 };
             })
             .OrderBy(l => l.WorkerFullName)
             .ToList();
 
+        var hasVouchers = vouchers.Count > 0;
+        var reportPeriodStart = hasVouchers ? vouchers.Min(v => v.WorkDate) : periodStart;
+        var reportPeriodEnd = hasVouchers ? vouchers.Max(v => v.WorkDate) : periodEnd;
+        var executatCount = vouchers.Count(v => v.Status == VoucherStatus.Executat);
+        var raportatCount = vouchers.Count(v => v.Status == VoucherStatus.Raportat);
+
         var report = new Ipc21ReportModel
         {
             Period = query.Period,
+            PeriodStart = reportPeriodStart,
+            PeriodEnd = reportPeriodEnd,
             Beneficiary = new BeneficiaryModel
             {
                 Id = beneficiary.Id,
@@ -86,6 +106,8 @@ public class GetIpc21ReportQueryHandler(
                 CreatedAt = beneficiary.CreatedAt
             },
             TotalVouchers = lines.Sum(l => l.VoucherCount),
+            ExecutatCount = executatCount,
+            RaportatCount = raportatCount,
             TotalNetRemuneration = lines.Sum(l => l.NetRemuneration),
             TotalIncomeTax = lines.Sum(l => l.IncomeTax),
             TotalCnasContribution = lines.Sum(l => l.CnasContribution),

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { UpperCasePipe } from '@angular/common';
@@ -8,6 +8,7 @@ import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
 import { SignaturePadComponent } from '../../../shared/ui/components/signature-pad.component';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
+import { AuthStore } from '../../../shared/auth/auth.store';
 
 @Component({
   selector: 'app-voucher-detail',
@@ -22,7 +23,7 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
            class="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors">
           &larr; {{ 'worker.profile.back' | t }}
         </a>
-        @if (voucher()) {
+        @if (voucher() && !isInspector()) {
           <div class="flex items-center gap-2">
             @if (voucher()!.status === 'Activ' || voucher()!.status === 'Executat') {
               <button type="button" (click)="showSignModal.set(true)"
@@ -266,6 +267,9 @@ export class VoucherDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly voucherDataService = inject(VoucherDataService);
   private readonly api = inject(ApiService);
+  private readonly authStore = inject(AuthStore);
+
+  protected readonly isInspector = computed(() => this.authStore.roleType() === 'Inspector');
 
   protected readonly voucher = signal<VoucherDetail | null>(null);
   protected readonly loading = signal(true);

@@ -13,6 +13,8 @@ public class Worker : EntityBase
     public DateTimeOffset? RspValidatedAt { get; set; }
     public string? RspErrorMessage { get; set; }
 
+    public bool IsActive { get; set; } = true;
+
     public Guid BeneficiaryId { get; set; }
     public virtual Beneficiary Beneficiary { get; set; } = null!;
     public virtual IList<Voucher> Vouchers { get; set; } = [];

@@ -29,4 +29,19 @@ public class WorkersController : BaseApiController
         var (model, errors, status) = await Mediator.Send(new UpdateWorkerCommand(id, request));
         return StatusCode(status, errors is not null ? errors : model);
     }
+
+    [HttpPatch("{id:guid}/status")]
+    public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateWorkerStatusRequest request)
+    {
+        var (model, errors, status) = await Mediator.Send(new UpdateWorkerStatusCommand(id, request.IsActive));
+        return StatusCode(status, errors is not null ? errors : model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create([FromBody] CreateWorkerRequest request)
+    {
+        var beneficiaryId = CurrentBeneficiaryId ?? Guid.Empty;
+        var (model, errors, status) = await Mediator.Send(new CreateWorkerCommand(request, beneficiaryId));
+        return StatusCode(status, errors is not null ? errors : model);
+    }
 }

@@ -8,7 +8,7 @@ type Dict = Record<string, string>;
 
 const RO: Dict = {
   // Navigation
-  'nav.vouchers': 'Vouchere', 'nav.workers': 'Lucratori', 'nav.reports': 'Rapoarte',
+  'nav.vouchers': 'Registru', 'nav.workers': 'Lucratori', 'nav.reports': 'Rapoarte',
   'nav.ipc21': 'IPC-21', 'nav.company': 'Profil companie', 'nav.dashboard': 'Dashboard',
   'nav.users': 'Utilizatori', 'nav.params': 'Parametri sistem',
   'nav.nomenclators': 'Nomenclatoare', 'nav.audit': 'Audit trail',
@@ -57,7 +57,7 @@ const RO: Dict = {
   'field.vouchersCreated': 'Vouchere create',
 
   // Voucher list page
-  'voucher.list.title': 'Vouchere',
+  'voucher.list.title': 'Registru de evidenta a zilierilor',
   'voucher.list.searchPlaceholder': 'Cauta dupa Cod, IDNP, Lucrator',
   'voucher.list.createBtn': 'Creare voucher',
   'voucher.list.registerBtn': 'Registrul zilnic',
@@ -116,6 +116,7 @@ const RO: Dict = {
 
   // Workers
   'worker.list.title': 'Lucratori',
+  'worker.list.create': 'Adauga lucrator',
   'worker.profile.history': 'Istoric vouchere',
   'worker.profile.rspDate': 'Data validarii RSP',
   'worker.profile.vouchersCount': 'Numar vouchere',
@@ -206,7 +207,7 @@ const RO: Dict = {
 };
 
 const RU: Dict = {
-  'nav.vouchers': 'Ваучеры', 'nav.workers': 'Работники', 'nav.reports': 'Отчеты',
+  'nav.vouchers': 'Реестр', 'nav.workers': 'Работники', 'nav.reports': 'Отчеты',
   'nav.ipc21': 'IPC-21', 'nav.company': 'Профиль компании', 'nav.dashboard': 'Панель',
   'nav.users': 'Пользователи', 'nav.params': 'Параметры системы',
   'nav.nomenclators': 'Номенклатуры', 'nav.audit': 'Журнал аудита',
@@ -250,7 +251,7 @@ const RU: Dict = {
   'field.fullName': 'ФИО', 'field.period': 'Период', 'field.role': 'Роль',
   'field.vouchersCreated': 'Создано ваучеров',
 
-  'voucher.list.title': 'Ваучеры',
+  'voucher.list.title': 'Реестр учёта поденщиков',
   'voucher.list.searchPlaceholder': 'Поиск по коду, IDNP, работнику',
   'voucher.list.createBtn': 'Создать ваучер',
   'voucher.list.registerBtn': 'Дневной журнал',
@@ -305,6 +306,7 @@ const RU: Dict = {
   'receipt.printPdf': 'Печать / Сохранить PDF',
 
   'worker.list.title': 'Работники',
+  'worker.list.create': 'Добавить работника',
   'worker.profile.history': 'История ваучеров',
   'worker.profile.rspDate': 'Дата проверки RSP',
   'worker.profile.vouchersCount': 'Количество ваучеров',
@@ -388,7 +390,7 @@ const RU: Dict = {
 };
 
 const EN: Dict = {
-  'nav.vouchers': 'Vouchers', 'nav.workers': 'Workers', 'nav.reports': 'Reports',
+  'nav.vouchers': 'Register', 'nav.workers': 'Workers', 'nav.reports': 'Reports',
   'nav.ipc21': 'IPC-21', 'nav.company': 'Company profile', 'nav.dashboard': 'Dashboard',
   'nav.users': 'Users', 'nav.params': 'System parameters',
   'nav.nomenclators': 'Nomenclatures', 'nav.audit': 'Audit trail',
@@ -432,7 +434,7 @@ const EN: Dict = {
   'field.fullName': 'Full name', 'field.period': 'Period', 'field.role': 'Role',
   'field.vouchersCreated': 'Vouchers created',
 
-  'voucher.list.title': 'Vouchers',
+  'voucher.list.title': 'Day workers register',
   'voucher.list.searchPlaceholder': 'Search by Code, IDNP, Worker',
   'voucher.list.createBtn': 'Create voucher',
   'voucher.list.registerBtn': 'Daily register',
@@ -487,6 +489,7 @@ const EN: Dict = {
   'receipt.printPdf': 'Print / Save PDF',
 
   'worker.list.title': 'Workers',
+  'worker.list.create': 'Add worker',
   'worker.profile.history': 'Voucher history',
   'worker.profile.rspDate': 'RSP validation date',
   'worker.profile.vouchersCount': 'Voucher count',

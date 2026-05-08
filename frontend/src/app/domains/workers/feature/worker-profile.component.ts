@@ -1,14 +1,17 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
 import { WorkerDataService } from '../data/worker-data.service';
 import { VoucherTableItem, WorkerModel } from '../../../shared/models/voucher.model';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
+import { AuthStore } from '../../../shared/auth/auth.store';
+import { WorkerEditComponent } from './worker-edit.component';
+import { ConfirmDialogComponent } from '../../../shared/ui/confirm-dialog.component';
 
 @Component({
   selector: 'app-worker-profile',
   standalone: true,
-  imports: [RouterLink, StatusBadgeComponent, TranslatePipe],
+  imports: [RouterLink, StatusBadgeComponent, TranslatePipe, WorkerEditComponent, ConfirmDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
@@ -34,7 +37,35 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
       @if (worker(); as w) {
         <!-- Worker details card -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
-          <h1 class="text-3xl font-bold tracking-tight text-foreground mb-6">{{ w.lastName }} {{ w.firstName }}</h1>
+          <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4 mb-6">
+            <div class="flex flex-wrap items-center gap-3">
+              <h1 class="text-3xl font-bold tracking-tight text-foreground">{{ w.lastName }} {{ w.firstName }}</h1>
+              <span class="inline-flex items-center gap-1.5 rounded-full border border-foreground/10 px-2.5 py-0.5 text-xs font-medium">
+                <span class="inline-block size-2 rounded-full"
+                  [class.bg-success]="w.isActive"
+                  [class.bg-muted-foreground]="!w.isActive"></span>
+                {{ w.isActive ? 'Activ' : 'Inactiv' }}
+              </span>
+            </div>
+            @if (!isInspector()) {
+              <div class="flex items-center gap-2">
+                <button type="button" (click)="onEdit()"
+                  class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h11a2 2 0 0 0 2-2v-5m-1.414-9.414a2 2 0 1 1 2.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Editare
+                </button>
+                <button type="button" (click)="onToggleStart()"
+                  [class]="'inline-flex h-9 items-center justify-center gap-2 rounded-md px-4 text-sm font-medium transition-colors ' + (w.isActive ? 'border border-destructive/30 text-destructive hover:bg-destructive/10' : 'border border-success/30 text-success hover:bg-success/10')">
+                  <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.69 14a6.9 6.9 0 0 0 .31-2V5l-8-3-3.16 1.18M4.73 4.73 4 5v7c0 6 8 10 8 10a20.29 20.29 0 0 0 5.62-4.38M1 1l22 22" />
+                  </svg>
+                  {{ w.isActive ? 'Dezactivare' : 'Activare' }}
+                </button>
+              </div>
+            }
+          </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8">
             <div>
               <dt class="text-sm text-muted-foreground">{{ "field.idnp" | t }}</dt>
@@ -141,6 +172,29 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
             </table>
           </div>
         </div>
+
+        @if (editing()) {
+          <app-worker-edit [worker]="w" (closed)="onEditClosed()" (saved)="onEditSaved($event)" />
+        }
+
+        @if (toggling()) {
+          <app-confirm-dialog
+            [title]="w.isActive ? 'Dezactivare lucrator' : 'Activare lucrator'"
+            [message]="w.isActive
+              ? 'Sigur dezactivati lucratorul ' + w.lastName + ' ' + w.firstName + '? Nu se vor mai putea emite voucher-e noi.'
+              : 'Sigur activati lucratorul ' + w.lastName + ' ' + w.firstName + '?'"
+            [confirmText]="w.isActive ? 'Dezactiveaza' : 'Activeaza'"
+            [confirmVariant]="w.isActive ? 'destructive' : 'primary'"
+            [submitting]="togglingSubmitting()"
+            (confirmed)="onToggleConfirmed()"
+            (cancelled)="onToggleCancelled()" />
+        }
+      }
+
+      @if (toastMessage(); as msg) {
+        <div class="fixed bottom-6 right-6 z-[300] rounded-md bg-foreground text-background px-4 py-2 text-sm shadow-lg">
+          {{ msg }}
+        </div>
       }
     </div>
   `,
@@ -148,10 +202,70 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 export class WorkerProfileComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly workerDataService = inject(WorkerDataService);
+  private readonly auth = inject(AuthStore);
 
   protected readonly worker = signal<WorkerModel | null>(null);
   protected readonly vouchers = signal<VoucherTableItem[]>([]);
   protected readonly loading = signal(false);
+  protected readonly isInspector = computed(() => this.auth.roleType() === 'Inspector');
+
+  protected readonly editing = signal<boolean>(false);
+  protected readonly toggling = signal<boolean>(false);
+  protected readonly togglingSubmitting = signal<boolean>(false);
+  protected readonly toastMessage = signal<string>('');
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
+
+  protected onEdit(): void {
+    this.editing.set(true);
+  }
+
+  protected onEditClosed(): void {
+    this.editing.set(false);
+  }
+
+  protected onEditSaved(updated: WorkerModel): void {
+    this.editing.set(false);
+    this.worker.set(updated);
+    this.flashToast('Lucrator actualizat');
+  }
+
+  protected onToggleStart(): void {
+    this.toggling.set(true);
+  }
+
+  protected onToggleCancelled(): void {
+    if (this.togglingSubmitting()) return;
+    this.toggling.set(false);
+  }
+
+  protected onToggleConfirmed(): void {
+    const w = this.worker();
+    if (!w) return;
+    this.togglingSubmitting.set(true);
+    const nextActive = !w.isActive;
+    this.workerDataService.updateStatus(w.id, nextActive).subscribe({
+      next: (updated) => {
+        this.togglingSubmitting.set(false);
+        this.toggling.set(false);
+        this.worker.set(updated);
+        this.flashToast(nextActive ? 'Lucrator activat' : 'Lucrator dezactivat');
+      },
+      error: () => {
+        this.togglingSubmitting.set(false);
+        this.toggling.set(false);
+        this.flashToast('Eroare la actualizarea statutului.');
+      },
+    });
+  }
+
+  private flashToast(msg: string): void {
+    this.toastMessage.set(msg);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
+      this.toastMessage.set('');
+      this.toastTimer = null;
+    }, 3000);
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

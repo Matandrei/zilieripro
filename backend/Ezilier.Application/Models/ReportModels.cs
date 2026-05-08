@@ -8,11 +8,21 @@ public record Ipc21ReportRequest
     public Guid BeneficiaryId { get; init; }
 }
 
+public record ExportIpc21Request
+{
+    public string Period { get; init; } = string.Empty;
+    public Guid? BeneficiaryId { get; init; }
+}
+
 public record Ipc21ReportModel
 {
     public string Period { get; init; } = string.Empty;
+    public DateOnly PeriodStart { get; init; }
+    public DateOnly PeriodEnd { get; init; }
     public BeneficiaryModel Beneficiary { get; init; } = null!;
     public int TotalVouchers { get; init; }
+    public int ExecutatCount { get; init; }
+    public int RaportatCount { get; init; }
     public decimal TotalNetRemuneration { get; init; }
     public decimal TotalIncomeTax { get; init; }
     public decimal TotalCnasContribution { get; init; }
@@ -30,6 +40,16 @@ public record Ipc21LineItem
     public decimal IncomeTax { get; init; }
     public decimal CnasContribution { get; init; }
     public decimal GrossRemuneration { get; init; }
+
+    public string? Cpas { get; init; }
+    public string InsuredPersonCategoryCode { get; init; } = string.Empty;
+    public string InsuredPersonCategoryDescription { get; init; } = string.Empty;
+    public string ContributionRate { get; init; } = string.Empty;
+    public string FunctionCode { get; init; } = string.Empty;
+    public string FunctionDescription { get; init; } = string.Empty;
+    public decimal ContributionBase { get; init; }
+    public decimal TemporaryIncapacityIndemnity { get; init; }
+    public decimal CalculatedContribution { get; init; }
 }
 
 public record StatisticsQueryParams

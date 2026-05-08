@@ -15,6 +15,7 @@ public class WorkerConfiguration : IEntityTypeConfiguration<Worker>
         builder.Property(x => x.Phone).HasMaxLength(20);
         builder.Property(x => x.Email).HasMaxLength(254);
         builder.Property(x => x.RspErrorMessage).HasMaxLength(500);
+        builder.Property(x => x.IsActive).HasDefaultValue(true);
 
         builder.HasIndex(x => x.Idnp);
         builder.HasIndex(x => new { x.Idnp, x.BeneficiaryId }).IsUnique()
