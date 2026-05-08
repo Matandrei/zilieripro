@@ -137,6 +137,9 @@ using (var scope = app.Services.CreateScope())
         "ALTER TABLE Vouchers ADD COLUMN SignatureDataUrl TEXT NULL",
         "ALTER TABLE Vouchers ADD COLUMN SignedAt TEXT NULL",
         "ALTER TABLE Vouchers ADD COLUMN ActivityType TEXT NULL",
+        "ALTER TABLE Vouchers ADD COLUMN ReportedAt TEXT NULL",
+        "ALTER TABLE Workers ADD COLUMN IsActive INTEGER NOT NULL DEFAULT 1",
+        "ALTER TABLE Workers ADD COLUMN Email TEXT NULL",
     })
     {
         try { db.Database.ExecuteSqlRaw(sql); }
