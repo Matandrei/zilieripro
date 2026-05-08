@@ -2,6 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { ApiService } from '../../../shared/services/api.service';
 import {
+  CreateWorkerRequest,
   PaginatedResult,
   VoucherTableItem,
   WorkerModel,
@@ -21,5 +22,17 @@ export class WorkerDataService {
 
   getWorkerVouchers(workerId: string): Observable<PaginatedResult<VoucherTableItem>> {
     return this.api.getVouchers({ workerId });
+  }
+
+  createWorker(request: CreateWorkerRequest): Observable<WorkerModel> {
+    return this.api.createWorker(request);
+  }
+
+  updateWorker(id: string, request: { phone: string | null; email: string | null }): Observable<WorkerModel> {
+    return this.api.updateWorker(id, request);
+  }
+
+  updateStatus(id: string, isActive: boolean): Observable<WorkerModel> {
+    return this.api.updateWorkerStatus(id, isActive);
   }
 }

@@ -1,5 +1,7 @@
+using System.Text.RegularExpressions;
 using Ezilier.Application.Handlers.Reports;
 using Ezilier.Application.Models;
+using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -13,6 +15,72 @@ public class ReportsController : BaseApiController
     {
         var (model, errors, status) = await Mediator.Send(new GetIpc21ReportQuery(beneficiaryId, period));
         return StatusCode(status, errors is not null ? errors : model);
+    }
+
+    [HttpPost("ipc21/export")]
+    public async Task<IActionResult> ExportIpc21([FromBody] ExportIpc21Request request)
+    {
+        // Period format + window validation (yyyy-MM, not in future, not older than 24 months).
+        if (string.IsNullOrWhiteSpace(request.Period) ||
+            !Regex.IsMatch(request.Period, @"^\d{4}-\d{2}$") ||
+            !DateOnly.TryParseExact(request.Period + "-01", "yyyy-MM-dd", out var periodFirstDay))
+        {
+            return StatusCode(400, new ValidationResult(
+                [new ValidationFailure("Period", "Formatul perioadei este invalid. Folositi yyyy-MM.")]));
+        }
+
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var currentMonthFirstDay = new DateOnly(today.Year, today.Month, 1);
+        if (periodFirstDay > currentMonthFirstDay)
+        {
+            return StatusCode(400, new ValidationResult(
+                [new ValidationFailure("Period", "Perioada nu poate fi in viitor.")]));
+        }
+
+        var oldestAllowed = currentMonthFirstDay.AddMonths(-24);
+        if (periodFirstDay < oldestAllowed)
+        {
+            return StatusCode(400, new ValidationResult(
+                [new ValidationFailure("Period", "Perioada este prea veche (limita: 24 luni).")]));
+        }
+
+        // Permissions: Inspector / Zilier -> 403; Administrator -> request body; Angajator -> own beneficiary.
+        var role = (CurrentRole ?? string.Empty).Trim();
+        if (string.Equals(role, "inspector", StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(role, "zilier", StringComparison.OrdinalIgnoreCase))
+        {
+            return Forbid();
+        }
+
+        Guid beneficiaryId;
+        if (string.Equals(role, "administrator", StringComparison.OrdinalIgnoreCase))
+        {
+            if (!request.BeneficiaryId.HasValue || request.BeneficiaryId.Value == Guid.Empty)
+            {
+                return StatusCode(400, new ValidationResult(
+                    [new ValidationFailure("BeneficiaryId", "BeneficiaryId este obligatoriu pentru administrator.")]));
+            }
+            beneficiaryId = request.BeneficiaryId.Value;
+        }
+        else
+        {
+            beneficiaryId = CurrentBeneficiaryId ?? Guid.Empty;
+            if (beneficiaryId == Guid.Empty)
+            {
+                return StatusCode(400, new ValidationResult(
+                    [new ValidationFailure("BeneficiaryId", "Beneficiar lipseste in contextul cererii.")]));
+            }
+        }
+
+        var (pdf, fileName, errors, status) = await Mediator.Send(
+            new ExportIpc21PdfCommand(beneficiaryId, request.Period));
+
+        if (status != 200 || pdf is null)
+        {
+            return StatusCode(status, errors);
+        }
+
+        return File(pdf, "application/pdf", fileName);
     }
 
     [HttpGet("statistics")]

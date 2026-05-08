@@ -12,6 +12,7 @@ public record WorkerModel
     public bool RspValidated { get; init; }
     public DateTimeOffset? RspValidatedAt { get; init; }
     public string? RspErrorMessage { get; init; }
+    public bool IsActive { get; init; } = true;
     public int VoucherCount { get; init; }
     public DateTimeOffset CreatedAt { get; init; }
 }
@@ -30,6 +31,11 @@ public record UpdateWorkerRequest
 {
     public string? Phone { get; init; }
     public string? Email { get; init; }
+}
+
+public record UpdateWorkerStatusRequest
+{
+    public bool IsActive { get; init; }
 }
 
 public record RspVerificationResult

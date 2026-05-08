@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, HostListener, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
@@ -35,6 +35,13 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
             </svg>
             {{ 'voucher.list.registerBtn' | t }}
           </button>
+          <a routerLink="/reports/ipc21"
+            class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-accent hover:text-accent-foreground">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/>
+            </svg>
+            IPC 21
+          </a>
           <a routerLink="/vouchers/create"
             class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90">
             <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
@@ -276,14 +283,16 @@ import { PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../share
                   <div class="relative">
                     <button
                       class="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground transition-colors"
-                      (click)="toggleMenu(voucher.id)"
+                      (click)="toggleMenu(voucher.id, $event.currentTarget)"
                     >
                       <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                         <path d="M10 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4zm0 6a2 2 0 110-4 2 2 0 010 4z" />
                       </svg>
                     </button>
-                    @if (openMenuId() === voucher.id) {
-                      <div class="absolute right-0 top-full mt-1 z-[100] min-w-[180px] rounded-md border border-foreground/10 bg-white p-1 text-foreground shadow-lg">
+                    @if (openMenuId() === voucher.id && menuPosition(); as pos) {
+                      <div class="fixed z-[100] min-w-[180px] rounded-md border border-foreground/10 bg-white p-1 text-foreground shadow-lg"
+                        [style.top.px]="pos.top"
+                        [style.left.px]="pos.left">
                         <a
                           [routerLink]="['/vouchers', voucher.id]"
                           class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none hover:bg-accent hover:text-accent-foreground transition-colors"
@@ -503,6 +512,7 @@ export class VoucherListComponent implements OnInit {
   protected readonly totalCount = signal(0);
   protected readonly loading = signal(false);
   protected readonly openMenuId = signal('');
+  protected readonly menuPosition = signal<{ top: number; left: number } | null>(null);
 
   // Bulk selection
   protected readonly selected = signal<Set<string>>(new Set<string>());
@@ -630,12 +640,35 @@ export class VoucherListComponent implements OnInit {
     this.loadVouchers();
   }
 
-  protected toggleMenu(id: string): void {
-    this.openMenuId.set(this.openMenuId() === id ? '' : id);
+  protected toggleMenu(id: string, trigger?: EventTarget | null): void {
+    if (this.openMenuId() === id) {
+      this.closeMenu();
+      return;
+    }
+    if (!(trigger instanceof HTMLElement)) {
+      this.openMenuId.set(id);
+      return;
+    }
+    const rect = trigger.getBoundingClientRect();
+    const popoverWidth = 200;
+    const popoverHeight = 220;
+    const flipUp = window.innerHeight - rect.bottom < popoverHeight + 8;
+    const top = flipUp ? rect.top - popoverHeight - 4 : rect.bottom + 4;
+    const left = Math.max(8, rect.right - popoverWidth);
+    this.menuPosition.set({ top, left });
+    this.openMenuId.set(id);
   }
 
   protected closeMenu(): void {
-    this.openMenuId.set('');
+    if (this.openMenuId() !== '') {
+      this.openMenuId.set('');
+      this.menuPosition.set(null);
+    }
+  }
+
+  @HostListener('window:scroll')
+  protected onWindowScroll(): void {
+    this.closeMenu();
   }
 
   protected statusDotColor(status: string): string {

@@ -1,6 +1,7 @@
 using Ezilier.Application.Interfaces;
 using Ezilier.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Ezilier.Infrastructure.Persistence;
 
@@ -54,6 +55,9 @@ public class DataContext : DbContext, IDataContext
         UpdateTimestamps();
         return base.SaveChangesAsync(cancellationToken);
     }
+
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken = default)
+        => Database.BeginTransactionAsync(cancellationToken);
 
     private void UpdateTimestamps()
     {

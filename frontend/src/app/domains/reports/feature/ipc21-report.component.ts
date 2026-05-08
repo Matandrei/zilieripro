@@ -1,10 +1,11 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DecimalPipe } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { AuthStore } from '../../../shared/auth/auth.store';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
+import { ConfirmDialogComponent } from '../../../shared/ui/confirm-dialog.component';
 
 export interface Ipc21Line {
   workerIdnp: string;
@@ -20,7 +21,12 @@ export interface Ipc21Line {
 
 export interface Ipc21Report {
   period: string;
+  periodStart: string;
+  periodEnd: string;
   beneficiaryName: string;
+  totalVouchers: number;
+  executatCount: number;
+  raportatCount: number;
   lines: Ipc21Line[];
   totals: {
     totalNet: number;
@@ -30,10 +36,20 @@ export interface Ipc21Report {
   };
 }
 
+interface PeriodOption {
+  value: string;
+  label: string;
+}
+
+const RO_MONTHS = [
+  'ianuarie', 'februarie', 'martie', 'aprilie', 'mai', 'iunie',
+  'iulie', 'august', 'septembrie', 'octombrie', 'noiembrie', 'decembrie',
+];
+
 @Component({
   selector: 'app-ipc21-report',
   standalone: true,
-  imports: [FormsModule, RouterLink, DecimalPipe, TranslatePipe],
+  imports: [FormsModule, RouterLink, DecimalPipe, TranslatePipe, ConfirmDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
@@ -50,15 +66,25 @@ export interface Ipc21Report {
         <div class="w-full md:mr-4 md:w-auto">
           <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">{{ 'reports.ipc21.title' | t }}</h1>
         </div>
-        <div class="w-full md:ml-auto md:w-auto">
-          <button
-            class="inline-flex h-9 w-full justify-center md:w-auto md:justify-start shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
-            [disabled]="!report()"
-            (click)="exportReport()"
-          >
-            {{ 'reports.ipc21.export' | t }}
-          </button>
-        </div>
+        @if (!isInspector()) {
+          <div class="w-full md:ml-auto md:w-auto">
+            <button
+              type="button"
+              class="inline-flex h-9 w-full justify-center md:w-auto md:justify-start shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
+              [disabled]="!report() || downloading()"
+              (click)="onExportClick()"
+            >
+              @if (downloading()) {
+                <svg class="h-4 w-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v4m0 8v4m8-8h-4M8 12H4m13.657-5.657l-2.828 2.828M9.172 14.828l-2.829 2.829m0-11.314l2.829 2.829m5.656 5.656l2.828 2.828" />
+                </svg>
+                Se genereaza...
+              } @else {
+                Descarca PDF
+              }
+            </button>
+          </div>
+        }
       </div>
 
       <!-- Filters -->
@@ -66,30 +92,21 @@ export interface Ipc21Report {
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
           <div class="space-y-2">
             <label class="text-sm font-medium leading-none select-none">{{ 'reports.ipc21.period' | t }}</label>
-            <div class="flex gap-2">
-              <select
-                class="flex-1 flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                [ngModel]="selectedMonth()"
-                (ngModelChange)="selectedMonth.set($event)"
-              >
-                @for (m of months; track m.value) {
-                  <option [value]="m.value">{{ m.label }}</option>
-                }
-              </select>
-              <select
-                class="w-28 flex h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-                [ngModel]="selectedYear()"
-                (ngModelChange)="selectedYear.set($event)"
-              >
-                @for (y of years; track y) {
-                  <option [value]="y">{{ y }}</option>
-                }
-              </select>
-            </div>
+            <select
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              [ngModel]="selectedPeriod()"
+              (ngModelChange)="selectedPeriod.set($event)"
+            >
+              @for (p of periodOptions; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
           </div>
           <div>
             <button
-              class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
+              type="button"
+              class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90 disabled:opacity-50"
+              [disabled]="loading()"
               (click)="loadReport()"
             >
               {{ 'reports.ipc21.generate' | t }}
@@ -168,6 +185,47 @@ export interface Ipc21Report {
             </table>
           </div>
         </div>
+
+        <!-- Counter panel -->
+        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-4 mt-4">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+            <div>
+              <div class="text-muted-foreground">Voucher-e in raport</div>
+              <div class="text-2xl font-semibold">{{ r.totalVouchers }}</div>
+            </div>
+            <div>
+              <div class="text-muted-foreground">Executate (vor fi raportate)</div>
+              <div class="text-2xl font-semibold text-warning">{{ r.executatCount }}</div>
+            </div>
+            <div>
+              <div class="text-muted-foreground">Raportate anterior</div>
+              <div class="text-2xl font-semibold text-muted-foreground">{{ r.raportatCount }}</div>
+            </div>
+          </div>
+          @if (r.executatCount > 0) {
+            <div class="mt-4 p-3 rounded-md bg-warning/10 border border-warning/30 text-sm text-warning-foreground">
+              <strong>La descarcarea PDF, {{ r.executatCount }} voucher-e vor trece in status Raportat.</strong>
+              Aceasta actiune este ireversibila.
+            </div>
+          }
+        </div>
+      }
+
+      @if (showConfirm() && report(); as r) {
+        <app-confirm-dialog
+          [title]="'Confirmare raportare'"
+          [message]="'Confirmati raportarea pentru ' + selectedPeriodLabel() + '? ' + r.executatCount + ' voucher-e vor trece in status Raportat.'"
+          [confirmText]="'Descarca si raporteaza'"
+          [confirmVariant]="'destructive'"
+          [submitting]="downloading()"
+          (confirmed)="onConfirmDownload()"
+          (cancelled)="showConfirm.set(false)" />
+      }
+
+      @if (toastMessage(); as msg) {
+        <div class="fixed bottom-6 right-6 z-[300] rounded-md bg-foreground text-background px-4 py-2 text-sm shadow-lg">
+          {{ msg }}
+        </div>
       }
     </div>
   `,
@@ -176,31 +234,24 @@ export class Ipc21ReportComponent implements OnInit {
   private readonly api = inject(ApiService);
   private readonly authStore = inject(AuthStore);
 
-  protected readonly months = [
-    { value: '01', label: 'Ianuarie' },
-    { value: '02', label: 'Februarie' },
-    { value: '03', label: 'Martie' },
-    { value: '04', label: 'Aprilie' },
-    { value: '05', label: 'Mai' },
-    { value: '06', label: 'Iunie' },
-    { value: '07', label: 'Iulie' },
-    { value: '08', label: 'August' },
-    { value: '09', label: 'Septembrie' },
-    { value: '10', label: 'Octombrie' },
-    { value: '11', label: 'Noiembrie' },
-    { value: '12', label: 'Decembrie' },
-  ];
+  protected readonly isInspector = computed(() => this.authStore.roleType() === 'Inspector');
 
-  protected readonly years = this.generateYears();
+  protected readonly periodOptions: PeriodOption[] = this.buildPeriodOptions();
+  protected readonly selectedPeriod = signal<string>(this.defaultPeriod());
 
-  protected readonly selectedMonth = signal(this.currentMonth());
-  protected readonly selectedYear = signal(String(new Date().getFullYear()));
   protected readonly beneficiaryId = signal('');
   protected readonly loading = signal(false);
+  protected readonly downloading = signal(false);
   protected readonly error = signal('');
   protected readonly report = signal<Ipc21Report | null>(null);
+  protected readonly showConfirm = signal(false);
+  protected readonly toastMessage = signal('');
+  private toastTimer: ReturnType<typeof setTimeout> | null = null;
 
-  protected readonly period = computed(() => `${this.selectedYear()}-${this.selectedMonth()}`);
+  protected readonly selectedPeriodLabel = computed(() => {
+    const p = this.selectedPeriod();
+    return this.periodOptions.find((o) => o.value === p)?.label ?? p;
+  });
 
   ngOnInit(): void {
     const user = this.authStore.user();
@@ -222,7 +273,7 @@ export class Ipc21ReportComponent implements OnInit {
 
     this.api.get<Ipc21Report>('/reports/ipc21', {
       beneficiaryId: bid,
-      period: this.period(),
+      period: this.selectedPeriod(),
     }).subscribe({
       next: (data) => {
         this.report.set(data);
@@ -235,21 +286,118 @@ export class Ipc21ReportComponent implements OnInit {
     });
   }
 
-  protected exportReport(): void {
-    // Placeholder for export functionality
-    alert('Functionalitatea de export va fi disponibila in curand.');
-  }
-
-  private currentMonth(): string {
-    return String(new Date().getMonth() + 1).padStart(2, '0');
-  }
-
-  private generateYears(): string[] {
-    const current = new Date().getFullYear();
-    const result: string[] = [];
-    for (let y = current; y >= current - 5; y--) {
-      result.push(String(y));
+  protected onExportClick(): void {
+    const r = this.report();
+    if (!r) return;
+    if (r.executatCount > 0) {
+      this.showConfirm.set(true);
+    } else {
+      this.downloadPdf();
     }
-    return result;
+  }
+
+  protected onConfirmDownload(): void {
+    this.downloadPdf();
+  }
+
+  private downloadPdf(): void {
+    const period = this.selectedPeriod();
+    this.downloading.set(true);
+    this.api.exportIpc21Pdf(period, this.beneficiaryId() || undefined).subscribe({
+      next: (response) => {
+        const blob = response.body;
+        if (!blob) {
+          this.downloading.set(false);
+          this.showConfirm.set(false);
+          this.flashToast('Raspuns gol de la server.');
+          return;
+        }
+
+        const filename = this.parseFilename(response.headers.get('Content-Disposition'))
+          ?? `IPC21-${period}.pdf`;
+
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+
+        const transitioned = this.report()?.executatCount ?? 0;
+        this.downloading.set(false);
+        this.showConfirm.set(false);
+        this.flashToast(transitioned > 0
+          ? `Raport descarcat. ${transitioned} voucher-e marcate ca Raportat.`
+          : 'Raport descarcat.');
+        this.loadReport();
+      },
+      error: async (err) => {
+        this.downloading.set(false);
+        this.showConfirm.set(false);
+        const msg = await this.extractBlobError(err);
+        this.flashToast(msg ?? 'Eroare la descarcarea raportului.');
+      },
+    });
+  }
+
+  private parseFilename(contentDisposition: string | null): string | null {
+    if (!contentDisposition) return null;
+    const match = /filename\*?=(?:UTF-8'')?"?([^";]+)"?/i.exec(contentDisposition);
+    return match?.[1] ? decodeURIComponent(match[1]) : null;
+  }
+
+  private async extractBlobError(err: { error?: unknown; status?: number }): Promise<string | null> {
+    try {
+      if (err.error instanceof Blob) {
+        const text = await err.error.text();
+        try {
+          const json = JSON.parse(text);
+          const errors = (json as { errors?: Array<{ errorMessage?: string }> }).errors;
+          if (Array.isArray(errors) && errors[0]?.errorMessage) return errors[0].errorMessage;
+          if ((json as { message?: string }).message) return (json as { message: string }).message;
+        } catch {
+          if (text) return text;
+        }
+      }
+    } catch {
+      // Ignore parsing failures.
+    }
+    if (err.status === 403) return 'Nu aveti permisiuni pentru aceasta actiune.';
+    if (err.status === 400) return 'Cerere invalida.';
+    return null;
+  }
+
+  private flashToast(msg: string): void {
+    this.toastMessage.set(msg);
+    if (this.toastTimer) clearTimeout(this.toastTimer);
+    this.toastTimer = setTimeout(() => {
+      this.toastMessage.set('');
+      this.toastTimer = null;
+    }, 3500);
+  }
+
+  private buildPeriodOptions(): PeriodOption[] {
+    const out: PeriodOption[] = [];
+    const today = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1);
+      const monthIdx = d.getMonth();
+      const yyyy = d.getFullYear();
+      const mm = String(monthIdx + 1).padStart(2, '0');
+      const monthName = RO_MONTHS[monthIdx];
+      const label = monthName.charAt(0).toUpperCase() + monthName.slice(1) + ' ' + yyyy;
+      out.push({ value: `${yyyy}-${mm}`, label });
+    }
+    return out;
+  }
+
+  private defaultPeriod(): string {
+    const today = new Date();
+    const d = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${yyyy}-${mm}`;
   }
 }

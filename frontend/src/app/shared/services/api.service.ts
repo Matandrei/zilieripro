@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
   BeneficiaryModel,
   CreateVoucherRequest,
+  CreateWorkerRequest,
   LoginResponse,
   NomenclatorModel,
   PaginatedResult,
@@ -48,6 +49,14 @@ export class ApiService {
 
   delete<T>(path: string): Observable<T> {
     return this.http.delete<T>(`${this.baseUrl}${path}`);
+  }
+
+  // --------------- Reports ---------------
+
+  exportIpc21Pdf(period: string, beneficiaryId?: string): Observable<HttpResponse<Blob>> {
+    return this.http.post(`${this.baseUrl}/reports/ipc21/export`,
+      { period, beneficiaryId },
+      { responseType: 'blob', observe: 'response' });
   }
 
   // --------------- Auth ---------------
@@ -106,6 +115,18 @@ export class ApiService {
 
   validateWorkerRsp(idnp: string): Observable<WorkerModel> {
     return this.post<WorkerModel>('/workers/validate-rsp', { idnp });
+  }
+
+  createWorker(request: CreateWorkerRequest): Observable<WorkerModel> {
+    return this.post<WorkerModel>('/workers', request);
+  }
+
+  updateWorker(id: string, request: { phone: string | null; email: string | null }): Observable<WorkerModel> {
+    return this.put<WorkerModel>(`/workers/${id}`, request);
+  }
+
+  updateWorkerStatus(id: string, isActive: boolean): Observable<WorkerModel> {
+    return this.patch<WorkerModel>(`/workers/${id}/status`, { isActive });
   }
 
   // --------------- Beneficiaries ---------------

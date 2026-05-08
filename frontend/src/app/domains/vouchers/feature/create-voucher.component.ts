@@ -7,6 +7,7 @@ import { ApiService } from '../../../shared/services/api.service';
 import { NomenclatorModel } from '../../../shared/models/voucher.model';
 import { VoucherCreatedSummary, WorkerModel } from '../../../shared/models/voucher.model';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
+import { optionalEmailValidator, optionalPhoneValidator } from '../../../shared/validators/optional-contact.validators';
 
 interface VoucherWorkerRow {
   id: string;
@@ -229,6 +230,28 @@ interface VoucherWorkerRow {
                         <input type="date" formControlName="birthDate" [max]="todayIso"
                           class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
                       </div>
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-muted-foreground">Telefon (optional)</label>
+                        <input type="tel" formControlName="phone" placeholder="+37360123456"
+                          class="flex h-9 w-full rounded-md border bg-white px-3 py-1 text-sm"
+                          [class.border-destructive]="newWorkerForm.controls.phone.invalid && newWorkerForm.controls.phone.touched"
+                          [class.border-input]="!(newWorkerForm.controls.phone.invalid && newWorkerForm.controls.phone.touched)" />
+                        @if (newWorkerForm.controls.phone.touched && newWorkerForm.controls.phone.errors?.['phoneFormat']) {
+                          <p class="text-xs text-destructive">
+                            Format Moldova: +373 urmat de 8 cifre (fara spatii).
+                          </p>
+                        }
+                      </div>
+                      <div class="space-y-1.5">
+                        <label class="text-xs text-muted-foreground">Email (optional)</label>
+                        <input type="email" formControlName="email" placeholder="ion.popescu@example.md"
+                          class="flex h-9 w-full rounded-md border bg-white px-3 py-1 text-sm"
+                          [class.border-destructive]="newWorkerForm.controls.email.invalid && newWorkerForm.controls.email.touched"
+                          [class.border-input]="!(newWorkerForm.controls.email.invalid && newWorkerForm.controls.email.touched)" />
+                        @if (newWorkerForm.controls.email.touched && newWorkerForm.controls.email.errors?.['email']) {
+                          <p class="text-xs text-destructive">Format email invalid (ex: nume&#64;domeniu.md).</p>
+                        }
+                      </div>
                     </div>
                   }
                 </div>
@@ -255,11 +278,11 @@ interface VoucherWorkerRow {
               <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl" (click)="$event.stopPropagation()">
                 <div class="p-6 pb-4 border-b border-foreground/10">
                   <h3 class="text-lg font-semibold">{{ 'voucher.create.importWorkers' | t }}</h3>
-                  <p class="text-sm text-muted-foreground">Fiecare linie trebuie sa contina: <span class="font-mono">Nume,Prenume,IDNP</span></p>
+                  <p class="text-sm text-muted-foreground">Fiecare linie: <span class="font-mono">Nume,Prenume,IDNP[,Telefon,Email]</span> &mdash; telefon si email sunt optionale.</p>
                 </div>
                 <div class="p-6">
                   <textarea rows="8" [value]="csvText()" (input)="csvText.set($any($event.target).value)"
-                    placeholder="Popescu,Ion,2001234567890&#10;Codreanu,Maria,2009876543210"
+                    placeholder="Popescu,Ion,2001234567890&#10;Codreanu,Maria,2009876543210,+37360111222,maria@example.md"
                     class="w-full rounded-md border border-input bg-white px-3 py-2 text-sm font-mono"></textarea>
                   @if (csvError()) {
                     <div class="mt-2 text-xs text-destructive">{{ csvError() }}</div>
@@ -468,6 +491,9 @@ export class CreateVoucherComponent implements OnInit {
     firstName: ['', Validators.required],
     idnp: ['', [Validators.required, Validators.minLength(13), Validators.maxLength(13)]],
     birthDate: ['', Validators.required],
+    // Optional. Validators apply ONLY when the field is non-empty (custom wrappers below).
+    email: ['', [optionalEmailValidator]],
+    phone: ['', [optionalPhoneValidator]],
   });
 
   protected readonly todayIso = new Date().toISOString().split('T')[0];
@@ -555,6 +581,8 @@ export class CreateVoucherComponent implements OnInit {
       netRemuneration: rem,
       hoursWorked: hours,
       rspValidated: false,
+      phone: v.phone?.trim() || undefined,
+      email: v.email?.trim() || undefined,
     }]);
     this.newWorkerForm.reset();
     this.panel.set(null);
@@ -591,12 +619,31 @@ export class CreateVoucherComponent implements OnInit {
     for (let idx = 0; idx < lines.length; idx++) {
       const parts = lines[idx].split(',').map((x) => x.trim());
       if (parts.length < 3) {
-        this.csvError.set(`Linia ${idx + 1}: format invalid (asteptat Nume,Prenume,IDNP)`);
+        this.csvError.set(`Linia ${idx + 1}: format invalid (asteptat Nume,Prenume,IDNP[,Telefon,Email])`);
         return;
       }
-      const [lastName, firstName, idnp] = parts;
+      const [lastName, firstName, idnp, phoneRaw, emailRaw] = parts;
       if (idnp.length !== 13) {
         this.csvError.set(`Linia ${idx + 1}: IDNP trebuie sa fie exact 13 cifre.`);
+        return;
+      }
+      // Optional phone: validate only if non-empty
+      const phone = (phoneRaw || '').trim();
+      if (phone) {
+        if (!/^[+\d\s\-()]+$/.test(phone)) {
+          this.csvError.set(`Linia ${idx + 1}: telefon contine caractere nepermise.`);
+          return;
+        }
+        const digits = phone.replace(/\D/g, '');
+        if (digits.length < 7 || digits.length > 15) {
+          this.csvError.set(`Linia ${idx + 1}: telefonul trebuie sa contina intre 7 si 15 cifre.`);
+          return;
+        }
+      }
+      // Optional email: validate only if non-empty
+      const email = (emailRaw || '').trim();
+      if (email && !/^[A-Za-z0-9._%+\-]+@[A-Za-z0-9.\-]+\.[A-Za-z]{2,}$/.test(email)) {
+        this.csvError.set(`Linia ${idx + 1}: format email invalid.`);
         return;
       }
       if (existing.has(idnp)) continue;
@@ -609,6 +656,8 @@ export class CreateVoucherComponent implements OnInit {
         netRemuneration: rem,
         hoursWorked: hours,
         rspValidated: false,
+        phone: phone || undefined,
+        email: email || undefined,
       });
     }
     this.rows.update((list) => [...list, ...newRows]);
@@ -736,7 +785,17 @@ export class CreateVoucherComponent implements OnInit {
       },
       error: (err) => {
         this.submitting.set(false);
-        this.errorMessage.set(err.error?.message || 'Eroare la crearea voucherelor.');
+        const fieldErrors: Array<{ propertyName?: string; errorMessage?: string }> =
+          Array.isArray(err?.error?.errors) ? err.error.errors : [];
+        const workerErrors = fieldErrors
+          .filter((f) => /workerid$/i.test(f.propertyName ?? ''))
+          .map((f) => f.errorMessage)
+          .filter((m): m is string => !!m);
+        if (workerErrors.length > 0) {
+          this.errorMessage.set(workerErrors.join(' '));
+        } else {
+          this.errorMessage.set(err.error?.message || 'Eroare la crearea voucherelor.');
+        }
       },
     });
   }

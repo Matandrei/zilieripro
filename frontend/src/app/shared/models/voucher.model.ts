@@ -59,6 +59,7 @@ export interface WorkerModel {
   rspValidated: boolean;
   rspValidatedAt?: string;
   rspErrorMessage?: string;
+  isActive: boolean;
   voucherCount?: number;
   createdAt?: string;
 }
@@ -97,6 +98,15 @@ export interface VoucherWorkerRequest {
   lastName: string;
   birthDate: string;
   netRemuneration: number;
+  phone?: string;
+  email?: string;
+}
+
+export interface CreateWorkerRequest {
+  idnp: string;
+  firstName: string;
+  lastName: string;
+  birthDate: string;
   phone?: string;
   email?: string;
 }
