@@ -72,7 +72,7 @@ interface VoucherWorkerRow {
               <label class="text-sm font-medium leading-none">{{ "field.district" | t }} <span class="text-destructive">*</span></label>
               <div class="relative">
                 <button type="button"
-                  (click)="districtDropdownOpen.update(v => !v); $event.stopPropagation()"
+                  (click)="districtDropdownOpen.set(!districtDropdownOpen()); $event.stopPropagation()"
                   [class]="'flex h-10 w-full items-center rounded-md border bg-white px-3 py-1 text-sm shadow-xs outline-none text-left ' + (voucherForm.get('workDistrict')?.invalid && voucherForm.get('workDistrict')?.touched ? 'border-destructive' : 'border-input')">
                   <span class="block flex-1 truncate" [class.text-muted-foreground]="!selectedDistrict()">
                     {{ selectedDistrict() || 'Selectati raionul' }}
@@ -123,7 +123,7 @@ interface VoucherWorkerRow {
               <div class="relative">
                 <button type="button"
                   [disabled]="!selectedDistrict()"
-                  (click)="localityDropdownOpen.update(v => !v); $event.stopPropagation()"
+                  (click)="localityDropdownOpen.set(!localityDropdownOpen()); $event.stopPropagation()"
                   [class]="'flex h-10 w-full items-center rounded-md border bg-white px-3 py-1 text-sm shadow-xs outline-none text-left ' + (!selectedDistrict() ? 'opacity-50 cursor-not-allowed ' : '') + (voucherForm.get('workLocality')?.invalid && voucherForm.get('workLocality')?.touched ? 'border-destructive' : 'border-input')">
                   <span class="block flex-1 truncate" [class.text-muted-foreground]="!selectedLocalityValue()">
                     {{ selectedLocalityValue() || (!selectedDistrict() ? 'Selectati mai intai raionul' : 'Selectati localitatea') }}
@@ -181,7 +181,7 @@ interface VoucherWorkerRow {
               <label class="text-sm font-medium leading-none">Activitatea realizata <span class="text-destructive">*</span></label>
               <div class="relative">
                 <button type="button"
-                  (click)="activityDropdownOpen.update(v => !v); $event.stopPropagation()"
+                  (click)="activityDropdownOpen.set(!activityDropdownOpen()); $event.stopPropagation()"
                   [class]="'flex h-10 w-full items-center rounded-md border bg-white px-3 py-1 text-sm shadow-xs outline-none text-left ' + (voucherForm.get('activityType')?.invalid && voucherForm.get('activityType')?.touched ? 'border-destructive' : 'border-input')">
                   <span class="block flex-1 truncate" [class.text-muted-foreground]="!selectedActivityCode()">
                     {{ selectedActivityLabel() || 'Selectati activitatea' }}
