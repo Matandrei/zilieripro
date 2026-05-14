@@ -140,6 +140,8 @@ using (var scope = app.Services.CreateScope())
         "ALTER TABLE Vouchers ADD COLUMN ReportedAt TEXT NULL",
         "ALTER TABLE Workers ADD COLUMN IsActive INTEGER NOT NULL DEFAULT 1",
         "ALTER TABLE Workers ADD COLUMN Email TEXT NULL",
+        "DROP INDEX IF EXISTS IX_UserIdentities_UserId",
+        "CREATE INDEX IF NOT EXISTS IX_UserIdentities_UserId ON UserIdentities (UserId)",
     })
     {
         try { db.Database.ExecuteSqlRaw(sql); }
