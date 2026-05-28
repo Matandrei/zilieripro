@@ -46,6 +46,9 @@ public class GetStatisticsQueryHandler(
         if (p.DateTo.HasValue)
             vouchersQuery = vouchersQuery.Where(v => v.WorkDate <= p.DateTo.Value);
 
+        if (!string.IsNullOrWhiteSpace(p.WorkerIdnp))
+            vouchersQuery = vouchersQuery.Where(v => v.Worker.Idnp.Contains(p.WorkerIdnp));
+
         var vouchers = await vouchersQuery.ToListAsync(cancellationToken);
 
         var vouchersByStatus = vouchers
@@ -55,6 +58,14 @@ public class GetStatisticsQueryHandler(
         var vouchersByDistrict = vouchers
             .GroupBy(v => v.WorkDistrict)
             .ToDictionary(g => g.Key, g => g.Count());
+
+        var vouchersByMonth = vouchers
+            .GroupBy(v => v.WorkDate.ToString("yyyy-MM"))
+            .ToDictionary(g => g.Key, g => g.Count());
+
+        var hoursByMonth = vouchers
+            .GroupBy(v => v.WorkDate.ToString("yyyy-MM"))
+            .ToDictionary(g => g.Key, g => g.Sum(v => v.HoursWorked));
 
         var remunerationByMonth = vouchers
             .GroupBy(v => v.WorkDate.ToString("yyyy-MM"))
@@ -68,11 +79,14 @@ public class GetStatisticsQueryHandler(
             TotalVouchers = vouchers.Count,
             TotalWorkers = totalWorkers,
             TotalBeneficiaries = totalBeneficiaries,
+            TotalHoursWorked = vouchers.Sum(v => v.HoursWorked),
             TotalNetRemuneration = vouchers.Sum(v => v.NetRemuneration),
             TotalGrossRemuneration = vouchers.Sum(v => v.GrossRemuneration),
             TotalTaxCollected = vouchers.Sum(v => v.IncomeTax + v.CnasContribution),
             VouchersByStatus = vouchersByStatus,
             VouchersByDistrict = vouchersByDistrict,
+            VouchersByMonth = vouchersByMonth,
+            HoursByMonth = hoursByMonth,
             RemunerationByMonth = remunerationByMonth
         };
 

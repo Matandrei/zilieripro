@@ -28,9 +28,9 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
         </div>
       </div>
 
-      <!-- Period Filter -->
+      <!-- Filters -->
       <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
           <div class="space-y-2">
             <label class="text-sm font-medium leading-none select-none">Data de la</label>
             <input
@@ -49,12 +49,29 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
               (ngModelChange)="dateTo.set($event)"
             />
           </div>
-          <div>
+          <div class="space-y-2">
+            <label class="text-sm font-medium leading-none select-none">IDNP Lucrător</label>
+            <input
+              type="text"
+              placeholder="Filtrare parțială..."
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              [ngModel]="workerIdnp()"
+              (ngModelChange)="workerIdnp.set($event)"
+            />
+          </div>
+          <div class="flex gap-2">
             <button
-              class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
+              class="flex-1 inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
               (click)="loadStatistics()"
             >
-              Filtreaza
+              Filtrează
+            </button>
+            <button
+              class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-muted disabled:opacity-50"
+              (click)="exportCsv()"
+              [disabled]="exportingCsv()"
+            >
+              {{ exportingCsv() ? 'Se exportă...' : 'Export CSV' }}
             </button>
           </div>
         </div>
@@ -65,37 +82,46 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
       }
 
       @if (stats(); as s) {
-        <!-- Summary Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-          <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <p class="text-sm text-muted-foreground">Total Vouchere</p>
-            <p class="mt-1 text-2xl font-bold text-foreground">{{ s.totalVouchers | number }}</p>
+        <!-- Summary Section -->
+        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden mb-6">
+          <div class="px-6 py-4 border-b border-input">
+            <h2 class="text-lg font-semibold text-foreground">Sumar</h2>
           </div>
-          <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <p class="text-sm text-muted-foreground">Total Lucratori</p>
-            <p class="mt-1 text-2xl font-bold text-foreground">{{ s.totalWorkers | number }}</p>
-          </div>
-          <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <p class="text-sm text-muted-foreground">Total Beneficiari</p>
-            <p class="mt-1 text-2xl font-bold text-foreground">{{ s.totalBeneficiaries | number }}</p>
-          </div>
-          <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <p class="text-sm text-muted-foreground">Remunerare Neta Totala</p>
-            <p class="mt-1 text-2xl font-bold text-foreground">{{ s.totalNetRemuneration | number:'1.2-2' }} MDL</p>
-          </div>
-          <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <p class="text-sm text-muted-foreground">Remunerare Bruta Totala</p>
-            <p class="mt-1 text-2xl font-bold text-foreground">{{ s.totalGrossRemuneration | number:'1.2-2' }} MDL</p>
-          </div>
-          <div class="bg-card rounded-xl ring-1 ring-foreground/10 shadow-xs p-6">
-            <p class="text-sm text-muted-foreground">Taxe Colectate</p>
-            <p class="mt-1 text-2xl font-bold text-foreground">{{ s.totalTaxCollected | number:'1.2-2' }} MDL</p>
-          </div>
+          <dl class="divide-y divide-foreground/5">
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Total Vouchere</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalVouchers | number }}</dd>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Total Lucrători</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalWorkers | number }}</dd>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Total Beneficiari</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalBeneficiaries | number }}</dd>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Ore Lucrate Totale</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalHoursWorked | number }}</dd>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Remunerare Netă Totală</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalNetRemuneration | number:'1.2-2' }} MDL</dd>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Remunerare Brută Totală</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalGrossRemuneration | number:'1.2-2' }} MDL</dd>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Taxe Colectate</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalTaxCollected | number:'1.2-2' }} MDL</dd>
+            </div>
+          </dl>
         </div>
 
         <!-- Vouchers by Status -->
-        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-8">
-          <h2 class="text-lg font-semibold text-foreground mb-4">Vouchere dupa Status</h2>
+        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
+          <h2 class="text-lg font-semibold text-foreground mb-4">Vouchere după Status</h2>
           @for (entry of statusEntries(); track entry.key) {
             <div class="flex items-center gap-3 mb-3">
               <span class="w-24 text-sm text-foreground/80 font-medium">{{ entry.key }}</span>
@@ -110,32 +136,32 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
               </div>
             </div>
           } @empty {
-            <p class="text-sm text-muted-foreground">Nu exista date.</p>
+            <p class="text-sm text-muted-foreground">Nu există date.</p>
           }
         </div>
 
         <!-- Vouchers by District -->
-        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden mb-8">
+        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden mb-6">
           <div class="px-6 py-4 border-b border-input">
-            <h2 class="text-lg font-semibold text-foreground">Vouchere dupa Raion</h2>
+            <h2 class="text-lg font-semibold text-foreground">Vouchere după Raion</h2>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full caption-bottom text-sm">
               <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
                 <tr>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Raion</th>
-                  <th class="text-foreground h-10 px-2 text-end align-middle font-medium whitespace-nowrap">Nr. Vouchere</th>
+                  <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Raion</th>
+                  <th class="text-foreground h-10 px-4 text-end align-middle font-medium whitespace-nowrap">Nr. Vouchere</th>
                 </tr>
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 @for (entry of districtEntries(); track entry.key) {
                   <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
-                    <td class="p-2 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
-                    <td class="p-2 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number }}</td>
+                    <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
+                    <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number }}</td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="2" class="p-2 align-middle py-6 text-center text-sm text-muted-foreground">Nu exista date.</td>
+                    <td colspan="2" class="px-4 py-6 align-middle text-center text-sm text-muted-foreground">Nu există date.</td>
                   </tr>
                 }
               </tbody>
@@ -146,25 +172,25 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
         <!-- Remuneration by Month -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
           <div class="px-6 py-4 border-b border-input">
-            <h2 class="text-lg font-semibold text-foreground">Remunerare dupa Luna</h2>
+            <h2 class="text-lg font-semibold text-foreground">Remunerare după Lună</h2>
           </div>
           <div class="overflow-x-auto">
             <table class="w-full caption-bottom text-sm">
               <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
                 <tr>
-                  <th class="text-foreground h-10 px-2 text-start align-middle font-medium whitespace-nowrap">Luna</th>
-                  <th class="text-foreground h-10 px-2 text-end align-middle font-medium whitespace-nowrap">Remunerare (MDL)</th>
+                  <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Lună</th>
+                  <th class="text-foreground h-10 px-4 text-end align-middle font-medium whitespace-nowrap">Remunerare (MDL)</th>
                 </tr>
               </thead>
               <tbody class="[&_tr:last-child]:border-0">
                 @for (entry of monthEntries(); track entry.key) {
                   <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
-                    <td class="p-2 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
-                    <td class="p-2 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number:'1.2-2' }}</td>
+                    <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
+                    <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number:'1.2-2' }}</td>
                   </tr>
                 } @empty {
                   <tr>
-                    <td colspan="2" class="p-2 align-middle py-6 text-center text-sm text-muted-foreground">Nu exista date.</td>
+                    <td colspan="2" class="px-4 py-6 align-middle text-center text-sm text-muted-foreground">Nu există date.</td>
                   </tr>
                 }
               </tbody>
@@ -180,7 +206,9 @@ export class ReportsComponent implements OnInit {
 
   protected readonly dateFrom = signal('');
   protected readonly dateTo = signal('');
+  protected readonly workerIdnp = signal('');
   protected readonly loading = signal(false);
+  protected readonly exportingCsv = signal(false);
   protected readonly stats = signal<StatisticsModel | null>(null);
 
   protected readonly statusEntries = computed(() => {
@@ -207,9 +235,7 @@ export class ReportsComponent implements OnInit {
 
   protected loadStatistics(): void {
     this.loading.set(true);
-    const params: Record<string, string> = {};
-    if (this.dateFrom()) params['dateFrom'] = this.dateFrom();
-    if (this.dateTo()) params['dateTo'] = this.dateTo();
+    const params = this.buildParams();
 
     this.api.getStatistics(params).subscribe({
       next: (data) => {
@@ -220,6 +246,38 @@ export class ReportsComponent implements OnInit {
         this.loading.set(false);
       },
     });
+  }
+
+  protected exportCsv(): void {
+    this.exportingCsv.set(true);
+    const params = this.buildParams();
+
+    this.api.exportStatisticsCsv(params).subscribe({
+      next: (response) => {
+        const blob = response.body!;
+        const cd = response.headers.get('content-disposition') ?? '';
+        const match = cd.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+        const fileName = match ? match[1].replace(/['"]/g, '') : 'statistici.csv';
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.exportingCsv.set(false);
+      },
+      error: () => {
+        this.exportingCsv.set(false);
+      },
+    });
+  }
+
+  private buildParams(): Record<string, string> {
+    const params: Record<string, string> = {};
+    if (this.dateFrom()) params['dateFrom'] = this.dateFrom();
+    if (this.dateTo()) params['dateTo'] = this.dateTo();
+    if (this.workerIdnp()) params['workerIdnp'] = this.workerIdnp();
+    return params;
   }
 
   protected statusPercent(value: number): number {

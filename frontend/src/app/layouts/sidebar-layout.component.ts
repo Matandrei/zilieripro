@@ -162,12 +162,14 @@ export class SidebarLayoutComponent {
   readonly employerNav: NavItem[] = [
     { label: 'nav.vouchers', route: '/vouchers', icon: '\u{1F4CB}' },
     { label: 'nav.workers', route: '/workers', icon: '\u{1F465}' },
+    { label: 'nav.statistics', route: '/statistics', icon: '\u{1F4CA}' },
     { label: 'nav.ipc21', route: '/reports/ipc21', icon: '\u{1F4C4}' },
     { label: 'nav.company', route: '/company', icon: '\u{1F3E2}' },
   ];
 
   readonly inspectorNav: NavItem[] = [
     { label: 'nav.vouchers', route: '/vouchers', icon: '\u{1F4CB}' },
+    { label: 'nav.reports', route: '/reports', icon: '\u{1F4CA}' },
   ];
 
   readonly adminNav: NavItem[] = [

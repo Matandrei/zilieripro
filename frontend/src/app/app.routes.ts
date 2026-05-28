@@ -30,6 +30,8 @@ export const routes: Routes = [
       // Reports
       { path: 'reports', loadComponent: () => import('./domains/reports/feature/reports.component').then(m => m.ReportsComponent) },
       { path: 'reports/ipc21', loadComponent: () => import('./domains/reports/feature/ipc21-report.component').then(m => m.Ipc21ReportComponent) },
+      // Statistics
+      { path: 'statistics', loadComponent: () => import('./domains/statistics/feature/statistics.component').then(m => m.StatisticsComponent) },
       // Company profile
       { path: 'company', loadComponent: () => import('./domains/user-management/feature/company-profile.component').then(m => m.CompanyProfileComponent) },
       // Admin
