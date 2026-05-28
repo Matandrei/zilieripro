@@ -59,6 +59,7 @@ public record StatisticsQueryParams
     public DateOnly? DateFrom { get; init; }
     public DateOnly? DateTo { get; init; }
     public Guid? BeneficiaryId { get; init; }
+    public string? WorkerIdnp { get; init; }
 }
 
 public record StatisticsModel
@@ -66,11 +67,14 @@ public record StatisticsModel
     public int TotalVouchers { get; init; }
     public int TotalWorkers { get; init; }
     public int TotalBeneficiaries { get; init; }
+    public int TotalHoursWorked { get; init; }
     public decimal TotalNetRemuneration { get; init; }
     public decimal TotalGrossRemuneration { get; init; }
     public decimal TotalTaxCollected { get; init; }
     public Dictionary<string, int> VouchersByStatus { get; init; } = [];
     public Dictionary<string, int> VouchersByDistrict { get; init; } = [];
+    public Dictionary<string, int> VouchersByMonth { get; init; } = [];
+    public Dictionary<string, int> HoursByMonth { get; init; } = [];
     public Dictionary<string, decimal> RemunerationByMonth { get; init; } = [];
 }
 

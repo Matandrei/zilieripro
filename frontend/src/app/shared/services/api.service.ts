@@ -186,7 +186,18 @@ export class ApiService {
   // --------------- Statistics ---------------
 
   getStatistics(params?: Record<string, string | number | boolean>): Observable<StatisticsModel> {
-    return this.get<StatisticsModel>('/statistics', params);
+    return this.get<StatisticsModel>('/reports/statistics', params);
+  }
+
+  exportStatisticsCsv(params?: Record<string, string | number | boolean>): Observable<HttpResponse<Blob>> {
+    let httpParams = new HttpParams();
+    if (params) {
+      Object.entries(params).forEach(([key, value]) => {
+        httpParams = httpParams.set(key, String(value));
+      });
+    }
+    return this.http.get(`${this.baseUrl}/reports/statistics/export-csv`,
+      { params: httpParams, responseType: 'blob', observe: 'response' });
   }
 
   // --------------- Nomenclators ---------------

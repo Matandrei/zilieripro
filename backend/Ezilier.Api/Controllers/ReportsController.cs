@@ -86,8 +86,38 @@ public class ReportsController : BaseApiController
     [HttpGet("statistics")]
     public async Task<IActionResult> GetStatistics([FromQuery] StatisticsQueryParams queryParams)
     {
+        var role = (CurrentRole ?? string.Empty).Trim();
+        if (string.Equals(role, "angajator", StringComparison.OrdinalIgnoreCase))
+        {
+            var beneficiaryId = CurrentBeneficiaryId ?? Guid.Empty;
+            if (beneficiaryId == Guid.Empty)
+                return StatusCode(400, new ValidationResult(
+                    [new ValidationFailure("BeneficiaryId", "Beneficiar lipseste in contextul cererii.")]));
+            queryParams = queryParams with { BeneficiaryId = beneficiaryId };
+        }
+
         var (model, errors, status) = await Mediator.Send(new GetStatisticsQuery(queryParams));
         return StatusCode(status, errors is not null ? errors : model);
+    }
+
+    [HttpGet("statistics/export-csv")]
+    public async Task<IActionResult> ExportStatisticsCsv([FromQuery] StatisticsQueryParams queryParams)
+    {
+        var role = (CurrentRole ?? string.Empty).Trim();
+        if (string.Equals(role, "angajator", StringComparison.OrdinalIgnoreCase))
+        {
+            var beneficiaryId = CurrentBeneficiaryId ?? Guid.Empty;
+            if (beneficiaryId == Guid.Empty)
+                return StatusCode(400, new ValidationResult(
+                    [new ValidationFailure("BeneficiaryId", "Beneficiar lipseste in contextul cererii.")]));
+            queryParams = queryParams with { BeneficiaryId = beneficiaryId };
+        }
+
+        var (csv, fileName, errors, status) = await Mediator.Send(new ExportStatisticsCsvQuery(queryParams));
+        if (status != 200 || csv is null)
+            return StatusCode(status, errors);
+
+        return File(csv, "text/csv; charset=utf-8", fileName);
     }
 
     [HttpGet("daily-register")]

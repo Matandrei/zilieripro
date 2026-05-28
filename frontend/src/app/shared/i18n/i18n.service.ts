@@ -14,6 +14,7 @@ const RO: Dict = {
   'nav.nomenclators': 'Nomenclatoare', 'nav.audit': 'Audit trail',
   'nav.companies': 'Companii',
   'nav.myVouchers': 'Voucherele mele',
+  'nav.statistics': 'Statistici',
 
   // Common actions
   'action.logout': 'Iesire', 'action.create': 'Creeaza', 'action.edit': 'Editeaza',
@@ -223,7 +224,7 @@ const RO: Dict = {
 };
 
 const RU: Dict = {
-  'nav.vouchers': 'Реестр', 'nav.workers': 'Работники', 'nav.reports': 'Отчеты',
+  'nav.vouchers': 'Реестр', 'nav.workers': 'Работники', 'nav.reports': 'Отчеты', 'nav.statistics': 'Статистика',
   'nav.ipc21': 'IPC-21', 'nav.company': 'Профиль компании', 'nav.dashboard': 'Панель',
   'nav.users': 'Пользователи', 'nav.params': 'Параметры системы',
   'nav.nomenclators': 'Номенклатуры', 'nav.audit': 'Журнал аудита',
@@ -422,7 +423,7 @@ const RU: Dict = {
 };
 
 const EN: Dict = {
-  'nav.vouchers': 'Register', 'nav.workers': 'Workers', 'nav.reports': 'Reports',
+  'nav.vouchers': 'Register', 'nav.workers': 'Workers', 'nav.reports': 'Reports', 'nav.statistics': 'Statistics',
   'nav.ipc21': 'IPC-21', 'nav.company': 'Company profile', 'nav.dashboard': 'Dashboard',
   'nav.users': 'Users', 'nav.params': 'System parameters',
   'nav.nomenclators': 'Nomenclatures', 'nav.audit': 'Audit trail',

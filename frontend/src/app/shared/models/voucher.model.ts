@@ -174,11 +174,14 @@ export interface StatisticsModel {
   totalVouchers: number;
   totalWorkers: number;
   totalBeneficiaries: number;
+  totalHoursWorked: number;
   totalNetRemuneration: number;
   totalGrossRemuneration: number;
   totalTaxCollected: number;
   vouchersByStatus: Record<string, number>;
   vouchersByDistrict: Record<string, number>;
+  vouchersByMonth: Record<string, number>;
+  hoursByMonth: Record<string, number>;
   remunerationByMonth: Record<string, number>;
 }
 
