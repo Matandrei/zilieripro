@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail } from '../../../shared/models/voucher.model';
@@ -203,8 +203,16 @@ export class VoucherReceiptComponent implements OnInit {
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
+    const autoprint = this.route.snapshot.queryParamMap.get('autoprint') === '1';
     this.voucherService.getVoucher(id).subscribe({
-      next: (v) => { this.voucher.set(v); this.loading.set(false); },
+      next: (v) => {
+        this.voucher.set(v);
+        this.loading.set(false);
+        if (autoprint) {
+          // Small delay to let Angular render the template before printing
+          setTimeout(() => window.print(), 300);
+        }
+      },
       error: () => this.loading.set(false),
     });
   }
