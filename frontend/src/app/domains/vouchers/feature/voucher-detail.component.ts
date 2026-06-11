@@ -6,15 +6,15 @@ import { ApiService } from '../../../shared/services/api.service';
 import { NomenclatorModel } from '../../../shared/models/voucher.model';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherActivityItem, VoucherDetail, VoucherStatus, CancellationReasonCode } from '../../../shared/models/voucher.model';
-import { SignaturePadComponent } from '../../../shared/ui/components/signature-pad.component';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 import { AuthStore } from '../../../shared/auth/auth.store';
 import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
+import { VoucherSignOverlayComponent } from '../ui/voucher-sign-overlay.component';
 
 @Component({
   selector: 'app-voucher-detail',
   standalone: true,
-  imports: [RouterLink, FormsModule, UpperCasePipe, SignaturePadComponent, TranslatePipe, MaskIdnpPipe],
+  imports: [RouterLink, FormsModule, UpperCasePipe, TranslatePipe, MaskIdnpPipe, VoucherSignOverlayComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="max-w-7xl mx-auto">
@@ -70,6 +70,7 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
               }
             }
             <a [routerLink]="['/vouchers', voucher()!.id, 'receipt']"
+               [queryParams]="{ autoprint: '1' }"
               class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4">
                 <polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/>
@@ -245,59 +246,136 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
 
       <!-- Cancel modal -->
       @if (showCancelModal()) {
-        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 print:hidden" (click)="showCancelModal.set(false)">
-          <div class="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-semibold mb-4 text-gray-900">{{ 'voucher.detail.cancelModal' | t }}</h3>
-            <div class="space-y-4">
-              <div>
-                <label class="block text-sm font-medium mb-1">Data anularii <span class="text-destructive">*</span></label>
-                <input type="date" [(ngModel)]="cancelDate"
-                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 print:hidden"
+             (click)="!showCancelConfirm() && showCancelModal.set(false)">
+          <div class="bg-white rounded-xl shadow-2xl w-full max-w-md relative overflow-hidden"
+               (click)="$event.stopPropagation()">
+            <div class="p-6">
+              <h3 class="text-lg font-semibold mb-4 text-gray-900">{{ 'voucher.detail.cancelModal' | t }}</h3>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-sm font-medium mb-1">Data anularii <span class="text-destructive">*</span></label>
+                  <input type="date" [(ngModel)]="cancelDate"
+                    class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm" />
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1">Motiv anulare <span class="text-destructive">*</span></label>
+                  <select [(ngModel)]="cancelReasonCode"
+                    class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm">
+                    <option value="">Selectati motivul</option>
+                    @for (r of cancelReasons(); track r.id) {
+                      <option [value]="r.code">{{ r.titleRo }}</option>
+                    }
+                  </select>
+                </div>
+                <div>
+                  <label class="block text-sm font-medium mb-1">Comentarii</label>
+                  <textarea [(ngModel)]="cancelNote" rows="3" maxlength="500"
+                    class="flex w-full rounded-md border border-input bg-white px-3 py-2 text-sm"></textarea>
+                  <p class="text-xs text-muted-foreground mt-1">{{ cancelNote.length }}/500</p>
+                </div>
               </div>
-              <div>
-                <label class="block text-sm font-medium mb-1">Motiv anulare <span class="text-destructive">*</span></label>
-                <select [(ngModel)]="cancelReasonCode"
-                  class="flex h-9 w-full rounded-md border border-input bg-white px-3 py-1 text-sm">
-                  <option value="">Selectati motivul</option>
-                  @for (r of cancelReasons(); track r.id) {
-                    <option [value]="r.code">{{ r.titleRo }}</option>
-                  }
-                </select>
-              </div>
-              <div>
-                <label class="block text-sm font-medium mb-1">Comentarii</label>
-                <textarea [(ngModel)]="cancelNote" rows="3" maxlength="500"
-                  class="flex w-full rounded-md border border-input bg-white px-3 py-2 text-sm"></textarea>
-                <p class="text-xs text-muted-foreground mt-1">{{ cancelNote.length }}/500</p>
+              <div class="mt-5 flex justify-end gap-2">
+                <button type="button" (click)="showCancelModal.set(false)"
+                  class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.close' | t }}</button>
+                <button type="button" (click)="showCancelConfirm.set(true)" [disabled]="!cancelReasonCode || !cancelDate"
+                  class="inline-flex h-9 items-center justify-center rounded-md bg-destructive text-white px-4 text-sm font-medium disabled:opacity-50">{{ 'voucher.detail.confirmCancel' | t }}</button>
               </div>
             </div>
-            <div class="mt-5 flex justify-end gap-2">
-              <button type="button" (click)="showCancelModal.set(false)"
-                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.close' | t }}</button>
-              <button type="button" (click)="confirmCancel()" [disabled]="!cancelReasonCode || !cancelDate"
-                class="inline-flex h-9 items-center justify-center rounded-md bg-destructive text-white px-4 text-sm font-medium disabled:opacity-50">{{ 'voucher.detail.confirmCancel' | t }}</button>
-            </div>
+
+            <!-- ─── Inline confirmation sheet ─── -->
+            @if (showCancelConfirm()) {
+              <div class="absolute inset-0 z-10 flex flex-col justify-end"
+                   style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);"
+                   (click)="!cancelSubmitting() && showCancelConfirm.set(false)">
+                <div class="bg-white rounded-t-2xl p-5 space-y-4" (click)="$event.stopPropagation()">
+
+                  <!-- Icon + title -->
+                  <div class="flex items-center gap-3">
+                    <div class="size-11 rounded-2xl bg-red-100 flex items-center justify-center shrink-0">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-red-600">
+                        <path stroke-linecap="round" stroke-linejoin="round"
+                          d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71
+                             c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898
+                             0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <p class="text-base font-bold text-gray-900">Confirmați anularea?</p>
+                      <p class="text-sm text-gray-500">Voucher {{ voucher()?.code }}</p>
+                    </div>
+                  </div>
+
+                  <!-- Summary -->
+                  <div class="bg-red-50 rounded-xl px-4 py-3 space-y-1.5">
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-500">Data anulării</span>
+                      <span class="font-semibold text-gray-800">{{ cancelDate }}</span>
+                    </div>
+                    <div class="flex justify-between text-sm">
+                      <span class="text-gray-500">Motiv</span>
+                      <span class="font-semibold text-gray-800 text-right max-w-[60%]">{{ cancelReasonLabel(cancelReasonCode) }}</span>
+                    </div>
+                    @if (cancelNote) {
+                      <div class="flex justify-between text-sm border-t border-red-100 pt-1.5">
+                        <span class="text-gray-500">Comentarii</span>
+                        <span class="text-gray-700 text-right max-w-[60%]">{{ cancelNote }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Disclaimer -->
+                  <p class="text-[12px] text-gray-500 text-center leading-relaxed">
+                    Această acțiune este <strong class="text-red-600">ireversibilă</strong>.
+                    Voucherul va fi anulat și nu va mai putea fi activat sau executat.
+                  </p>
+
+                  <!-- Buttons -->
+                  <div class="flex gap-3">
+                    <button type="button" (click)="showCancelConfirm.set(false)"
+                      [disabled]="cancelSubmitting()"
+                      class="flex-1 h-12 rounded-xl border border-gray-200 text-sm font-semibold
+                             text-gray-700 hover:bg-gray-50 active:bg-gray-100
+                             transition-colors touch-manipulation disabled:opacity-50">
+                      Renunță
+                    </button>
+                    <button type="button" (click)="confirmCancel()"
+                      [disabled]="cancelSubmitting()"
+                      class="flex-[2] h-12 rounded-xl bg-red-600 text-white text-sm font-bold
+                             hover:bg-red-700 active:bg-red-800 transition-colors
+                             touch-manipulation disabled:opacity-70">
+                      @if (cancelSubmitting()) {
+                        <span class="flex items-center justify-center gap-2">
+                          <svg class="animate-spin size-4" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"
+                                    stroke-dasharray="31.4 62.8" stroke-linecap="round"/>
+                          </svg>
+                          Se anulează...
+                        </span>
+                      } @else {
+                        Da, anulez voucherul
+                      }
+                    </button>
+                  </div>
+
+                </div>
+              </div>
+            }
           </div>
         </div>
       }
 
-      <!-- Signature modal -->
+      <!-- Signature overlay -->
       @if (showSignModal()) {
-        <div class="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 p-4 print:hidden" (click)="showSignModal.set(false)">
-          <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6" (click)="$event.stopPropagation()">
-            <h3 class="text-lg font-semibold mb-1">{{ 'voucher.detail.signModal' | t }}</h3>
-            <p class="text-sm text-muted-foreground mb-4">{{ 'voucher.detail.signModalHint' | t }}</p>
-            <app-signature-pad (changed)="signatureData.set($event)" />
-            <div class="mt-5 flex justify-end gap-2">
-              <button type="button" (click)="showSignModal.set(false)"
-                class="inline-flex h-9 items-center justify-center rounded-md border border-input bg-background px-4 text-sm">{{ 'action.cancel' | t }}</button>
-              <button type="button" (click)="saveSignature()" [disabled]="!signatureData() || saving()"
-                class="inline-flex h-9 items-center justify-center rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium disabled:opacity-50">
-                @if (saving()) { {{ 'common.processing' | t }} } @else { {{ 'voucher.detail.saveSignature' | t }} }
-              </button>
-            </div>
-          </div>
-        </div>
+        <app-voucher-sign-overlay
+          [code]="voucher()!.code"
+          [workerName]="voucher()!.worker.firstName + ' ' + voucher()!.worker.lastName"
+          [workDate]="formatDate(voucher()!.workDate)"
+          [netAmount]="formatMoney(voucher()!.netRemuneration)"
+          [saving]="saving()"
+          (confirmed)="saveSignature($event)"
+          (cancelled)="showSignModal.set(false)"
+        />
       }
     </div>
 
@@ -320,6 +398,7 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
         body { background: white !important; }
       }
     </style>
+
   `,
 })
 export class VoucherDetailComponent implements OnInit {
@@ -333,8 +412,9 @@ export class VoucherDetailComponent implements OnInit {
   protected readonly voucher = signal<VoucherDetail | null>(null);
   protected readonly loading = signal(true);
   protected readonly showCancelModal = signal(false);
+  protected readonly showCancelConfirm = signal(false);
+  protected readonly cancelSubmitting = signal(false);
   protected readonly showSignModal = signal(false);
-  protected readonly signatureData = signal<string | null>(null);
   protected readonly saving = signal(false);
   protected readonly showActivity = signal(false);
   protected readonly activity = signal<VoucherActivityItem[]>([]);
@@ -384,16 +464,13 @@ export class VoucherDetailComponent implements OnInit {
     });
   }
 
-  protected saveSignature(): void {
-    const data = this.signatureData();
-    if (!data) return;
+  protected saveSignature(data: string): void {
     this.saving.set(true);
     this.voucherDataService.signVoucher(this.voucher()!.id, data).subscribe({
       next: (v) => {
         this.voucher.set(v);
         this.saving.set(false);
         this.showSignModal.set(false);
-        this.signatureData.set(null);
       },
       error: () => this.saving.set(false),
     });
@@ -401,6 +478,7 @@ export class VoucherDetailComponent implements OnInit {
 
   protected confirmCancel(): void {
     if (!this.cancelReasonCode || !this.cancelDate) return;
+    this.cancelSubmitting.set(true);
     this.voucherDataService
       .cancelVoucher(this.voucher()!.id, {
         reasonCode: this.cancelReasonCode,
@@ -411,10 +489,13 @@ export class VoucherDetailComponent implements OnInit {
         next: (v) => {
           this.voucher.set(v);
           this.showCancelModal.set(false);
+          this.showCancelConfirm.set(false);
+          this.cancelSubmitting.set(false);
           this.cancelReasonCode = '';
           this.cancelNote = '';
           this.cancelDate = new Date().toISOString().split('T')[0];
         },
+        error: () => this.cancelSubmitting.set(false),
       });
   }
 

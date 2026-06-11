@@ -5,6 +5,7 @@ import { DecimalPipe } from '@angular/common';
 import { ApiService } from '../../../shared/services/api.service';
 import { StatisticsModel } from '../../../shared/models/voucher.model';
 import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
+import { AuthStore } from '../../../shared/auth/auth.store';
 
 @Component({
   selector: 'app-reports',
@@ -18,14 +19,16 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
         <div class="w-full md:mr-4 md:w-auto">
           <h1 class="text-3xl font-bold tracking-tight text-foreground scroll-m-20">{{ 'reports.title' | t }}</h1>
         </div>
-        <div class="w-full md:ml-auto md:w-auto">
-          <a
-            routerLink="/reports/ipc21"
-            class="inline-flex h-9 w-full justify-center md:w-auto md:justify-start shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
-          >
-            Raport IPC-21
-          </a>
-        </div>
+        @if (!isInspector()) {
+          <div class="w-full md:ml-auto md:w-auto">
+            <a
+              routerLink="/reports/ipc21"
+              class="inline-flex h-9 w-full justify-center md:w-auto md:justify-start shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
+            >
+              Raport IPC-21
+            </a>
+          </div>
+        }
       </div>
 
       <!-- Filters -->
@@ -59,20 +62,38 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
               (ngModelChange)="workerIdnp.set($event)"
             />
           </div>
-          <div class="flex gap-2">
+          <div class="space-y-2">
+            <label class="text-sm font-medium leading-none select-none">Raion</label>
+            <select
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              [ngModel]="district()"
+              (ngModelChange)="district.set($event)"
+            >
+              <option value="">Toate raioanele</option>
+              <option value="Chisinau">Chisinau</option>
+              <option value="Balti">Balti</option>
+              <option value="Cahul">Cahul</option>
+              <option value="Orhei">Orhei</option>
+              <option value="Ungheni">Ungheni</option>
+              <option value="Soroca">Soroca</option>
+            </select>
+          </div>
+          <div class="flex gap-2 md:col-span-4">
             <button
               class="flex-1 inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90"
               (click)="loadStatistics()"
             >
               Filtrează
             </button>
-            <button
-              class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-muted disabled:opacity-50"
-              (click)="exportCsv()"
-              [disabled]="exportingCsv()"
-            >
-              {{ exportingCsv() ? 'Se exportă...' : 'Export CSV' }}
-            </button>
+            @if (!isInspector()) {
+              <button
+                class="inline-flex h-9 shrink-0 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium shadow-xs transition-all hover:bg-muted disabled:opacity-50"
+                (click)="exportCsv()"
+                [disabled]="exportingCsv()"
+              >
+                {{ exportingCsv() ? 'Se exportă...' : 'Export CSV' }}
+              </button>
+            }
           </div>
         </div>
       </div>
@@ -82,6 +103,43 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
       }
 
       @if (stats(); as s) {
+        <!-- Inspector KPI Panel -->
+        @if (isInspector()) {
+          <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
+            <h2 class="text-lg font-semibold text-foreground mb-4">Tablou de bord Inspector ISM</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div class="rounded-lg bg-primary/5 ring-1 ring-primary/20 p-4 text-center">
+                <div class="text-2xl font-bold text-primary">{{ raportatCount() | number }}</div>
+                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Raportat</div>
+              </div>
+              <div class="rounded-lg bg-destructive/5 ring-1 ring-destructive/20 p-4 text-center">
+                <div class="text-2xl font-bold text-destructive">{{ anulatCount() | number }}</div>
+                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Anulat</div>
+              </div>
+              <div class="rounded-lg bg-muted/50 ring-1 ring-foreground/10 p-4 text-center">
+                <div class="text-2xl font-bold text-foreground">{{ s.totalBeneficiaries | number }}</div>
+                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Beneficiari activi</div>
+              </div>
+              <div class="rounded-lg bg-muted/50 ring-1 ring-foreground/10 p-4 text-center">
+                <div class="text-2xl font-bold text-foreground">{{ anulatRatio() }}%</div>
+                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Rată anulare</div>
+              </div>
+            </div>
+            <!-- RAPORTAT vs ANULAT progress bar -->
+            @if (raportatCount() + anulatCount() > 0) {
+              <div>
+                <div class="flex justify-between text-xs text-muted-foreground mb-1">
+                  <span>Raportat ({{ raportatCount() }})</span>
+                  <span>Anulat ({{ anulatCount() }})</span>
+                </div>
+                <div class="flex h-3 rounded-full overflow-hidden bg-destructive/20">
+                  <div class="bg-primary transition-all" [style.width.%]="raportatPercent()"></div>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
         <!-- Summary Section -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden mb-6">
           <div class="px-6 py-4 border-b border-input">
@@ -203,13 +261,30 @@ import { TranslatePipe } from '../../../shared/i18n/translate.pipe';
 })
 export class ReportsComponent implements OnInit {
   private readonly api = inject(ApiService);
+  private readonly auth = inject(AuthStore);
+
+  protected readonly isInspector = computed(() => this.auth.roleType() === 'Inspector');
 
   protected readonly dateFrom = signal('');
   protected readonly dateTo = signal('');
   protected readonly workerIdnp = signal('');
+  protected readonly district = signal('');
   protected readonly loading = signal(false);
   protected readonly exportingCsv = signal(false);
   protected readonly stats = signal<StatisticsModel | null>(null);
+
+  protected readonly raportatCount = computed(() => this.stats()?.vouchersByStatus?.['Raportat'] ?? 0);
+  protected readonly anulatCount = computed(() => this.stats()?.vouchersByStatus?.['Anulat'] ?? 0);
+  protected readonly anulatRatio = computed(() => {
+    const total = this.stats()?.totalVouchers ?? 0;
+    if (total === 0) return 0;
+    return Math.round((this.anulatCount() / total) * 100);
+  });
+  protected readonly raportatPercent = computed(() => {
+    const total = this.raportatCount() + this.anulatCount();
+    if (total === 0) return 0;
+    return Math.round((this.raportatCount() / total) * 100);
+  });
 
   protected readonly statusEntries = computed(() => {
     const s = this.stats();
@@ -277,6 +352,7 @@ export class ReportsComponent implements OnInit {
     if (this.dateFrom()) params['dateFrom'] = this.dateFrom();
     if (this.dateTo()) params['dateTo'] = this.dateTo();
     if (this.workerIdnp()) params['workerIdnp'] = this.workerIdnp();
+    if (this.district()) params['district'] = this.district();
     return params;
   }
 

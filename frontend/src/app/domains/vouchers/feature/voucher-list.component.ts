@@ -9,11 +9,12 @@ import { ApiService } from '../../../shared/services/api.service';
 import { AuthStore } from '../../../shared/auth/auth.store';
 import { BeneficiaryModel, PaginatedResult, VoucherStatus, VoucherTableItem } from '../../../shared/models/voucher.model';
 import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
+import { ConfirmDialogComponent } from '../../../shared/ui/confirm-dialog.component';
 
 @Component({
   selector: 'app-voucher-list',
   standalone: true,
-  imports: [FormsModule, RouterLink, StatusBadgeComponent, TranslatePipe, MaskIdnpPipe],
+  imports: [FormsModule, RouterLink, StatusBadgeComponent, TranslatePipe, MaskIdnpPipe, ConfirmDialogComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="mx-auto">
@@ -45,13 +46,15 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
               IPC 21
             </a>
           }
-          <a routerLink="/vouchers/create"
-            class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90">
-            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
-            </svg>
-            {{ 'voucher.list.createBtn' | t }}
-          </a>
+          @if (!isInspector()) {
+            <a routerLink="/vouchers/create"
+              class="inline-flex h-9 shrink-0 items-center gap-2 rounded-md bg-primary text-primary-foreground px-4 text-sm font-medium shadow-xs transition-all hover:bg-primary/90">
+              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+              </svg>
+              {{ 'voucher.list.createBtn' | t }}
+            </a>
+          }
         </div>
       </div>
 
@@ -75,9 +78,7 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
           [ngModel]="store.state().status"
           (ngModelChange)="onFilterChange('status', $event)">
           <option value="">{{ 'voucher.list.statusAll' | t }}</option>
-          @if (!isInspector()) {
             <option value="Emis">{{ 'status.emis' | t }}</option>
-          }
           <option value="Activ">{{ 'status.activ' | t }}</option>
           <option value="Executat">{{ 'status.executat' | t }}</option>
           <option value="Raportat">{{ 'status.raportat' | t }}</option>
@@ -325,15 +326,20 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
         <table class="w-full caption-bottom text-sm">
           <thead class="[&_tr]:border-b [&_tr]:border-foreground/10 bg-background sticky top-0 z-10">
             <tr>
-              <th class="h-10 px-4 align-middle w-10">
-                <input type="checkbox" class="rounded border-input"
-                  [checked]="allSelected()"
-                  [indeterminate]="someSelected() && !allSelected()"
-                  (change)="toggleSelectAll()" />
-              </th>
+              @if (!isInspector()) {
+                <th class="h-10 px-4 align-middle w-10">
+                  <input type="checkbox" class="rounded border-input"
+                    [checked]="allSelected()"
+                    [indeterminate]="someSelected() && !allSelected()"
+                    (change)="toggleSelectAll()" />
+                </th>
+              }
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.code' | t }}</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.worker' | t }}</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.idnp' | t }}</th>
+              @if (isInspector()) {
+                <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">Beneficiar</th>
+              }
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.district' | t }}</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'common.status' | t }}</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.hours' | t }}</th>
@@ -345,11 +351,13 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
           <tbody class="[&_tr:last-child]:border-0">
             @for (voucher of vouchers(); track voucher.id) {
               <tr [class]="'border-b border-foreground/5 transition-colors ' + (selected().has(voucher.id) ? 'bg-primary/5' : 'hover:bg-muted/30')">
-                <td class="px-4 py-3 align-middle w-10">
-                  <input type="checkbox" class="rounded border-input"
-                    [checked]="selected().has(voucher.id)"
-                    (change)="toggleSelect(voucher.id)" />
-                </td>
+                @if (!isInspector()) {
+                  <td class="px-4 py-3 align-middle w-10">
+                    <input type="checkbox" class="rounded border-input"
+                      [checked]="selected().has(voucher.id)"
+                      (change)="toggleSelect(voucher.id)" />
+                  </td>
+                }
                 <td class="px-4 py-3 align-middle whitespace-nowrap">
                   <a [routerLink]="['/vouchers', voucher.id]" class="text-primary hover:underline underline-offset-4 font-medium text-sm">
                     {{ voucher.code }}
@@ -357,6 +365,9 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
                 </td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground">{{ voucher.workerFullName }}</td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/60 font-mono text-xs">{{ voucher.workerIdnp | maskIdnp }}</td>
+                @if (isInspector()) {
+                  <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80 text-sm">{{ voucher.beneficiaryName ?? '—' }}</td>
+                }
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.workDistrict }}</td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap">
                   <span class="inline-flex items-center gap-1.5 text-sm">
@@ -432,7 +443,7 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
                           @if (voucher.status === 'Emis' || voucher.status === 'Activ') {
                             <button
                               class="relative flex w-full cursor-default items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none select-none text-destructive hover:bg-destructive/10 transition-colors"
-                              (click)="cancelVoucher(voucher); closeMenu()"
+                              (click)="openCancelConfirm(voucher); closeMenu()"
                             >
                               <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
                               {{ "action.cancel" | t }}
@@ -509,6 +520,19 @@ import { MaskIdnpPipe } from '../../../shared/pipes/mask-idnp.pipe';
         </div>
       </div>
     </div>
+
+    @if (cancelConfirmVoucher()) {
+      <app-confirm-dialog
+        title="Confirmare anulare voucher"
+        message="Ești sigur că dorești să anulezi voucherul {{ cancelConfirmVoucher()!.code }}? Această acțiune nu poate fi anulată."
+        confirmText="Anulează voucherul"
+        cancelText="Renunță"
+        confirmVariant="destructive"
+        [submitting]="cancelSubmitting()"
+        (confirmed)="confirmCancel()"
+        (cancelled)="cancelConfirmVoucher.set(null)"
+      />
+    }
   `,
 })
 export class VoucherListComponent implements OnInit {
@@ -855,13 +879,30 @@ export class VoucherListComponent implements OnInit {
     this.voucherDataService.reportVoucher(voucher.id, period).subscribe(() => this.loadVouchers());
   }
 
-  protected cancelVoucher(voucher: VoucherTableItem): void {
+  protected readonly cancelConfirmVoucher = signal<VoucherTableItem | null>(null);
+  protected readonly cancelSubmitting = signal(false);
+
+  protected openCancelConfirm(voucher: VoucherTableItem): void {
+    this.cancelConfirmVoucher.set(voucher);
+  }
+
+  protected confirmCancel(): void {
+    const voucher = this.cancelConfirmVoucher();
+    if (!voucher) return;
+    this.cancelSubmitting.set(true);
     this.voucherDataService
       .cancelVoucher(voucher.id, {
         reasonCode: 'CA01',
         cancellationDate: new Date().toISOString().split('T')[0],
       })
-      .subscribe(() => this.loadVouchers());
+      .subscribe({
+        next: () => {
+          this.cancelConfirmVoucher.set(null);
+          this.cancelSubmitting.set(false);
+          this.loadVouchers();
+        },
+        error: () => this.cancelSubmitting.set(false),
+      });
   }
 
   private loadVouchers(): void {
