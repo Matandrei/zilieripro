@@ -219,3 +219,13 @@ export interface CreateBeneficiaryRequest {
   phone?: string;
   email?: string;
 }
+
+export interface GuideItem {
+  id: string;
+  title: string;
+  description?: string;
+  type: 'pdf' | 'video';
+  url: string;
+  sortOrder: number;
+  isActive: boolean;
+}

@@ -178,6 +178,7 @@ export class SidebarLayoutComponent {
     { label: 'nav.statistics', route: '/statistics', icon: '\u{1F4CA}' },
     { label: 'nav.ipc21', route: '/reports/ipc21', icon: '\u{1F4C4}' },
     { label: 'nav.company', route: '/company', icon: '\u{1F3E2}' },
+    { label: 'nav.guide', route: '/guide', icon: '\u{1F4D6}' },
   ];
 
   readonly inspectorNav: NavItem[] = [
@@ -190,6 +191,7 @@ export class SidebarLayoutComponent {
     { label: 'nav.companies', route: '/admin/companies', icon: '\u{1F3E2}' },
     { label: 'nav.params', route: '/admin/params', icon: '\u{2699}\u{FE0F}' },
     { label: 'nav.nomenclators', route: '/admin/nomenclators', icon: '\u{1F4D6}' },
+    { label: 'nav.guides', route: '/admin/guides', icon: '\u{1F4D8}' },
     { label: 'nav.audit', route: '/admin/audit', icon: '\u{1F50D}' },
   ];
 
