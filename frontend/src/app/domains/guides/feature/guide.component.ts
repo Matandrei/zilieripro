@@ -26,7 +26,7 @@ interface GuideEntry {
         <div class="text-center py-16 text-muted-foreground text-sm">Niciun ghid disponibil momentan.</div>
       } @else {
         @if (pdfs().length > 0) {
-          <div class="mb-8">
+          <div [class]="videos().length > 0 ? 'mb-0' : ''">
             <div class="flex items-center gap-3 mb-4">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-muted-foreground shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
               <span class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Ghiduri PDF</span>
@@ -36,7 +36,9 @@ interface GuideEntry {
               @for (item of pdfs(); track item.id) {
                 <div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-card px-5 py-4">
                   <div class="flex items-center gap-3 min-w-0">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 shrink-0 text-blue-600"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                    <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-blue-600"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                    </div>
                     <div class="min-w-0">
                       <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
                       @if (item.description) {
@@ -55,6 +57,10 @@ interface GuideEntry {
           </div>
         }
 
+        @if (pdfs().length > 0 && videos().length > 0) {
+          <div class="my-8 border-t border-border"></div>
+        }
+
         @if (videos().length > 0) {
           <div>
             <div class="flex items-center gap-3 mb-4">
@@ -66,7 +72,9 @@ interface GuideEntry {
               @for (item of videos(); track item.id) {
                 <div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-card px-5 py-4">
                   <div class="flex items-center gap-3 min-w-0">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 shrink-0 text-green-600"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                    <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-green-50">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-green-600"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                    </div>
                     <div class="min-w-0">
                       <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
                       @if (item.description) {
@@ -102,7 +110,7 @@ export class GuideComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.http.get<GuideEntry[]>('/assets/guides.json').subscribe({
+    this.http.get<GuideEntry[]>('/guides.json').subscribe({
       next: (items) => { this.entries.set(items ?? []); this.loading.set(false); },
       error: () => this.loading.set(false),
     });
