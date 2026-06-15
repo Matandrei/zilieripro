@@ -2,7 +2,6 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams, HttpResponse } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { GuideItem } from '../models/voucher.model';
 import {
   BeneficiaryModel,
   CreateBeneficiaryRequest,
@@ -211,21 +210,4 @@ export class ApiService {
     return this.get<NomenclatorModel[]>('/nomenclators', { category });
   }
 
-  // --------------- Guides ---------------
-
-  getGuides(): Observable<GuideItem[]> {
-    return this.get<GuideItem[]>('/guides');
-  }
-
-  createGuide(body: Omit<GuideItem, 'id'>): Observable<GuideItem> {
-    return this.post<GuideItem>('/guides', body);
-  }
-
-  updateGuide(id: string, body: Partial<Omit<GuideItem, 'id'>>): Observable<GuideItem> {
-    return this.put<GuideItem>(`/guides/${id}`, body);
-  }
-
-  deleteGuide(id: string): Observable<void> {
-    return this.delete<void>(`/guides/${id}`);
-  }
 }
