@@ -156,6 +156,7 @@ public class CreateVouchersCommandHandler(
                 Art5Alin1LitG = request.Art5Alin1LitG,
                 WorkerPhone = worker.Phone,
                 WorkerEmail = worker.Email,
+                Tag = request.Tag,
                 Worker = worker
             };
 

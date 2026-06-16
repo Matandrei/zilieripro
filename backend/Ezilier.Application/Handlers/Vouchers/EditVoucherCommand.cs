@@ -54,6 +54,7 @@ public class EditVoucherCommandHandler(
         var oldWorkAddress = voucher.WorkAddress;
         var oldPhone = voucher.Worker?.Phone;
         var oldEmail = voucher.Worker?.Email;
+        var oldTag = voucher.Tag;
 
         var failures = new List<ValidationFailure>();
         var remunerationChanged = false;
@@ -108,6 +109,11 @@ public class EditVoucherCommandHandler(
             if (request.Email is not null)
             {
                 voucher.Worker.Email = request.Email;
+            }
+
+            if (request.Tag is not null)
+            {
+                voucher.Tag = request.Tag == string.Empty ? null : request.Tag;
             }
         }
         else if (voucher.Status == VoucherStatus.Activ)
@@ -201,6 +207,8 @@ public class EditVoucherCommandHandler(
             auditChanges.Add($"Telefon: {oldPhone ?? "-"} → {voucher.Worker?.Phone ?? "-"}");
         if (voucher.Worker?.Email != oldEmail)
             auditChanges.Add($"Email: {oldEmail ?? "-"} → {voucher.Worker?.Email ?? "-"}");
+        if (voucher.Tag != oldTag)
+            auditChanges.Add($"Tag: {oldTag ?? "-"} → {voucher.Tag ?? "-"}");
 
         if (auditChanges.Count > 0)
         {

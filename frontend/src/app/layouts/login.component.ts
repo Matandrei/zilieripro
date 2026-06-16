@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, signal, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { AuthStore } from '../shared/auth/auth.store';
 import { RoleType } from '../shared/models/voucher.model';
 import { TranslatePipe } from '../shared/i18n/translate.pipe';
@@ -8,10 +8,18 @@ import { TranslatePipe } from '../shared/i18n/translate.pipe';
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, TranslatePipe],
+  imports: [FormsModule, TranslatePipe, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="min-h-screen flex items-center justify-center bg-white px-4">
+    <div class="min-h-screen flex flex-col bg-white">
+      <!-- Header cu logo clickabil -> landing -->
+      <header class="border-b border-gray-100">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center">
+          <a routerLink="/" class="text-lg font-bold text-[#2d6a2d] tracking-tight hover:opacity-80 transition-opacity">e-Zilier</a>
+        </div>
+      </header>
+
+      <div class="flex-1 flex items-center justify-center px-4 py-10">
       <div class="w-full sm:w-[480px] bg-card text-card-foreground flex flex-col gap-6 overflow-hidden rounded-xl py-6 text-sm shadow-xs ring-1 ring-foreground/10">
         <!-- Logo -->
         <div class="text-center px-6">
@@ -134,6 +142,7 @@ import { TranslatePipe } from '../shared/i18n/translate.pipe';
             </button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   `,

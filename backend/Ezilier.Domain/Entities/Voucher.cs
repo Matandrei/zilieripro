@@ -45,6 +45,8 @@ public class Voucher : EntityBase
     public string? WorkerPhone { get; set; }
     public string? WorkerEmail { get; set; }
 
+    public string? Tag { get; set; }
+
     public virtual Beneficiary Beneficiary { get; set; } = null!;
     public virtual Worker Worker { get; set; } = null!;
 }

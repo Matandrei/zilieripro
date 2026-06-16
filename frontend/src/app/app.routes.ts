@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './shared/auth/auth.guard';
 
 export const routes: Routes = [
+  { path: '', loadComponent: () => import('./layouts/landing.component').then(m => m.LandingComponent), pathMatch: 'full' },
   { path: 'login', loadComponent: () => import('./layouts/login.component').then(m => m.LoginComponent) },
   {
     path: 'select-company',
