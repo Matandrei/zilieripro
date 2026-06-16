@@ -5,11 +5,7 @@ module.exports = [
   {
     name: 'strapi::cors',
     config: {
-      origin: [
-        'http://localhost:4200',   // dev Angular
-        'https://ezilier.netlify.app', // prototip Netlify
-        /\.netlify\.app$/,         // orice preview Netlify
-      ],
+      origin: '*',
       methods: ['GET', 'HEAD'],
       headers: ['Content-Type', 'Authorization'],
     },
