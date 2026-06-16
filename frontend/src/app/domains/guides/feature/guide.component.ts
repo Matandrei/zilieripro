@@ -1,13 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-
-interface GuideEntry {
-  id: string;
-  title: string;
-  description?: string;
-  type: 'pdf' | 'video';
-  url: string;
-}
+import { GuidesService, GuideEntry } from '../data-access/guides.service';
 
 @Component({
   selector: 'app-guide',
@@ -97,7 +89,7 @@ interface GuideEntry {
   `,
 })
 export class GuideComponent implements OnInit {
-  private readonly http = inject(HttpClient);
+  private readonly guidesService = inject(GuidesService);
 
   protected readonly loading = signal(true);
   private readonly entries = signal<GuideEntry[]>([]);
@@ -110,7 +102,7 @@ export class GuideComponent implements OnInit {
   );
 
   ngOnInit(): void {
-    this.http.get<GuideEntry[]>('/guides.json').subscribe({
+    this.guidesService.getGuides().subscribe({
       next: (items) => { this.entries.set(items ?? []); this.loading.set(false); },
       error: () => this.loading.set(false),
     });

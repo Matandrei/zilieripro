@@ -1,0 +1,35 @@
+{
+  "kind": "collectionType",
+  "collectionName": "guide_entries",
+  "info": {
+    "singularName": "guide-entry",
+    "pluralName": "guide-entries",
+    "displayName": "Guide Entry",
+    "description": "Ghiduri PDF și tutoriale video"
+  },
+  "options": {
+    "draftAndPublish": true
+  },
+  "attributes": {
+    "title": {
+      "type": "string",
+      "required": true
+    },
+    "description": {
+      "type": "string"
+    },
+    "type": {
+      "type": "enumeration",
+      "enum": ["pdf", "video"],
+      "required": true
+    },
+    "url": {
+      "type": "string",
+      "required": true
+    },
+    "order": {
+      "type": "integer",
+      "default": 0
+    }
+  }
+}
