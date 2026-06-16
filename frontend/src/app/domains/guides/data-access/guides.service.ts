@@ -39,7 +39,7 @@ export class GuidesService {
   }
 
   private fetchFromStrapi(): Observable<GuideEntry[]> {
-    const url = `${environment.strapiUrl}/api/guide-entries?sort=order:asc&populate=*`;
+    const url = `${environment.strapiUrl}/api/guide-entries?sort=order:asc`;
     return this.http.get<StrapiResponse>(url).pipe(
       map(res => res.data.map(item => ({
         id: String(item.id),

@@ -10,6 +10,7 @@ public record CreateVoucherRequest
     public string WorkLocality { get; init; } = string.Empty;
     public string? WorkAddress { get; init; }
     public string? ActivityType { get; init; }
+    public string? Tag { get; init; }
     public bool Art5Alin1LitB { get; init; }
     public bool Art5Alin1LitG { get; init; }
     public List<VoucherWorkerRequest> Workers { get; init; } = [];
@@ -37,6 +38,7 @@ public record EditVoucherRequest
     public string? WorkAddress { get; init; }
     public string? Phone { get; init; }
     public string? Email { get; init; }
+    public string? Tag { get; init; }
 }
 
 public record CancelVoucherRequest
@@ -67,6 +69,7 @@ public record VoucherTableItem
     public DateTimeOffset CreatedAt { get; init; }
     public string? WorkerPhone { get; init; }
     public string? WorkerEmail { get; init; }
+    public string? Tag { get; init; }
 }
 
 public record VoucherDetailModel
@@ -99,6 +102,7 @@ public record VoucherDetailModel
     public DateTimeOffset? SignedAt { get; init; }
     public string? WorkerPhone { get; init; }
     public string? WorkerEmail { get; init; }
+    public string? Tag { get; init; }
 
     public WorkerModel Worker { get; init; } = null!;
     public BeneficiaryModel Beneficiary { get; init; } = null!;
@@ -128,4 +132,5 @@ public record VouchersQueryParams
     public Guid? BeneficiaryId { get; init; }
     public string? SortBy { get; init; }
     public bool SortDesc { get; init; }
+    public string? Tag { get; init; }
 }

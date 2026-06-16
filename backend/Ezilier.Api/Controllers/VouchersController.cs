@@ -1,14 +1,24 @@
 using Ezilier.Application.Handlers.Vouchers;
+using Ezilier.Application.Interfaces;
 using Ezilier.Application.Models;
 using FluentValidation.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Ezilier.Api.Controllers;
 
 [Authorize]
 public class VouchersController : BaseApiController
 {
+    [HttpGet("tags")]
+    public async Task<IActionResult> GetTags()
+    {
+        var beneficiaryId = IsInspector ? null : CurrentBeneficiaryId;
+        var (tags, errors, status) = await Mediator.Send(new GetVoucherTagsQuery(beneficiaryId));
+        return StatusCode(status, errors is not null ? errors : tags);
+    }
+
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] VouchersQueryParams queryParams)
     {

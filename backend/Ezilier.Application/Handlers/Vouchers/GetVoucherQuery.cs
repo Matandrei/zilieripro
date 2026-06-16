@@ -66,6 +66,7 @@ public class GetVoucherQueryHandler(
             SignedAt = voucher.SignedAt,
             WorkerPhone = voucher.WorkerPhone,
             WorkerEmail = voucher.WorkerEmail,
+            Tag = voucher.Tag,
             Worker = new WorkerModel
             {
                 Id = voucher.Worker.Id,

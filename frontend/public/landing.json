@@ -1,0 +1,122 @@
+{
+  "brand": "e-Zilier",
+  "loginLabel": "Autentificare",
+  "hero": {
+    "title": "Registrul digital pentru zilieri în agricultură",
+    "description": "Ministerul Muncii și Protecției Sociale implementează registrul digital pentru evidența zilierilor în agricultură, la nivel național. Sistemul simplifică înregistrarea zilierilor și a zilelor lucrate, crește trasabilitatea și facilitează calculul și raportarea contribuțiilor, conform legislației.",
+    "ctaLabel": "Autentificare",
+    "imageUrl": "assets/landing-hero.jpg"
+  },
+  "implementation": {
+    "title": "Etapele de implementare",
+    "steps": [
+      {
+        "num": "01",
+        "title": "Lansare națională",
+        "desc": "Implementarea registrului digital pentru zilieri la nivel național, în funcție de intrarea în vigoare a modificărilor legislative."
+      },
+      {
+        "num": "02",
+        "title": "Instruiri și suport pentru agricultori",
+        "desc": "Sesiuni de instruire și ghidare practică pentru utilizarea sistemului în teren, inclusiv suport pentru primele înregistrări și primele cicluri de lucru."
+      },
+      {
+        "num": "03",
+        "title": "Îmbunătățiri continue",
+        "desc": "Ajustări și îmbunătățiri ale funcționalităților pe baza feedback-ului din utilizare și a nevoilor din teren, pe parcursul sezonului agricol."
+      }
+    ]
+  },
+  "benefits": {
+    "title": "Beneficii pentru agricultori și zilieri",
+    "subtitle": "Un sistem digital transparent și eficient pentru gestionarea zilierilor.",
+    "employerLabel": "Pentru agricultori",
+    "workerLabel": "Pentru zilieri",
+    "employer": [
+      "Registru de evidență a zilierilor digital, fără registre pe hârtie cu cost de procurare și fără 3 semnături zilnice repetate.",
+      "Evidență mai simplă a zilierilor și a zilelor lucrate, inclusiv posibilitate de lucru în lot (mai mulți zilieri).",
+      "Calcul automat al impozitului și contribuțiilor conform legislației și export pentru contabilitate.",
+      "Trasabilitate clară la control: evidență unică, verificabilă, cu istoric și audit.",
+      "Elimină raportarea lunară a registrelor către ISM: evidența și verificarea se fac direct în sistem, iar la control datele sunt disponibile imediat.",
+      "Export în format compatibil cu IPC-21 pentru raportarea către SFS."
+    ],
+    "worker": [
+      "Dovadă clară a zilelor lucrate și a remunerației, înregistrată în SI „e-Zilier\".",
+      "Persoanele înregistrate cu statut de șomer pot desfășura activități ca zilieri în condițiile legii, fără a fi scoase din evidență din acest motiv.",
+      "Contribuții sociale calculate și achitate conform legii, cu impact direct asupra stagiului de cotizare.",
+      "Remunerația nu poate fi sub nivelul minim prevăzut de legislație pentru o zi de muncă.",
+      "La solicitarea zilierului, beneficiarul de lucrări poate tipări dovada pentru ziua respectivă de muncă (voucherul/înregistrarea din sistem) și i-o înmânează pe suport de hârtie."
+    ]
+  },
+  "infoBanner": "Munca nedeclarată în agricultură afectează direct drepturile zilierilor și reduce contribuțiile acumulate pentru pensie și alte beneficii. Registrul digital ajută la formalizare, la trasabilitate și la o evidență corectă a muncii prestate, cu un proces mai simplu pentru agricultori.",
+  "howItWorks": {
+    "title": "Cum funcționează înregistrarea în sistem",
+    "steps": [
+      {
+        "num": "01",
+        "title": "Autentificarea pe platformă",
+        "desc": "Beneficiarul se autentifică prin MPass."
+      },
+      {
+        "num": "02",
+        "title": "Înregistrarea zilierilor și a zilei de lucru",
+        "desc": "Se introduc datele zilierului și datele pentru ziua de activitate (zi, ore, loc, activitate, remunerație). Se poate lucra și prin import (CSV/Excel), după caz."
+      },
+      {
+        "num": "03",
+        "title": "Generarea voucherului digital și calcul automat",
+        "desc": "Sistemul generează înregistrarea digitală pentru ziua respectivă și calculează automat impozitul și contribuțiile conform legislației."
+      },
+      {
+        "num": "04",
+        "title": "Export și raportare",
+        "desc": "Sistemul permite exportul datelor în format compatibil pentru evidență contabilă și raportare."
+      }
+    ]
+  },
+  "faq": {
+    "title": "Întrebări frecvente",
+    "items": [
+      {
+        "q": "Îmi pierd statutul de șomer dacă lucrez ca zilier?",
+        "a": "Nu. Dacă ești înregistrat ca șomer, poți lucra ca zilier. Nu îți pierzi statutul de șomer doar pentru că ai lucrat ca zilier."
+      },
+      {
+        "q": "Cum înregistrez zilieri?",
+        "a": "Accesați platforma e-Zilier, autentificați-vă prin MPass, introduceți datele zilierului (IDNP, nume, prenume, data nașterii) și completați informațiile pentru ziua de activitate (dată, ore, locație, remunerație)."
+      },
+      {
+        "q": "Ce documente sunt necesare pentru a utiliza SI „e-Zilier\"?",
+        "a": "Este necesar un cont MPass activ pentru autentificare. Nu sunt necesare alte documente — datele zilierilor sunt preluate automat din registrele de stat pe baza IDNP-ului."
+      },
+      {
+        "q": "Pot înregistra zilierul după ce munca a fost prestată?",
+        "a": "Înregistrarea trebuie efectuată înainte sau în ziua prestării muncii. Sistemul nu permite înregistrări retroactive pentru zile anterioare."
+      },
+      {
+        "q": "Ce se întâmplă dacă un zilier nu se prezintă la muncă?",
+        "a": "Voucherul poate fi anulat înainte de activare. Odată activat, voucherul atestă că munca a fost prestată și nu mai poate fi anulat fără un motiv valid."
+      },
+      {
+        "q": "Sunt eligibili pentru ajutor social dacă lucrez ca zilier?",
+        "a": "Veniturile obținute ca zilier se iau în calcul la determinarea venitului total al familiei pentru ajutorul social. Contactați asistentul social local pentru detalii specifice situației dvs."
+      }
+    ]
+  },
+  "contact": {
+    "title": "Contactați-ne dacă aveți întrebări",
+    "email": "zilieri@social.gov.md"
+  },
+  "footer": {
+    "logos": [],
+    "supportTitle": "Serviciul suport client:",
+    "supportPhones": [
+      "+373 60 302 950",
+      "+373 60 104 465",
+      "+373 60 225 521",
+      "+373 60 302 953"
+    ],
+    "legalText": "Această platformă a fost elaborată cu sprijinul financiar al Guvernului Italiei, în cadrul proiectului „Transformarea digitală a protecției sociale în Republica Moldova\", implementat de Programul Națiunilor Unite pentru Dezvoltare (PNUD), în parteneriat cu Organizația Internațională a Muncii și Guvernul Elveției. Conținutul platformei aparține autorilor și nu reflectă în mod neapărat viziunea partenerilor de dezvoltare.",
+    "copyright": "© Ministerul Muncii și Protecției Sociale · SI „e-Zilier\""
+  }
+}

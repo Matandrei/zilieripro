@@ -144,6 +144,9 @@ import { VoucherSignOverlayComponent } from '../ui/voucher-sign-overlay.componen
                 @if (v.workAddress) { <br/>{{ v.workAddress }} }
               </dd>
               <dt>Activitatea realizata</dt><dd>{{ activityLabel(v.activityType) }}</dd>
+              @if (v.tag) {
+                <dt>Tag</dt><dd>{{ v.tag }}</dd>
+              }
             </dl>
           </section>
 

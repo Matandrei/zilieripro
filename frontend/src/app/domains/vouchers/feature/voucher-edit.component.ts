@@ -4,6 +4,7 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { VoucherDataService } from '../data/voucher-data.service';
 import { VoucherDetail } from '../../../shared/models/voucher.model';
 import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge.component';
+import { ApiService } from '../../../shared/services/api.service';
 
 @Component({
   selector: 'app-voucher-edit',
@@ -160,6 +161,30 @@ import { StatusBadgeComponent } from '../../../shared/ui/components/status-badge
                   class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:pointer-events-none disabled:opacity-50"
                 />
               </div>
+
+              <!-- Tag combobox -->
+              <div class="space-y-2">
+                <label class="text-sm font-medium leading-none select-none">Tag <span class="text-muted-foreground font-normal">(optional)</span></label>
+                <div class="relative">
+                  <input type="text"
+                    [value]="tagInput()"
+                    (input)="onTagInput($any($event.target).value)"
+                    (focus)="tagDropdownOpen.set(filteredExistingTags().length > 0)"
+                    (blur)="confirmTag()"
+                    (keydown.enter)="$event.preventDefault(); confirmTag()"
+                    placeholder="ex: cirese, vie, constructii..."
+                    class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50" />
+                  @if (tagDropdownOpen() && filteredExistingTags().length > 0) {
+                    <div class="fixed inset-0 z-[40]" (mousedown)="tagDropdownOpen.set(false)"></div>
+                    <div class="absolute left-0 right-0 top-full mt-1 z-[50] max-h-48 overflow-y-auto rounded-md border border-foreground/10 bg-white shadow-lg">
+                      @for (tag of filteredExistingTags(); track tag) {
+                        <div class="px-3 py-2 text-sm hover:bg-accent cursor-pointer"
+                             (mousedown)="selectTag(tag)">{{ tag }}</div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
             </div>
             <div class="mt-4 flex items-center gap-6">
               <label class="flex items-center gap-2 text-sm text-foreground/80">
@@ -302,6 +327,7 @@ export class VoucherEditComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
   private readonly voucherDataService = inject(VoucherDataService);
+  private readonly api = inject(ApiService);
 
   protected readonly voucher = signal<VoucherDetail | null>(null);
   protected readonly loading = signal(true);
@@ -321,6 +347,15 @@ export class VoucherEditComponent implements OnInit {
 
   // Locks district/locality dropdowns when voucher is Activ
   protected readonly locationLocked = signal(false);
+
+  // Tag combobox
+  protected readonly tagInput = signal('');
+  protected readonly existingTags = signal<string[]>([]);
+  protected readonly tagDropdownOpen = signal(false);
+  protected readonly filteredExistingTags = computed(() => {
+    const term = this.tagInput().toLowerCase();
+    return this.existingTags().filter(t => t.toLowerCase().includes(term) && t !== this.tagInput());
+  });
 
   private readonly districtLocalities: Record<string, string[]> = {
     Chisinau: ['mun. Chisinau', 'Buiucani', 'Centru', 'Botanica', 'Ciocana', 'Riscani', 'Durlesti', 'Vatra', 'Codru', 'Cricova', 'Sangera', 'Stauceni', 'Ialoveni', 'Straseni'],
@@ -378,6 +413,21 @@ export class VoucherEditComponent implements OnInit {
   ngOnInit(): void {
     this.voucherId = this.route.snapshot.paramMap.get('id')!;
     this.loadVoucher(this.voucherId);
+    this.api.getVoucherTags().subscribe({ next: (tags) => this.existingTags.set(tags ?? []) });
+  }
+
+  protected onTagInput(value: string): void {
+    this.tagInput.set(value);
+    this.tagDropdownOpen.set(value.length > 0 && this.filteredExistingTags().length > 0);
+  }
+
+  protected selectTag(tag: string): void {
+    this.tagInput.set(tag);
+    this.tagDropdownOpen.set(false);
+  }
+
+  protected confirmTag(): void {
+    this.tagDropdownOpen.set(false);
   }
 
   protected selectDistrict(district: string): void {
@@ -413,6 +463,7 @@ export class VoucherEditComponent implements OnInit {
       netRemuneration: Number(value.netRemuneration),
       phone: value.phone || null,
       email: value.email || null,
+      tag: this.tagInput().trim() || '',
     };
 
     if (!isActiv) {
@@ -466,6 +517,7 @@ export class VoucherEditComponent implements OnInit {
 
     this.selectedDistrict.set(v.workDistrict || '');
     this.selectedLocalityValue.set(v.workLocality || '');
+    this.tagInput.set(v.tag ?? '');
 
     if (v.status === 'Activ') {
       ['workDate', 'workDistrict', 'workLocality', 'workAddress', 'art5Alin1LitB', 'art5Alin1LitG']

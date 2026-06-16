@@ -69,6 +69,11 @@ public class GetVouchersQueryHandler(
             q = q.Where(v => v.WorkDistrict == p.District);
         }
 
+        if (!string.IsNullOrWhiteSpace(p.Tag))
+        {
+            q = q.Where(v => v.Tag == p.Tag);
+        }
+
         if (!string.IsNullOrWhiteSpace(p.Locality))
         {
             // Multi-select: frontend trimite CSV (ex: "Balti,Cahul"). Daca un singur item, fallback Contains pentru flexibilitate.
@@ -120,7 +125,8 @@ public class GetVouchersQueryHandler(
                 WorkDistrict = v.WorkDistrict,
                 CreatedAt = v.CreatedAt,
                 WorkerPhone = v.WorkerPhone,
-                WorkerEmail = v.WorkerEmail
+                WorkerEmail = v.WorkerEmail,
+                Tag = v.Tag
             })
             .ToListAsync(cancellationToken);
 
