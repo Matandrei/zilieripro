@@ -1,88 +1,77 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { GuidesService, GuideEntry } from '../data-access/guides.service';
 
+interface GuideGroup {
+  category: string | null;
+  items: GuideEntry[];
+}
+
 @Component({
   selector: 'app-guide',
   standalone: true,
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="max-w-4xl mx-auto">
+    <div class="max-w-3xl mx-auto">
       <div class="mb-6">
         <h1 class="text-3xl font-bold tracking-tight text-foreground">Ghid de utilizare</h1>
-        <p class="text-sm text-muted-foreground mt-1">Apasă pe buton pentru a deschide ghidul sau tutorialul în Google Drive.</p>
+        <p class="text-sm text-muted-foreground mt-1">Apasă pe un ghid pentru a-l deschide în Google Drive.</p>
       </div>
 
       @if (loading()) {
-        <div class="text-center py-16 text-muted-foreground text-sm">Se încarcă...</div>
-      } @else if (pdfs().length === 0 && videos().length === 0) {
-        <div class="text-center py-16 text-muted-foreground text-sm">Niciun ghid disponibil momentan.</div>
+        <div class="space-y-3">
+          @for (i of [1,2,3]; track i) {
+            <div class="h-[72px] rounded-xl border border-border bg-card animate-pulse"></div>
+          }
+        </div>
+      } @else if (entries().length === 0) {
+        <div class="rounded-xl border border-dashed border-border bg-card/50 text-center py-16 px-6">
+          <p class="text-sm text-muted-foreground">Niciun ghid disponibil momentan.</p>
+        </div>
       } @else {
-        @if (pdfs().length > 0) {
-          <div [class]="videos().length > 0 ? 'mb-0' : ''">
-            <div class="flex items-center gap-3 mb-4">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-muted-foreground shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
-              <span class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Ghiduri PDF</span>
-              <div class="flex-1 h-px bg-border"></div>
-            </div>
+        @for (group of groups(); track group.category) {
+          <section class="mb-8 last:mb-0">
+            @if (group.category) {
+              <h2 class="text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-3 px-1">{{ group.category }}</h2>
+            }
             <div class="space-y-3">
-              @for (item of pdfs(); track item.id) {
-                <div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-card px-5 py-4">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-blue-600"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
-                      @if (item.description) {
-                        <p class="text-xs text-muted-foreground">{{ item.description }}</p>
-                      }
-                    </div>
+              @for (item of group.items; track item.id) {
+                <a [href]="item.url" target="_blank" rel="noopener noreferrer"
+                  class="group flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 transition-all hover:border-primary/40 hover:shadow-sm">
+                  <!-- Icon -->
+                  <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                    @if (item.type === 'video') {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-muted-foreground"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                    } @else {
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-muted-foreground"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                    }
                   </div>
-                  <a [href]="item.url" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
-                    Deschide în Drive
-                  </a>
-                </div>
+
+                  <!-- Text -->
+                  <div class="min-w-0 flex-1">
+                    <p class="text-sm font-medium text-foreground truncate">{{ item.title }}</p>
+                    @if (item.description) {
+                      <p class="text-xs text-muted-foreground truncate mt-0.5">{{ item.description }}</p>
+                    }
+                  </div>
+
+                  <!-- Buton CTA sau chevron -->
+                  @if (item.ctaLabel) {
+                    <span class="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                      {{ item.ctaLabel }}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
+                      </svg>
+                    </span>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
+                    </svg>
+                  }
+                </a>
               }
             </div>
-          </div>
-        }
-
-        @if (pdfs().length > 0 && videos().length > 0) {
-          <div class="my-8 border-t border-border"></div>
-        }
-
-        @if (videos().length > 0) {
-          <div>
-            <div class="flex items-center gap-3 mb-4">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4 text-muted-foreground shrink-0"><path stroke-linecap="round" stroke-linejoin="round" d="m15 10 4.553-2.07A1 1 0 0 1 21 8.845v6.31a1 1 0 0 1-1.447.894L15 14M3 8a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
-              <span class="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Tutoriale video</span>
-              <div class="flex-1 h-px bg-border"></div>
-            </div>
-            <div class="space-y-3">
-              @for (item of videos(); track item.id) {
-                <div class="flex items-center justify-between gap-4 rounded-lg border border-border bg-card px-5 py-4">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-green-50">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-green-600"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
-                    </div>
-                    <div class="min-w-0">
-                      <p class="text-sm font-medium text-foreground">{{ item.title }}</p>
-                      @if (item.description) {
-                        <p class="text-xs text-muted-foreground">{{ item.description }}</p>
-                      }
-                    </div>
-                  </div>
-                  <a [href]="item.url" target="_blank" rel="noopener noreferrer"
-                    class="inline-flex shrink-0 items-center gap-2 rounded-md border border-input bg-background px-4 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground transition-colors">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-4"><path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/></svg>
-                    Deschide în Drive
-                  </a>
-                </div>
-              }
-            </div>
-          </div>
+          </section>
         }
       }
     </div>
@@ -92,14 +81,25 @@ export class GuideComponent implements OnInit {
   private readonly guidesService = inject(GuidesService);
 
   protected readonly loading = signal(true);
-  private readonly entries = signal<GuideEntry[]>([]);
+  protected readonly entries = signal<GuideEntry[]>([]);
 
-  protected readonly pdfs = computed(() =>
-    this.entries().filter(g => g.type === 'pdf')
-  );
-  protected readonly videos = computed(() =>
-    this.entries().filter(g => g.type === 'video')
-  );
+  // Grupare dinamică: dacă itemii au `category`, se grupează pe secțiuni
+  // (ordinea categoriilor = prima apariție); altfel o singură listă plată.
+  protected readonly groups = computed<GuideGroup[]>(() => {
+    const items = this.entries();
+    const hasCategories = items.some(i => !!i.category?.trim());
+    if (!hasCategories) {
+      return [{ category: null, items }];
+    }
+    const order: string[] = [];
+    const map = new Map<string, GuideEntry[]>();
+    for (const item of items) {
+      const key = item.category?.trim() || 'Altele';
+      if (!map.has(key)) { map.set(key, []); order.push(key); }
+      map.get(key)!.push(item);
+    }
+    return order.map(category => ({ category, items: map.get(category)! }));
+  });
 
   ngOnInit(): void {
     this.guidesService.getGuides().subscribe({
