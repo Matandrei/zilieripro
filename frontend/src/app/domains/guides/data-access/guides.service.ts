@@ -10,6 +10,8 @@ export interface GuideEntry {
   type: 'pdf' | 'video';
   url: string;
   order?: number;
+  /** Opțional: grupează itemii pe secțiuni dinamice (setat din Strapi). */
+  category?: string;
 }
 
 // Strapi v5 response shape (flat)
@@ -21,6 +23,7 @@ interface StrapiItem {
   type: 'pdf' | 'video';
   url: string;
   order?: number;
+  category?: string;
 }
 
 interface StrapiResponse {
@@ -48,6 +51,7 @@ export class GuidesService {
         type: item.type,
         url: item.url,
         order: item.order,
+        category: item.category,
       }))),
       catchError(() => this.fetchFromJson()) // fallback dacă Strapi e down
     );
