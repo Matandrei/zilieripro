@@ -52,16 +52,18 @@ import { AuthStore } from '../../../shared/auth/auth.store';
               (ngModelChange)="dateTo.set($event)"
             />
           </div>
-          <div class="space-y-2">
-            <label class="text-sm font-medium leading-none select-none">IDNP Lucrător</label>
-            <input
-              type="text"
-              placeholder="Filtrare parțială..."
-              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-              [ngModel]="workerIdnp()"
-              (ngModelChange)="workerIdnp.set($event)"
-            />
-          </div>
+          @if (!isInspector()) {
+            <div class="space-y-2">
+              <label class="text-sm font-medium leading-none select-none">IDNP Lucrător</label>
+              <input
+                type="text"
+                placeholder="Filtrare parțială..."
+                class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none transition-[color,box-shadow] placeholder:text-muted-foreground focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                [ngModel]="workerIdnp()"
+                (ngModelChange)="workerIdnp.set($event)"
+              />
+            </div>
+          }
           <div class="space-y-2">
             <label class="text-sm font-medium leading-none select-none">Raion</label>
             <select
