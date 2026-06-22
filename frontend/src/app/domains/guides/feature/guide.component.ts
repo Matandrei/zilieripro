@@ -37,35 +37,37 @@ interface GuideGroup {
               @for (item of group.items; track item.id) {
                 <a [href]="item.url" target="_blank" rel="noopener noreferrer"
                   class="group flex items-center gap-4 rounded-xl border border-border bg-card px-4 py-3.5 transition-all hover:border-primary/40 hover:shadow-sm">
-                  <!-- Icon tip -->
-                  <div class="flex size-10 shrink-0 items-center justify-center rounded-lg"
-                    [class]="item.type === 'video' ? 'bg-green-50' : 'bg-blue-50'">
+                  <!-- Icon -->
+                  <div class="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
                     @if (item.type === 'video') {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-green-600"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-muted-foreground"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg>
                     } @else {
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-blue-600"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5 text-muted-foreground"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2z"/></svg>
                     }
                   </div>
 
                   <!-- Text -->
                   <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2">
-                      <p class="text-sm font-medium text-foreground truncate">{{ item.title }}</p>
-                      <span class="shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide"
-                        [class]="item.type === 'video' ? 'bg-green-50 text-green-700' : 'bg-blue-50 text-blue-700'">
-                        {{ item.type === 'video' ? 'Video' : 'PDF' }}
-                      </span>
-                    </div>
+                    <p class="text-sm font-medium text-foreground truncate">{{ item.title }}</p>
                     @if (item.description) {
                       <p class="text-xs text-muted-foreground truncate mt-0.5">{{ item.description }}</p>
                     }
                   </div>
 
-                  <!-- Chevron / open -->
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                    class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
-                  </svg>
+                  <!-- Buton CTA sau chevron -->
+                  @if (item.ctaLabel) {
+                    <span class="shrink-0 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold bg-primary/10 text-primary transition-colors group-hover:bg-primary/20">
+                      {{ item.ctaLabel }}
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-3">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
+                      </svg>
+                    </span>
+                  } @else {
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                      class="size-4 shrink-0 text-muted-foreground transition-transform group-hover:translate-x-0.5 group-hover:text-primary">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14 21 3"/>
+                    </svg>
+                  }
                 </a>
               }
             </div>

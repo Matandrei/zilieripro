@@ -12,6 +12,8 @@ export interface GuideEntry {
   order?: number;
   /** Opțional: grupează itemii pe secțiuni dinamice (setat din Strapi). */
   category?: string;
+  /** Opțional: label buton custom (ex: "Deschide video", "Descarcă PDF"). */
+  ctaLabel?: string;
 }
 
 // Strapi v5 response shape (flat)
@@ -24,6 +26,7 @@ interface StrapiItem {
   url: string;
   order?: number;
   category?: string;
+  ctaLabel?: string;
 }
 
 interface StrapiResponse {
@@ -52,6 +55,7 @@ export class GuidesService {
         url: item.url,
         order: item.order,
         category: item.category,
+        ctaLabel: item.ctaLabel,
       }))),
       catchError(() => this.fetchFromJson()) // fallback dacă Strapi e down
     );
