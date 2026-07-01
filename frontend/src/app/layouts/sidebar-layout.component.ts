@@ -10,6 +10,7 @@ interface NavItem {
   route: string;
   icon: string;
   separator?: boolean;
+  href?: string; // link extern — deschide în tab nou
 }
 
 @Component({
@@ -143,16 +144,29 @@ interface NavItem {
         @if (item.separator) {
           <div class="my-2 border-t border-border"></div>
         }
-        <a
-          [routerLink]="item.route"
-          routerLinkActive="bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80"
-          [routerLinkActiveOptions]="{ exact: item.route === '/vouchers' }"
-          class="inline-flex items-center whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full justify-start gap-3"
-          (click)="closeSidebar()"
-        >
-          <span class="text-base leading-none">{{ item.icon }}</span>
-          <span>{{ item.label | t }}</span>
-        </a>
+        @if (item.href) {
+          <a
+            [href]="item.href"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="inline-flex items-center whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full justify-start gap-3"
+            (click)="closeSidebar()"
+          >
+            <span class="text-base leading-none">{{ item.icon }}</span>
+            <span>{{ item.label | t }}</span>
+          </a>
+        } @else {
+          <a
+            [routerLink]="item.route"
+            routerLinkActive="bg-secondary text-secondary-foreground shadow-sm hover:bg-secondary/80"
+            [routerLinkActiveOptions]="{ exact: item.route === '/vouchers' }"
+            class="inline-flex items-center whitespace-nowrap rounded-md text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-accent hover:text-accent-foreground h-9 px-4 py-2 w-full justify-start gap-3"
+            (click)="closeSidebar()"
+          >
+            <span class="text-base leading-none">{{ item.icon }}</span>
+            <span>{{ item.label | t }}</span>
+          </a>
+        }
       </ng-template>
     </aside>
 
@@ -182,7 +196,7 @@ export class SidebarLayoutComponent {
     { label: 'nav.statistics', route: '/statistics', icon: '\u{1F4CA}' },
     { label: 'nav.ipc21', route: '/reports/ipc21', icon: '\u{1F4C4}' },
     { label: 'nav.company', route: '/company', icon: '\u{1F3E2}' },
-    { label: 'nav.guide', route: '/guide', icon: '\u{1F4D6}', separator: true },
+    { label: 'nav.guide', route: '/guide', href: 'https://youtu.be/JUAuT-mt9ek?si=hwJ5eAi3H1myByoH', icon: '\u{1F4D6}', separator: true },
   ];
 
   readonly inspectorNav: NavItem[] = [
