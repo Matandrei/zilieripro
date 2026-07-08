@@ -73,6 +73,7 @@ public record StatisticsModel
     public decimal TotalTaxCollected { get; init; }
     public Dictionary<string, int> VouchersByStatus { get; init; } = [];
     public Dictionary<string, int> VouchersByDistrict { get; init; } = [];
+    public Dictionary<string, int> WorkersByAgeGroup { get; init; } = [];
     public Dictionary<string, int> VouchersByMonth { get; init; } = [];
     public Dictionary<string, int> HoursByMonth { get; init; } = [];
     public Dictionary<string, decimal> RemunerationByMonth { get; init; } = [];

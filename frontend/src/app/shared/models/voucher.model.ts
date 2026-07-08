@@ -185,6 +185,7 @@ export interface StatisticsModel {
   totalTaxCollected: number;
   vouchersByStatus: Record<string, number>;
   vouchersByDistrict: Record<string, number>;
+  workersByAgeGroup: Record<string, number>;
   vouchersByMonth: Record<string, number>;
   hoursByMonth: Record<string, number>;
   remunerationByMonth: Record<string, number>;

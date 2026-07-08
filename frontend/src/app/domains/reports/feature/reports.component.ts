@@ -167,6 +167,26 @@ import { AuthStore } from '../../../shared/auth/auth.store';
           }
         </div>
 
+        <!-- Workers by Age Group -->
+        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
+          <h2 class="text-lg font-semibold text-foreground mb-4">Lucrători după Vârstă</h2>
+          @for (entry of ageEntries(); track entry.key) {
+            <div class="flex items-center gap-3 mb-3">
+              <span class="w-24 shrink-0 text-sm text-foreground/80 font-medium">{{ entry.key }}</span>
+              <div class="flex-1 bg-muted rounded-full h-6 overflow-hidden">
+                <div
+                  class="h-6 rounded-full bg-success flex items-center justify-end pr-2 text-xs font-medium text-white"
+                  [style.width.%]="ratioPercent(entry.value, s.totalWorkers)"
+                >
+                  {{ entry.value }}
+                </div>
+              </div>
+            </div>
+          } @empty {
+            <p class="text-sm text-muted-foreground">Nu există date.</p>
+          }
+        </div>
+
         <!-- Vouchers by District -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
           <div class="px-6 py-4 border-b border-input">
@@ -238,6 +258,15 @@ export class ReportsComponent implements OnInit {
     return Object.entries(s.vouchersByDistrict).map(([key, value]) => ({ key, value }));
   });
 
+  private readonly ageOrder = ['Sub 18', '18-24', '25-34', '35-44', '45-54', '55-64', '65+'];
+
+  protected readonly ageEntries = computed(() => {
+    const s = this.stats();
+    if (!s) return [];
+    const byAge = s.workersByAgeGroup ?? {};
+    return this.ageOrder.filter((key) => key in byAge).map((key) => ({ key, value: byAge[key] }));
+  });
+
   ngOnInit(): void {
     this.loadStatistics();
   }
@@ -294,6 +323,11 @@ export class ReportsComponent implements OnInit {
     const s = this.stats();
     if (!s || s.totalVouchers === 0) return 0;
     return Math.max(4, (value / s.totalVouchers) * 100);
+  }
+
+  protected ratioPercent(value: number, total: number): number {
+    if (!total) return 0;
+    return Math.max(4, (value / total) * 100);
   }
 
   protected statusBarColor(status: string): string {
