@@ -105,43 +105,6 @@ import { AuthStore } from '../../../shared/auth/auth.store';
       }
 
       @if (stats(); as s) {
-        <!-- Inspector KPI Panel -->
-        @if (isInspector()) {
-          <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs p-6 mb-6">
-            <h2 class="text-lg font-semibold text-foreground mb-4">Tablou de bord Inspector ISM</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div class="rounded-lg bg-primary/5 ring-1 ring-primary/20 p-4 text-center">
-                <div class="text-2xl font-bold text-primary">{{ raportatCount() | number }}</div>
-                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Raportat</div>
-              </div>
-              <div class="rounded-lg bg-destructive/5 ring-1 ring-destructive/20 p-4 text-center">
-                <div class="text-2xl font-bold text-destructive">{{ anulatCount() | number }}</div>
-                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Anulat</div>
-              </div>
-              <div class="rounded-lg bg-muted/50 ring-1 ring-foreground/10 p-4 text-center">
-                <div class="text-2xl font-bold text-foreground">{{ s.totalBeneficiaries | number }}</div>
-                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Beneficiari activi</div>
-              </div>
-              <div class="rounded-lg bg-muted/50 ring-1 ring-foreground/10 p-4 text-center">
-                <div class="text-2xl font-bold text-foreground">{{ anulatRatio() }}%</div>
-                <div class="text-xs text-muted-foreground mt-1 uppercase tracking-wide">Rată anulare</div>
-              </div>
-            </div>
-            <!-- RAPORTAT vs ANULAT progress bar -->
-            @if (raportatCount() + anulatCount() > 0) {
-              <div>
-                <div class="flex justify-between text-xs text-muted-foreground mb-1">
-                  <span>Raportat ({{ raportatCount() }})</span>
-                  <span>Anulat ({{ anulatCount() }})</span>
-                </div>
-                <div class="flex h-3 rounded-full overflow-hidden bg-destructive/20">
-                  <div class="bg-primary transition-all" [style.width.%]="raportatPercent()"></div>
-                </div>
-              </div>
-            }
-          </div>
-        }
-
         <!-- Summary Section -->
         <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden mb-6">
           <div class="px-6 py-4 border-b border-input">
@@ -165,16 +128,20 @@ import { AuthStore } from '../../../shared/auth/auth.store';
               <dd class="text-sm font-semibold text-foreground">{{ s.totalHoursWorked | number }}</dd>
             </div>
             <div class="flex items-center justify-between px-6 py-3">
-              <dt class="text-sm text-muted-foreground">Remunerare Netă Totală</dt>
-              <dd class="text-sm font-semibold text-foreground">{{ s.totalNetRemuneration | number:'1.2-2' }} MDL</dd>
+              <dt class="text-sm text-muted-foreground">Impozit pe venit (12%)</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ incomeTaxTotal() | number:'1.2-2' }} MDL</dd>
             </div>
             <div class="flex items-center justify-between px-6 py-3">
-              <dt class="text-sm text-muted-foreground">Remunerare Brută Totală</dt>
+              <dt class="text-sm text-muted-foreground">Contribuții CNAS (6%)</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ cnasTotal() | number:'1.2-2' }} MDL</dd>
+            </div>
+            <div class="flex items-center justify-between px-6 py-3">
+              <dt class="text-sm text-muted-foreground">Remunerație Brută</dt>
               <dd class="text-sm font-semibold text-foreground">{{ s.totalGrossRemuneration | number:'1.2-2' }} MDL</dd>
             </div>
             <div class="flex items-center justify-between px-6 py-3">
-              <dt class="text-sm text-muted-foreground">Taxe Colectate</dt>
-              <dd class="text-sm font-semibold text-foreground">{{ s.totalTaxCollected | number:'1.2-2' }} MDL</dd>
+              <dt class="text-sm text-muted-foreground">Remunerație Netă</dt>
+              <dd class="text-sm font-semibold text-foreground">{{ s.totalNetRemuneration | number:'1.2-2' }} MDL</dd>
             </div>
           </dl>
         </div>
@@ -201,7 +168,7 @@ import { AuthStore } from '../../../shared/auth/auth.store';
         </div>
 
         <!-- Vouchers by District -->
-        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden mb-6">
+        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
           <div class="px-6 py-4 border-b border-input">
             <h2 class="text-lg font-semibold text-foreground">Vouchere după Raion</h2>
           </div>
@@ -218,35 +185,6 @@ import { AuthStore } from '../../../shared/auth/auth.store';
                   <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
                     <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
                     <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number }}</td>
-                  </tr>
-                } @empty {
-                  <tr>
-                    <td colspan="2" class="px-4 py-6 align-middle text-center text-sm text-muted-foreground">Nu există date.</td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Remuneration by Month -->
-        <div class="bg-card text-card-foreground rounded-xl ring-1 ring-foreground/10 shadow-xs overflow-hidden">
-          <div class="px-6 py-4 border-b border-input">
-            <h2 class="text-lg font-semibold text-foreground">Remunerare după Lună</h2>
-          </div>
-          <div class="overflow-x-auto">
-            <table class="w-full caption-bottom text-sm">
-              <thead class="[&_tr]:border-b [&_tr]:border-foreground/10">
-                <tr>
-                  <th class="text-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap">Lună</th>
-                  <th class="text-foreground h-10 px-4 text-end align-middle font-medium whitespace-nowrap">Remunerare (MDL)</th>
-                </tr>
-              </thead>
-              <tbody class="[&_tr:last-child]:border-0">
-                @for (entry of monthEntries(); track entry.key) {
-                  <tr class="hover:bg-muted/50 border-b border-foreground/5 transition-colors">
-                    <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ entry.key }}</td>
-                    <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80 text-right">{{ entry.value | number:'1.2-2' }}</td>
                   </tr>
                 } @empty {
                   <tr>
@@ -275,35 +213,29 @@ export class ReportsComponent implements OnInit {
   protected readonly exportingCsv = signal(false);
   protected readonly stats = signal<StatisticsModel | null>(null);
 
-  protected readonly raportatCount = computed(() => this.stats()?.vouchersByStatus?.['Raportat'] ?? 0);
-  protected readonly anulatCount = computed(() => this.stats()?.vouchersByStatus?.['Anulat'] ?? 0);
-  protected readonly anulatRatio = computed(() => {
-    const total = this.stats()?.totalVouchers ?? 0;
-    if (total === 0) return 0;
-    return Math.round((this.anulatCount() / total) * 100);
-  });
-  protected readonly raportatPercent = computed(() => {
-    const total = this.raportatCount() + this.anulatCount();
-    if (total === 0) return 0;
-    return Math.round((this.raportatCount() / total) * 100);
-  });
+  // Split the collected tax in the 12:6 ratio so that Impozit + CNAS == Gross - Net exactly.
+  protected readonly incomeTaxTotal = computed(() => (this.stats()?.totalTaxCollected ?? 0) * (12 / 18));
+  protected readonly cnasTotal = computed(() => (this.stats()?.totalTaxCollected ?? 0) * (6 / 18));
+
+  private readonly statusOrder = ['Emis', 'Activ', 'Executat', 'Raportat', 'Anulat'];
 
   protected readonly statusEntries = computed(() => {
     const s = this.stats();
     if (!s) return [];
-    return Object.entries(s.vouchersByStatus).map(([key, value]) => ({ key, value }));
+    const byStatus = s.vouchersByStatus;
+    const ordered = this.statusOrder
+      .filter((key) => key in byStatus)
+      .map((key) => ({ key, value: byStatus[key] }));
+    const extras = Object.entries(byStatus)
+      .filter(([key]) => !this.statusOrder.includes(key))
+      .map(([key, value]) => ({ key, value }));
+    return [...ordered, ...extras];
   });
 
   protected readonly districtEntries = computed(() => {
     const s = this.stats();
     if (!s) return [];
     return Object.entries(s.vouchersByDistrict).map(([key, value]) => ({ key, value }));
-  });
-
-  protected readonly monthEntries = computed(() => {
-    const s = this.stats();
-    if (!s) return [];
-    return Object.entries(s.remunerationByMonth).map(([key, value]) => ({ key, value }));
   });
 
   ngOnInit(): void {
