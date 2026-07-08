@@ -22,6 +22,7 @@ public class GetStatisticsQueryHandler(
 
         var vouchersQuery = context.Vouchers
             .AsNoTracking()
+            .Include(v => v.Worker)
             .Where(v => !v.IsDeleted);
 
         // Apply filters
@@ -59,6 +60,15 @@ public class GetStatisticsQueryHandler(
             .GroupBy(v => v.WorkDistrict)
             .ToDictionary(g => g.Key, g => g.Count());
 
+        // Distinct workers bucketed by age (as of today), demographic view over the filtered set.
+        var today = DateOnly.FromDateTime(DateTimeOffset.UtcNow.UtcDateTime);
+        var workersByAgeGroup = vouchers
+            .Where(v => v.Worker is not null)
+            .GroupBy(v => v.WorkerId)
+            .Select(g => g.First().Worker)
+            .GroupBy(w => AgeGroup(CalculateAge(w.BirthDate, today)))
+            .ToDictionary(g => g.Key, g => g.Count());
+
         var vouchersByMonth = vouchers
             .GroupBy(v => v.WorkDate.ToString("yyyy-MM"))
             .ToDictionary(g => g.Key, g => g.Count());
@@ -85,6 +95,7 @@ public class GetStatisticsQueryHandler(
             TotalTaxCollected = vouchers.Sum(v => v.IncomeTax + v.CnasContribution),
             VouchersByStatus = vouchersByStatus,
             VouchersByDistrict = vouchersByDistrict,
+            WorkersByAgeGroup = workersByAgeGroup,
             VouchersByMonth = vouchersByMonth,
             HoursByMonth = hoursByMonth,
             RemunerationByMonth = remunerationByMonth
@@ -92,4 +103,22 @@ public class GetStatisticsQueryHandler(
 
         return (model, null, 200);
     }
+
+    private static int CalculateAge(DateOnly birthDate, DateOnly today)
+    {
+        var age = today.Year - birthDate.Year;
+        if (birthDate > today.AddYears(-age)) age--;
+        return age;
+    }
+
+    private static string AgeGroup(int age) => age switch
+    {
+        < 18 => "Sub 18",
+        <= 24 => "18-24",
+        <= 34 => "25-34",
+        <= 44 => "35-44",
+        <= 54 => "45-54",
+        <= 64 => "55-64",
+        _ => "65+"
+    };
 }
