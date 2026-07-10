@@ -51,5 +51,6 @@ public record WorkersQueryParams
     public int Limit { get; init; } = 25;
     public string? Search { get; init; }
     public string? Idnp { get; init; }
+    public string? Contact { get; init; }
     public Guid? BeneficiaryId { get; init; }
 }
