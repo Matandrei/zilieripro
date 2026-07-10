@@ -201,6 +201,7 @@ export class SidebarLayoutComponent {
 
   readonly inspectorNav: NavItem[] = [
     { label: 'nav.vouchers', route: '/vouchers', icon: '\u{1F4CB}' },
+    { label: 'nav.beneficiaries', route: '/inspector/beneficiaries', icon: '\u{1F50E}' },
     { label: 'nav.reports', route: '/reports', icon: '\u{1F4CA}' },
   ];
 

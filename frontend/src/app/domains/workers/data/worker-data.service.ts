@@ -24,6 +24,10 @@ export class WorkerDataService {
     return this.api.getVouchers({ workerId });
   }
 
+  getWorkerVouchersByIdnp(idnp: string): Observable<PaginatedResult<VoucherTableItem>> {
+    return this.api.getVouchers({ workerIdnp: idnp, limit: 500 });
+  }
+
   createWorker(request: CreateWorkerRequest): Observable<WorkerModel> {
     return this.api.createWorker(request);
   }

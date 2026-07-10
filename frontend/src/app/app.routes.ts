@@ -28,6 +28,8 @@ export const routes: Routes = [
       // Workers
       { path: 'workers', loadComponent: () => import('./domains/workers/feature/worker-list.component').then(m => m.WorkerListComponent) },
       { path: 'workers/:id', loadComponent: () => import('./domains/workers/feature/worker-profile.component').then(m => m.WorkerProfileComponent) },
+      // Inspector — beneficiary/worker lookup
+      { path: 'inspector/beneficiaries', loadComponent: () => import('./domains/workers/feature/beneficiary-lookup.component').then(m => m.BeneficiaryLookupComponent) },
       // Reports
       { path: 'reports', loadComponent: () => import('./domains/reports/feature/reports.component').then(m => m.ReportsComponent) },
       { path: 'reports/ipc21', loadComponent: () => import('./domains/reports/feature/ipc21-report.component').then(m => m.Ipc21ReportComponent) },

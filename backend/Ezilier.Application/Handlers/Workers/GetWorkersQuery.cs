@@ -29,6 +29,17 @@ public class GetWorkersQueryHandler(
             q = q.Where(w => w.Idnp == p.Idnp);
         }
 
+        // Unified exact lookup: match IDNP, email or phone in a single search box.
+        if (!string.IsNullOrWhiteSpace(p.Contact))
+        {
+            var contact = p.Contact.Trim();
+            var contactLower = contact.ToLower();
+            q = q.Where(w =>
+                w.Idnp == contact ||
+                (w.Email != null && w.Email.ToLower() == contactLower) ||
+                w.Phone == contact);
+        }
+
         if (p.BeneficiaryId.HasValue)
         {
             q = q.Where(w => w.BeneficiaryId == p.BeneficiaryId.Value);
