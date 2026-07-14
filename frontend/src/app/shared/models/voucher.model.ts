@@ -18,6 +18,7 @@ export interface VoucherTableItem {
   workerPhone?: string;
   workerEmail?: string;
   tag?: string;
+  isSigned: boolean;
 }
 
 export interface VoucherDetail {

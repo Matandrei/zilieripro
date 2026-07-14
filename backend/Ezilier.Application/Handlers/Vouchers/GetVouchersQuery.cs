@@ -126,7 +126,8 @@ public class GetVouchersQueryHandler(
                 CreatedAt = v.CreatedAt,
                 WorkerPhone = v.WorkerPhone,
                 WorkerEmail = v.WorkerEmail,
-                Tag = v.Tag
+                Tag = v.Tag,
+                IsSigned = v.SignatureDataUrl != null && v.SignatureDataUrl != ""
             })
             .ToListAsync(cancellationToken);
 
