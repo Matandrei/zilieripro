@@ -70,6 +70,7 @@ public record VoucherTableItem
     public string? WorkerPhone { get; init; }
     public string? WorkerEmail { get; init; }
     public string? Tag { get; init; }
+    public bool IsSigned { get; init; }
 }
 
 public record VoucherDetailModel

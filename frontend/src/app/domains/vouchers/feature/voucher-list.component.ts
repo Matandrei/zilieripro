@@ -378,6 +378,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/confirm-dialog.compon
               }
               <th class="hidden sm:table-cell text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.district' | t }}</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'common.status' | t }}</th>
+              <th class="text-muted-foreground h-10 px-4 text-center align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.signed' | t }}</th>
               <th class="hidden md:table-cell text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.hours' | t }}</th>
               <th class="text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'field.remuneration' | t }}</th>
               <th class="hidden md:table-cell text-muted-foreground h-10 px-4 text-start align-middle font-medium whitespace-nowrap text-xs uppercase tracking-wide">{{ 'common.date' | t }}</th>
@@ -411,6 +412,11 @@ import { ConfirmDialogComponent } from '../../../shared/ui/confirm-dialog.compon
                     <span [class]="'inline-block size-2 rounded-full ' + statusDotColor(voucher.status)"></span>
                     {{ voucher.status }}
                   </span>
+                </td>
+                <td class="px-4 py-3 align-middle whitespace-nowrap text-center">
+                  <input type="checkbox" class="rounded border-input accent-primary pointer-events-none"
+                    [checked]="voucher.isSigned" tabindex="-1" aria-readonly="true"
+                    [attr.aria-label]="('field.signed' | t)" [title]="('field.signed' | t)" />
                 </td>
                 <td class="hidden md:table-cell px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.hoursWorked }}h</td>
                 <td class="px-4 py-3 align-middle whitespace-nowrap text-foreground/80">{{ voucher.netRemuneration }} {{ 'common.mdl' | t }}</td>
@@ -501,7 +507,7 @@ import { ConfirmDialogComponent } from '../../../shared/ui/confirm-dialog.compon
               </tr>
             } @empty {
               <tr>
-                <td colspan="10" class="px-4 py-8 text-center text-sm text-muted-foreground">
+                <td colspan="12" class="px-4 py-8 text-center text-sm text-muted-foreground">
                   {{ "voucher.list.empty" | t }}
                 </td>
               </tr>

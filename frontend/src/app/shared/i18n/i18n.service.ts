@@ -47,7 +47,7 @@ const RO: Dict = {
   // Fields
   'field.code': 'Cod', 'field.worker': 'Lucrator', 'field.idnp': 'IDNP',
   'field.district': 'Raion', 'field.locality': 'Localitate', 'field.address': 'Adresa',
-  'field.hours': 'Ore', 'field.remuneration': 'Remunerare',
+  'field.hours': 'Ore', 'field.remuneration': 'Remunerare', 'field.signed': 'Semnat',
   'field.remunerationNet': 'Remunerare neta', 'field.remunerationGross': 'Remunerare bruta',
   'field.incomeTax': 'Impozit pe venit (12%)', 'field.cnas': 'Contributii CNAS (6%)',
   'field.workDate': 'Data lucrarilor', 'field.firstName': 'Prenume', 'field.lastName': 'Nume',
@@ -271,7 +271,7 @@ const RU: Dict = {
 
   'field.code': 'Код', 'field.worker': 'Работник', 'field.idnp': 'IDNP',
   'field.district': 'Район', 'field.locality': 'Населенный пункт', 'field.address': 'Адрес',
-  'field.hours': 'Часов', 'field.remuneration': 'Вознаграждение',
+  'field.hours': 'Часов', 'field.remuneration': 'Вознаграждение', 'field.signed': 'Подписан',
   'field.remunerationNet': 'Чистое вознаграждение', 'field.remunerationGross': 'Брутто вознаграждение',
   'field.incomeTax': 'Подоходный налог (12%)', 'field.cnas': 'Взносы CNAS (6%)',
   'field.workDate': 'Дата работы', 'field.firstName': 'Имя', 'field.lastName': 'Фамилия',
@@ -483,7 +483,7 @@ const EN: Dict = {
 
   'field.code': 'Code', 'field.worker': 'Worker', 'field.idnp': 'IDNP',
   'field.district': 'District', 'field.locality': 'Locality', 'field.address': 'Address',
-  'field.hours': 'Hours', 'field.remuneration': 'Remuneration',
+  'field.hours': 'Hours', 'field.remuneration': 'Remuneration', 'field.signed': 'Signed',
   'field.remunerationNet': 'Net remuneration', 'field.remunerationGross': 'Gross remuneration',
   'field.incomeTax': 'Income tax (12%)', 'field.cnas': 'CNAS contributions (6%)',
   'field.workDate': 'Work date', 'field.firstName': 'First name', 'field.lastName': 'Last name',
