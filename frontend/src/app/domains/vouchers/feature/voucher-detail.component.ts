@@ -75,6 +75,13 @@ import { VoucherSignOverlayComponent } from '../ui/voucher-sign-overlay.componen
                 </button>
               }
             }
+            <!-- Administrator: poate anula un voucher din orice stare (Executat/Raportat) -->
+            @if (isAdmin() && (voucher()!.status === 'Executat' || voucher()!.status === 'Raportat')) {
+              <button type="button" (click)="showCancelModal.set(true)"
+                class="inline-flex h-9 items-center justify-center gap-2 rounded-md bg-destructive text-white px-4 text-sm font-medium hover:bg-destructive/90">
+                {{ 'action.cancel' | t }}
+              </button>
+            }
             <a [routerLink]="['/vouchers', voucher()!.id, 'receipt']"
                [queryParams]="{ autoprint: '1' }"
               class="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-input bg-background px-4 text-sm font-medium hover:bg-accent hover:text-accent-foreground">
@@ -417,6 +424,7 @@ export class VoucherDetailComponent implements OnInit {
   private readonly authStore = inject(AuthStore);
 
   protected readonly isInspector = computed(() => this.authStore.roleType() === 'Inspector');
+  protected readonly isAdmin = computed(() => this.authStore.roleType() === 'Administrator');
 
   protected readonly voucher = signal<VoucherDetail | null>(null);
   protected readonly loading = signal(true);

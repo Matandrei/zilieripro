@@ -96,7 +96,7 @@ public class VouchersController : BaseApiController
     [HttpPost("{id:guid}/cancel")]
     public async Task<IActionResult> Cancel(Guid id, [FromBody] CancelVoucherRequest request)
     {
-        var (model, errors, status) = await Mediator.Send(new CancelVoucherCommand(id, request));
+        var (model, errors, status) = await Mediator.Send(new CancelVoucherCommand(id, request, IsAdministrator));
         return StatusCode(status, errors is not null ? errors : model);
     }
 
