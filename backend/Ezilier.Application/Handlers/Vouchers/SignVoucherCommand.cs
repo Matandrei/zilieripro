@@ -1,5 +1,6 @@
 using Ezilier.Application.Interfaces;
 using Ezilier.Application.Models;
+using Ezilier.Domain.Enums;
 using FluentValidation.Results;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -36,9 +37,29 @@ public class SignVoucherCommandHandler(
                 [new ValidationFailure("Id", "Voucherul nu a fost gasit.")]), 404);
         }
 
+        if (voucher.Status != VoucherStatus.Activ)
+        {
+            return (null, new ValidationResult(
+                [new ValidationFailure("Status",
+                    $"Voucherul poate fi semnat doar din starea Activ. Starea curenta: {voucher.Status}.")]), 400);
+        }
+
+        // Semnatura este ireversibila: un voucher deja semnat nu poate fi resemnat.
+        if (!string.IsNullOrEmpty(voucher.SignatureDataUrl))
+        {
+            return (null, new ValidationResult(
+                [new ValidationFailure("SignatureDataUrl", "Voucherul este deja semnat.")]), 400);
+        }
+
+        var now = DateTimeOffset.UtcNow;
+
         voucher.SignatureDataUrl = command.Request.SignatureDataUrl;
-        voucher.SignedAt = DateTimeOffset.UtcNow;
-        voucher.UpdatedAt = DateTimeOffset.UtcNow;
+        voucher.SignedAt = now;
+        voucher.UpdatedAt = now;
+
+        // Semnarea executa voucherul: Activ -> Executat.
+        voucher.Status = VoucherStatus.Executat;
+        voucher.ExecutedAt = now;
 
         await context.SaveChangesAsync(cancellationToken);
 
