@@ -9,7 +9,8 @@ namespace Ezilier.Application.Handlers.Vouchers;
 
 public record CancelVoucherCommand(
     Guid Id,
-    CancelVoucherRequest Request
+    CancelVoucherRequest Request,
+    bool IsAdministrator = false
 ) : IRequest<(VoucherDetailModel? Model, ValidationResult? ValidationResult, int StatusCode)>;
 
 public class CancelVoucherCommandHandler(
@@ -30,7 +31,17 @@ public class CancelVoucherCommandHandler(
                 [new ValidationFailure("Id", "Voucherul nu a fost gasit.")]), 404);
         }
 
-        if (voucher.Status != VoucherStatus.Emis && voucher.Status != VoucherStatus.Activ)
+        // Administrator poate anula un voucher din orice stare (mai putin unul deja anulat).
+        // Celelalte roluri pot anula doar din starile Emis sau Activ.
+        if (voucher.Status == VoucherStatus.Anulat)
+        {
+            return (null, new ValidationResult(
+                [new ValidationFailure("Status", "Voucherul este deja anulat.")]), 400);
+        }
+
+        if (!command.IsAdministrator
+            && voucher.Status != VoucherStatus.Emis
+            && voucher.Status != VoucherStatus.Activ)
         {
             return (null, new ValidationResult(
                 [new ValidationFailure("Status",

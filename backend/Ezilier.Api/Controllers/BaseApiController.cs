@@ -18,4 +18,5 @@ public abstract class BaseApiController : ControllerBase
 
     protected bool IsZilier => string.Equals(CurrentRole, "zilier", StringComparison.OrdinalIgnoreCase);
     protected bool IsInspector => string.Equals(CurrentRole, "inspector", StringComparison.OrdinalIgnoreCase);
+    protected bool IsAdministrator => string.Equals(CurrentRole, "administrator", StringComparison.OrdinalIgnoreCase);
 }
