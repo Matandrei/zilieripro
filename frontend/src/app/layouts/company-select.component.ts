@@ -92,7 +92,7 @@ export class CompanySelectComponent {
     this.switching.set(true);
     try {
       await this.auth.switchCompany(id);
-      window.location.href = '/statistics';
+      window.location.href = '/vouchers';
     } finally {
       this.switching.set(false);
     }
