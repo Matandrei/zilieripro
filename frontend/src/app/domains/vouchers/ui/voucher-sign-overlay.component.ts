@@ -3,6 +3,7 @@ import {
   Component,
   HostListener,
   OnInit,
+  computed,
   input,
   output,
   signal,
@@ -91,22 +92,37 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
         />
       </div>
 
-      <!-- ─── Footer ─── -->
+      <!-- ─── Footer — declaratia si confirmarea sunt inline, fara dialog separat ─── -->
       <div
         class="px-4 pt-3 border-t border-gray-100 bg-white shrink-0 space-y-2.5"
         style="padding-bottom: max(16px, env(safe-area-inset-bottom));"
       >
-        <p class="text-[11px] text-gray-400 text-center leading-relaxed px-2">
-          Prin semnarea prezentului voucher confirm prestarea activității indicate și
-          primirea remunerației nete de
-          <strong class="text-gray-600">{{ netAmount() }} MDL</strong>
-          în data de {{ workDate() }}.
-        </p>
+        <!-- Declaratie: gest deliberat pentru o actiune ireversibila -->
+        <label
+          class="flex items-start gap-3 rounded-2xl border px-3.5 py-3 cursor-pointer
+                 transition-colors touch-manipulation select-none"
+          [class]="declarationBoxClass()"
+        >
+          <input
+            type="checkbox"
+            [checked]="declarationAccepted()"
+            (change)="toggleDeclaration()"
+            [disabled]="saving()"
+            class="mt-0.5 size-5 shrink-0 rounded-md border-gray-300 text-green-600
+                   accent-green-600 cursor-pointer disabled:cursor-not-allowed"
+          />
+          <span class="text-[12.5px] leading-relaxed text-gray-600">
+            Confirm că am prestat activitatea indicată și am primit remunerația netă de
+            <strong class="text-gray-900">{{ netAmount() }} MDL</strong>
+            în data de {{ workDate() }}.
+            <span class="text-amber-700 font-medium">Această acțiune nu poate fi anulată.</span>
+          </span>
+        </label>
 
         <button
           type="button"
-          (click)="requestConfirm()"
-          [disabled]="!signatureData() || saving()"
+          (click)="submitSignature()"
+          [disabled]="!canSubmit() || saving()"
           class="w-full rounded-2xl text-[15px] font-semibold leading-none transition-all
                  active:scale-[0.97] touch-manipulation select-none disabled:cursor-not-allowed"
           style="height: 56px;"
@@ -120,12 +136,20 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
               </svg>
               Se salvează...
             </span>
-          } @else if (signatureData()) {
+          } @else if (canSubmit()) {
             <span class="flex items-center justify-center gap-2">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="size-5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
               </svg>
-              Semnez și confirm primirea remunerației
+              Da, semnez și confirm
+            </span>
+          } @else if (signatureData()) {
+            <span class="flex items-center justify-center gap-2 opacity-60">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/>
+              </svg>
+              Bifați declarația de mai sus
             </span>
           } @else {
             <span class="flex items-center justify-center gap-2 opacity-60">
@@ -140,80 +164,6 @@ import { SignaturePadComponent } from '../../../shared/ui/components/signature-p
         </button>
       </div>
 
-      <!-- ─── Confirmation bottom-sheet (absolute, within panel stacking context) ─── -->
-      @if (showConfirm()) {
-        <div
-          class="absolute inset-0 z-10 flex flex-col justify-end"
-          style="background: rgba(0,0,0,0.45); backdrop-filter: blur(2px);"
-          (click)="showConfirm.set(false)"
-        >
-          <div
-            class="bg-white rounded-t-3xl sm:rounded-3xl p-6 space-y-5 shadow-2xl
-                   sm:mx-6 sm:mb-6 sm:rounded-3xl"
-            (click)="$event.stopPropagation()"
-          >
-            <!-- Icon + title -->
-            <div class="flex items-center gap-3">
-              <div class="size-12 rounded-2xl bg-green-100 flex items-center justify-center shrink-0">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-6 text-green-600">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07
-                       a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931z"/>
-                </svg>
-              </div>
-              <div>
-                <p class="text-base font-bold text-gray-900">Confirmați semnătura?</p>
-                <p class="text-sm text-gray-500">{{ workerName() }}</p>
-              </div>
-            </div>
-
-            <!-- Details summary -->
-            <div class="bg-gray-50 rounded-2xl px-4 py-3 space-y-1.5">
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">Voucher</span>
-                <span class="font-mono font-semibold text-gray-800">{{ code() }}</span>
-              </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-gray-500">Data activității</span>
-                <span class="text-gray-800">{{ workDate() }}</span>
-              </div>
-              <div class="flex justify-between text-sm border-t border-gray-200 pt-1.5 mt-0.5">
-                <span class="text-gray-500">Remunerare netă</span>
-                <span class="text-lg font-bold text-gray-900 tabular-nums">{{ netAmount() }} MDL</span>
-              </div>
-            </div>
-
-            <!-- Confirmation text -->
-            <p class="text-[13px] text-gray-500 leading-relaxed text-center">
-              Prin confirmare, declarați că ați prestat activitatea indicată și ați primit
-              suma de <strong class="text-gray-700">{{ netAmount() }} MDL</strong>.
-              Această acțiune nu poate fi anulată.
-            </p>
-
-            <!-- Action buttons -->
-            <div class="flex gap-3">
-              <button
-                type="button"
-                (click)="showConfirm.set(false)"
-                class="flex-1 h-12 rounded-2xl border border-gray-200 text-sm font-semibold
-                       text-gray-700 hover:bg-gray-50 active:bg-gray-100
-                       transition-colors touch-manipulation"
-              >
-                Renunță
-              </button>
-              <button
-                type="button"
-                (click)="submitSignature()"
-                class="flex-[2] h-12 rounded-2xl bg-green-600 text-white text-sm font-bold
-                       hover:bg-green-700 active:bg-green-800 shadow-lg shadow-green-200
-                       transition-colors touch-manipulation"
-              >
-                Da, semnez și confirm
-              </button>
-            </div>
-          </div>
-        </div>
-      }
     </div>
   `,
 })
@@ -228,29 +178,35 @@ export class VoucherSignOverlayComponent implements OnInit {
   readonly cancelled = output<void>();
 
   protected readonly signatureData = signal<string | null>(null);
-  protected readonly showConfirm = signal(false);
+  protected readonly declarationAccepted = signal(false);
   protected readonly sigHeight = signal(260);
+
+  protected readonly canSubmit = computed(
+    () => this.signatureData() !== null && this.declarationAccepted()
+  );
 
   protected readonly btnClass = () => {
     if (this.saving()) return 'bg-gray-100 text-gray-500';
-    if (this.signatureData()) return 'bg-green-600 text-white shadow-lg shadow-green-200 hover:bg-green-700 active:bg-green-800';
+    if (this.canSubmit()) return 'bg-green-600 text-white shadow-lg shadow-green-200 hover:bg-green-700 active:bg-green-800';
     return 'bg-gray-100 text-gray-500';
+  };
+
+  protected readonly declarationBoxClass = () => {
+    if (this.declarationAccepted()) return 'border-green-300 bg-green-50/60';
+    if (this.signatureData()) return 'border-amber-300 bg-amber-50/50';
+    return 'border-gray-200 bg-gray-50/60';
   };
 
   @HostListener('document:keydown.escape')
   onEscape(): void {
-    if (this.showConfirm()) {
-      this.showConfirm.set(false);
-    } else if (!this.saving()) {
-      this.cancelled.emit();
-    }
+    if (!this.saving()) this.cancelled.emit();
   }
 
   ngOnInit(): void {
     const vh = window.innerHeight;
-    // header~58 + summary~80 + hint~48 + footer~130 ≈ 316px overhead
-    const available = vh - 316;
-    this.sigHeight.set(Math.max(180, Math.min(available, 380)));
+    // header~58 + summary~80 + hint~48 + footer~200 (declaratie + buton) ≈ 386px overhead
+    const available = vh - 386;
+    this.sigHeight.set(Math.max(160, Math.min(available, 340)));
   }
 
   protected onBackdropClick(): void {
@@ -259,18 +215,17 @@ export class VoucherSignOverlayComponent implements OnInit {
 
   protected onSignatureChanged(data: string | null): void {
     this.signatureData.set(data);
+    // Stergerea semnaturii invalideaza si declaratia.
+    if (data === null) this.declarationAccepted.set(false);
   }
 
-  protected requestConfirm(): void {
-    if (this.signatureData() && !this.saving()) {
-      this.showConfirm.set(true);
-    }
+  protected toggleDeclaration(): void {
+    if (!this.saving()) this.declarationAccepted.update((v) => !v);
   }
 
   protected submitSignature(): void {
     const data = this.signatureData();
-    if (data) {
-      this.showConfirm.set(false);
+    if (data && this.canSubmit() && !this.saving()) {
       this.confirmed.emit(data);
     }
   }
